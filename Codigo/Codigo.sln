@@ -3,9 +3,47 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35931.197 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web_GaleriaArte_ASPX_Monolitico", "Web_GaleriaArte_ASPX_Monolitico", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLayer.GaleriaArte", "BusinessLayer.GaleriaArte\BusinessLayer.GaleriaArte.csproj", "{7C51EB7A-E9B1-44AC-A10B-CC32B3A9FDAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess.GaleriaArte", "DataAccess.GaleriaArte\DataAccess.GaleriaArte.csproj", "{C42A75D5-3CC9-412C-BC29-EDEC951B3377}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityLayer.GaleriaArte", "EntityLayer.GaleriaArte\EntityLayer.GaleriaArte.csproj", "{438F32D4-E8A8-4DDD-B630-94C3FA706FD9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAppGaleriaArte", "WebAppGaleriaArte\WebAppGaleriaArte.csproj", "{EA8315F3-597E-4C7F-BD3D-FEF14F035A56}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7C51EB7A-E9B1-44AC-A10B-CC32B3A9FDAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C51EB7A-E9B1-44AC-A10B-CC32B3A9FDAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C51EB7A-E9B1-44AC-A10B-CC32B3A9FDAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C51EB7A-E9B1-44AC-A10B-CC32B3A9FDAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C42A75D5-3CC9-412C-BC29-EDEC951B3377}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C42A75D5-3CC9-412C-BC29-EDEC951B3377}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C42A75D5-3CC9-412C-BC29-EDEC951B3377}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C42A75D5-3CC9-412C-BC29-EDEC951B3377}.Release|Any CPU.Build.0 = Release|Any CPU
+		{438F32D4-E8A8-4DDD-B630-94C3FA706FD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{438F32D4-E8A8-4DDD-B630-94C3FA706FD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{438F32D4-E8A8-4DDD-B630-94C3FA706FD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{438F32D4-E8A8-4DDD-B630-94C3FA706FD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA8315F3-597E-4C7F-BD3D-FEF14F035A56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA8315F3-597E-4C7F-BD3D-FEF14F035A56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA8315F3-597E-4C7F-BD3D-FEF14F035A56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA8315F3-597E-4C7F-BD3D-FEF14F035A56}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7C51EB7A-E9B1-44AC-A10B-CC32B3A9FDAF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{C42A75D5-3CC9-412C-BC29-EDEC951B3377} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{438F32D4-E8A8-4DDD-B630-94C3FA706FD9} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{EA8315F3-597E-4C7F-BD3D-FEF14F035A56} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A8B8A5BE-6E6F-46AC-8026-0DFDD1E39596}
