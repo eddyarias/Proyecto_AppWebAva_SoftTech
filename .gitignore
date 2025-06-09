@@ -1,1 +1,50 @@
-/Documentos
+## Archivos generados por Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Archivos binarios y temporales
+bin/
+obj/
+[Bb]uild/
+[Bb]uild[Ll]og.*
+*.log
+
+## Archivos de dependencias temporales
+*.dll
+*.exe
+*.pdb
+*.cache
+*.mdb
+
+## Archivos de publicación
+*.publishsettings
+*.deploy*
+
+## Archivos de configuración específicos de usuario
+*.csproj.user
+*.vbproj.user
+
+## Archivos temporales de Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## Archivos de backup de Visual Studio o del sistema
+*.bak
+*.old
+*.orig
+
+## Carpetas ocultas de control de versiones
+_ReSharper*/
+*.DotSettings.user
+
+## Otros archivos
+*.tmp
+*.log
+*.scc
+*.vssscc
+*.vspscc
