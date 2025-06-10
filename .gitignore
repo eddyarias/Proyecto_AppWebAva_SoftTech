@@ -6,6 +6,7 @@
 *.sln.docstates
 
 ## Archivos binarios y temporales
+packages/
 bin/
 obj/
 [Bb]uild/

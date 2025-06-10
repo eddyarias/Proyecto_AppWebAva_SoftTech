@@ -8,24 +8,24 @@ namespace EntityLayer.GaleriaArte
     {
         public Usuarios() { }
 
-        public Usuarios(int id, string nickname, string correo, string contraseñaHash, string rol, bool estado, DateTime fechaCreacion)
+        public Usuarios(int id, string nickname, string correo, string contraseña_hash, string rol, bool estado, DateTime fecha_creacion)
         {
             this.id = id;
             this.nickname = nickname;
             this.correo = correo;
-            this.contraseñaHash = contraseñaHash;
+            this.contraseña_hash = contraseña_hash;
             this.rol = rol;
             this.estado = estado;
-            this.fechaCreacion = fechaCreacion;
+            this.fecha_creacion = fecha_creacion;
         }
         
         public int id{ get; set; }
         public string nickname { get; set; }
         public string correo { get; set; }
-        public string contraseñaHash { get; set; }
+        public string contraseña_hash { get; set; }
         public string rol { get; set; }
         public bool estado { get; set; }
-        public DateTime fechaCreacion{get; set;}
+        public DateTime fecha_creacion { get; set;}
 
     }
 }

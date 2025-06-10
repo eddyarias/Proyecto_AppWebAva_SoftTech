@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Logout.aspx.cs" Inherits="WebAppGaleriaArte.View.Logout" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="CerrarSesion.aspx.cs" Inherits="WebAppGaleriaArte.View.Logout" %>
 
 <!DOCTYPE html>
 
