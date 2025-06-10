@@ -6,10 +6,12 @@
 <head runat="server">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title></title>
+    <link rel="stylesheet" type="text/css" href="css/styles.css"/>
 </head>
 <body>
     <form id="form1" runat="server">
         <div>
+            <asp:Label ID="lblWelcome" runat="server" Font-Size="Large" Font-Bold="true" ForeColor="#4a5568" />
         </div>
     </form>
 </body>

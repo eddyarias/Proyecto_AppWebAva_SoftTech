@@ -6,6 +6,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Configuration;
+using System.Web.Security;
 
 namespace WebAppGaleriaArte.View
 {
@@ -34,16 +35,19 @@ namespace WebAppGaleriaArte.View
             {
                 Session["Usuario"] = usuarioAutenticado.nickname;
                 Session["Rol"] = usuarioAutenticado.rol;
-                if (usuarioAutenticado.rol == "comprador")
+                if (usuarioAutenticado.rol == EntityLayer.GaleriaArte.Util.Constants.ID_USUARIO_COMPRADOR)
                 {
+                    FormsAuthentication.RedirectFromLoginPage(usuario, true);
                     Response.Redirect("/View/comprador/Panel.aspx");
                 }
-                else if (usuarioAutenticado.rol == "artista")
+                else if (usuarioAutenticado.rol == EntityLayer.GaleriaArte.Util.Constants.ID_USUARIO_ARTISTA)
                 {
+                    FormsAuthentication.RedirectFromLoginPage(usuario, true);
                     Response.Redirect("/View/artista/Panel.aspx");
                 }
-                else if (usuarioAutenticado.rol == "admin")
+                else if (usuarioAutenticado.rol == EntityLayer.GaleriaArte.Util.Constants.ID_USUARIO_ADMIN)
                 {
+                    FormsAuthentication.RedirectFromLoginPage(usuario, true);
                     Response.Redirect("/View/admin/Panel.aspx");
                 }
             }

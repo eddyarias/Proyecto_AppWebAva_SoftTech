@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <title>Iniciar Sesión</title>
-    <link rel="stylesheet" type="text/css" href="css/IniciarSesion_styles.css">
+    <link rel="stylesheet" type="text/css" href="css/IniciarSesion_styles.css"/>
 </head>
 <body>
     <form id="form1" runat="server">

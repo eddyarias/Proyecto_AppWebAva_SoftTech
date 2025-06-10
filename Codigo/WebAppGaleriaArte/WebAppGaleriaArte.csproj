@@ -157,6 +157,10 @@
       <Project>{7c51eb7a-e9b1-44ac-a10b-cc32b3a9fdaf}</Project>
       <Name>BusinessLayer.GaleriaArte</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DataAccess.GaleriaArte\DataAccess.GaleriaArte.csproj">
+      <Project>{c42a75d5-3cc9-412c-bc29-edec951b3377}</Project>
+      <Name>DataAccess.GaleriaArte</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EntityLayer.GaleriaArte\EntityLayer.GaleriaArte.csproj">
       <Project>{438f32d4-e8a8-4ddd-b630-94c3fa706fd9}</Project>
       <Name>EntityLayer.GaleriaArte</Name>

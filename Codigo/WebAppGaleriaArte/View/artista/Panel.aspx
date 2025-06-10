@@ -10,6 +10,7 @@
 <body>
     <form id="form1" runat="server">
         <div>
+            <asp:Label ID="lblWelcome" runat="server" Font-Size="Large" Font-Bold="true" ForeColor="#4a5568" />
         </div>
     </form>
 </body>

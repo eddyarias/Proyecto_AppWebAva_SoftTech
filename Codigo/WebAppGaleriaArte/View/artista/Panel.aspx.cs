@@ -11,7 +11,20 @@ namespace WebAppGaleriaArte.View.artista
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            if (!IsPostBack)
+            {
+                // Verifica si hay un usuario en sesión
+                var userSession = Session[EntityLayer.GaleriaArte.Util.Constants.NICKNAME] as EntityLayer.GaleriaArte.Usuarios;
+                if (userSession != null)
+                {
+                    lblWelcome.Text = $"Bienvenido {userSession.nickname}";
+                }
+                else
+                {
+                    // Si no hay sesión activa, redirige al login
+                    Response.Redirect("Login.aspx", true);
+                }
+            }
         }
     }
 }
