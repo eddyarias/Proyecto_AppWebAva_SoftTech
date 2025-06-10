@@ -22,7 +22,7 @@ namespace WebAppGaleriaArte.View.artista
                 else
                 {
                     // Si no hay sesión activa, redirige al login
-                    Response.Redirect("Login.aspx", true);
+                    //Response.Redirect("IniciarSesion.aspx", true);
                 }
             }
         }
