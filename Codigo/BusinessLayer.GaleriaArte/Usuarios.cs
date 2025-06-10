@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EntityLayer.GaleriaArte
+namespace BusinessLayer.GaleriaArte
 {
-    public class Class1
+    internal class Usuarios
     {
     }
 }
