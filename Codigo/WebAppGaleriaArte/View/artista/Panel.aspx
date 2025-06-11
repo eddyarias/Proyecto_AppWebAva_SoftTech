@@ -220,7 +220,7 @@
             $('#chatMessages').prepend($msg); // prepend por column-reverse
         }
 
-        loadHistory();
+        //loadHistory();
 
         const chat = $.connection.chatHub;
 
