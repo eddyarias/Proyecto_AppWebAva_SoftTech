@@ -15,6 +15,10 @@ namespace BusinessLayer.GaleriaArte
 
         public int Save(EntityLayer.GaleriaArte.Usuarios usuario)
         {
+            if (!EsCorreoMicrosoft(usuario.correo))
+                throw new ArgumentException("Solo se permiten correos electrónicos de Microsoft (Outlook, Hotmail, Live).");
+
+
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(usuario.contraseña_hash);
             usuario.contraseña_hash = hashedPassword;
 
@@ -68,6 +72,15 @@ namespace BusinessLayer.GaleriaArte
         {
             DataAccess.GaleriaArte.Usuarios dataAccess = new DataAccess.GaleriaArte.Usuarios(strConnectionString);
             return dataAccess.GetByNickname(nickname);
+        }
+
+        private bool EsCorreoMicrosoft(string correo)
+        {
+            if (string.IsNullOrWhiteSpace(correo))
+                return false;
+
+            correo = correo.ToLower();
+            return correo.EndsWith("@outlook.com") || correo.EndsWith("@hotmail.com") || correo.EndsWith("@epn.edu.ec");
         }
     }
 }
