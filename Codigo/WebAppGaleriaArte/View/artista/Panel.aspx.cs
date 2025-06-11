@@ -21,7 +21,7 @@ namespace WebAppGaleriaArte.View.artista
                     lblWelcome.Text = $"Bienvenido {nickname}";
 
                     // Obtener el ID del artista (puedes guardarlo en sesión al loguear)
-                    int artistaId = Convert.ToInt32(Session["ArtistaId"]);
+                    int artistaId = Convert.ToInt32(Session["UsuarioID"]);
 
                     // Obtener las obras del artista
                     var negocioObras = new BusinessLayer.GaleriaArte.Obras(connectionString);
@@ -38,6 +38,11 @@ namespace WebAppGaleriaArte.View.artista
                 }
             }
         }
+        protected void btnCrearObra_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("CrearObra.aspx");
+        }
+
 
     }
 }

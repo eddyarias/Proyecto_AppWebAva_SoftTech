@@ -84,9 +84,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Recursos\Claves\privada.xml" />
+    <Content Include="Recursos\Claves\publica.xml" />
+    <Content Include="Recursos\imagenesFirmadas\04de3092-0d38-45fd-bac1-3e3353d19157.jpeg" />
+    <Content Include="Recursos\imagenesFirmadas\80b824d1-dacc-4c5f-ad3d-00b2342be039.jpeg" />
     <Content Include="Recursos\imagenesFirmadas\images %282%29.jfif" />
     <Content Include="View\admin\css\styles.css" />
     <Content Include="View\admin\Panel.aspx" />
+    <Content Include="View\artista\CrearObra.aspx" />
     <Content Include="View\artista\css\styles.css" />
     <Content Include="View\artista\Panel.aspx" />
     <Content Include="View\comprador\css\styles.css" />
@@ -109,6 +114,13 @@
     <Compile Include="View\admin\Panel.aspx.designer.cs">
       <DependentUpon>Panel.aspx</DependentUpon>
     </Compile>
+    <Compile Include="View\artista\CrearObra.aspx.cs">
+      <DependentUpon>CrearObra.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\artista\CrearObra.aspx.designer.cs">
+      <DependentUpon>CrearObra.aspx</DependentUpon>
+    </Compile>
     <Compile Include="View\artista\Panel.aspx.cs">
       <DependentUpon>Panel.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -122,6 +134,9 @@
     </Compile>
     <Compile Include="View\comprador\Panel.aspx.designer.cs">
       <DependentUpon>Panel.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\FileManagement.cs">
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="View\IniciarSesion.aspx.cs">
       <DependentUpon>IniciarSesion.aspx</DependentUpon>
@@ -166,6 +181,7 @@
       <Name>EntityLayer.GaleriaArte</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

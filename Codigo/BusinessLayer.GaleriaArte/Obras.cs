@@ -1,26 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BusinessLayer.GaleriaArte
 {
     public class Obras
     {
         private string strConnectionString;
+
         public Obras(string connectionString)
         {
             strConnectionString = connectionString;
         }
 
+        // CREATE
+        public int CrearObra(EntityLayer.GaleriaArte.Obra obra)
+        {
+            var dataAccess = new DataAccess.GaleriaArte.Obras(strConnectionString);
+            return dataAccess.CrearObra(obra);
+        }
+
+        // READ (por artista)
         public List<EntityLayer.GaleriaArte.Obra> ObtenerObrasPorArtista(int artistaId)
         {
-            DataAccess.GaleriaArte.Obras dataAccess = new DataAccess.GaleriaArte.Obras(strConnectionString);
+            var dataAccess = new DataAccess.GaleriaArte.Obras(strConnectionString);
             return dataAccess.ObtenerObrasPorArtista(artistaId);
         }
 
+        // READ (por id)
+        public EntityLayer.GaleriaArte.Obra ObtenerObraPorId(int id)
+        {
+            var dataAccess = new DataAccess.GaleriaArte.Obras(strConnectionString);
+            return dataAccess.ObtenerObraPorId(id);
+        }
+
+        // UPDATE
+        public bool ActualizarObra(EntityLayer.GaleriaArte.Obra obra)
+        {
+            var dataAccess = new DataAccess.GaleriaArte.Obras(strConnectionString);
+            return dataAccess.ActualizarObra(obra);
+        }
+
+        // DELETE
+        public bool EliminarObra(int id)
+        {
+            var dataAccess = new DataAccess.GaleriaArte.Obras(strConnectionString);
+            return dataAccess.EliminarObra(id);
+        }
     }
-
-
 }

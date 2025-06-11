@@ -18,7 +18,7 @@ namespace WebAppGaleriaArte.View
         {
             if (!IsPostBack)
             {
-                txtUsuario.Text = "comprador12345";
+                txtUsuario.Text = "esteban";
                 txtPassword.Text = "123456789";
                 lblMensaje.Text = "";
             }
@@ -34,6 +34,7 @@ namespace WebAppGaleriaArte.View
             if (usuarioAutenticado != null && usuarioAutenticado.estado)
             {
                 Session["Usuario"] = usuarioAutenticado.nickname;
+                Session["UsuarioID"] = usuarioAutenticado.id;
                 Session["Rol"] = usuarioAutenticado.rol;
                 if (usuarioAutenticado.rol == EntityLayer.GaleriaArte.Util.Constants.ID_USUARIO_COMPRADOR)
                 {
