@@ -87,7 +87,7 @@ namespace WebAppGaleriaArte.View.artista
                 firma_digital = firmaDigital,
                 artista_id = artistaId,
                 precio = precio,
-                estado = ddlEstado.SelectedValue,
+                estado = "activa",
             };
 
             // Guardar en base de datos
@@ -99,9 +99,13 @@ namespace WebAppGaleriaArte.View.artista
                 int idObra = negocioObras.CrearObra(obra);
                 if (idObra > 0)
                 {
-                    lblMensaje.ForeColor = System.Drawing.Color.Green;
-                    lblMensaje.Text = "Obra registrada correctamente.";
                     LimpiarFormulario();
+                    Session["MensajeExito"] = "La obra fue subida exitosamente.";
+
+                    // Redirige al panel de artista después de actualizar correctamente
+                    Response.Redirect("~/View/artista/Panel.aspx", false);
+                    Context.ApplicationInstance.CompleteRequest();
+                    return;
                 }
                 else
                 {
@@ -119,7 +123,14 @@ namespace WebAppGaleriaArte.View.artista
             txtTitulo.Text = "";
             txtDescripcion.Text = "";
             txtPrecio.Text = "";
-            ddlEstado.SelectedIndex = 0;
+        }
+
+        protected void btnRegresar_Click(object sender, EventArgs e)
+        {
+            // Redirige al panel de artista después de actualizar correctamente
+            Response.Redirect("~/View/artista/Panel.aspx", false);
+            Context.ApplicationInstance.CompleteRequest();
+            return;
         }
     }
 }

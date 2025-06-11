@@ -40,11 +40,18 @@ namespace BusinessLayer.GaleriaArte
             return dataAccess.ActualizarObra(obra);
         }
 
-        // DELETE
-        public bool EliminarObra(int id)
+        // HIDE
+        public bool OcultarObra(int obraId)
         {
             var dataAccess = new DataAccess.GaleriaArte.Obras(strConnectionString);
-            return dataAccess.EliminarObra(id);
+            return dataAccess.OcultarObra(obraId);
+        }
+
+        // Active
+        public bool ActivarObra(int obraId)
+        {
+            var dataAccess = new DataAccess.GaleriaArte.Obras(strConnectionString);
+            return dataAccess.ActivarObra(obraId);
         }
     }
 }

@@ -2,9 +2,11 @@
 
 namespace EntityLayer.GaleriaArte
 {
+    [Serializable]
     public class Obra
     {
         public Obra() { }
+
 
         public Obra(int id, string titulo, string descripcion, string archivo_url, string firma_digital, int artista_id, decimal precio, string estado, DateTime fecha_publicacion)
         {

@@ -93,6 +93,7 @@
     <Content Include="View\admin\Panel.aspx" />
     <Content Include="View\artista\CrearObra.aspx" />
     <Content Include="View\artista\css\styles.css" />
+    <Content Include="View\artista\EditarObra.aspx" />
     <Content Include="View\artista\Panel.aspx" />
     <Content Include="View\comprador\css\styles.css" />
     <Content Include="View\comprador\Panel.aspx" />
@@ -120,6 +121,13 @@
     </Compile>
     <Compile Include="View\artista\CrearObra.aspx.designer.cs">
       <DependentUpon>CrearObra.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\artista\EditarObra.aspx.cs">
+      <DependentUpon>EditarObra.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\artista\EditarObra.aspx.designer.cs">
+      <DependentUpon>EditarObra.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\artista\Panel.aspx.cs">
       <DependentUpon>Panel.aspx</DependentUpon>

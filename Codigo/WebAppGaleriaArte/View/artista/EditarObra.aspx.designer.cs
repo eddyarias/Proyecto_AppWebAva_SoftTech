@@ -11,7 +11,7 @@ namespace WebAppGaleriaArte.View.artista
 {
 
 
-    public partial class CrearObra
+    public partial class EditarObra
     {
 
         /// <summary>
@@ -78,15 +78,6 @@ namespace WebAppGaleriaArte.View.artista
         protected global::System.Web.UI.WebControls.TextBox txtDescripcion;
 
         /// <summary>
-        /// fupArchivo control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.FileUpload fupArchivo;
-
-        /// <summary>
         /// txtPrecio control.
         /// </summary>
         /// <remarks>
@@ -114,12 +105,12 @@ namespace WebAppGaleriaArte.View.artista
         protected global::System.Web.UI.WebControls.RegularExpressionValidator revPrecio;
 
         /// <summary>
-        /// btnGuardar control.
+        /// btnActualizar control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnGuardar;
+        protected global::System.Web.UI.WebControls.Button btnActualizar;
     }
 }

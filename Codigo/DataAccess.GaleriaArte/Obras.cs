@@ -153,21 +153,53 @@ namespace DataAccess.GaleriaArte
             return rowsAffected > 0;
         }
 
-        // DELETE
-        public bool EliminarObra(int id)
+        // DELETE/HIDE
+        public bool OcultarObra(int obraId)
         {
             int rowsAffected = 0;
             using (var con = new NpgsqlConnection(connectionString))
             {
-                string query = @"DELETE FROM obras WHERE id = @id";
+                string query = @"UPDATE obras 
+                         SET estado = @estado 
+                         WHERE id = @id";
+
                 using (var cmd = new NpgsqlCommand(query, con))
                 {
-                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@estado", "oculta");
+                    cmd.Parameters.AddWithValue("@id", obraId);
+
                     con.Open();
                     rowsAffected = cmd.ExecuteNonQuery();
                 }
             }
+
             return rowsAffected > 0;
         }
+
+
+        // Active
+        public bool ActivarObra(int obraId)
+        {
+            int rowsAffected = 0;
+            using (var con = new NpgsqlConnection(connectionString))
+            {
+                string query = @"UPDATE obras 
+                         SET estado = @estado 
+                         WHERE id = @id";
+
+                using (var cmd = new NpgsqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@estado", "activa");
+                    cmd.Parameters.AddWithValue("@id", obraId);
+
+                    con.Open();
+                    rowsAffected = cmd.ExecuteNonQuery();
+                }
+            }
+
+            return rowsAffected > 0;
+        }
+
+
     }
 }
