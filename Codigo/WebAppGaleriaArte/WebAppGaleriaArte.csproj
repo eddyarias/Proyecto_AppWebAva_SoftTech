@@ -151,6 +151,7 @@
     <Content Include="View\css\RecuperarCuenta_styles.css" />
     <Content Include="View\css\IniciarSesion_styles.css" />
     <Content Include="View\css\styleIniciarSesion.css" />
+    <Content Include="View\css\styleRegistrarse.css" />
     <Content Include="View\IniciarSesion.aspx" />
     <Content Include="View\CerrarSesion.aspx" />
     <Content Include="View\ReestablecerContraseña.aspx" />

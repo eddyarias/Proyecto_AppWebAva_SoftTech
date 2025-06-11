@@ -1,0 +1,68 @@
+﻿/* Fondo con imagen */
+body {
+    background-image: url('imagenesCss/abstract-fractal-534910.jpeg'); /* Ajusta si es necesario */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    margin: 0;
+    color: #e7e9ea;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Caja de registro */
+.register-box {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid #2f3336;
+    max-width: 400px;
+    width: 100%;
+    backdrop-filter: blur(6px);
+}
+
+/* Títulos */
+h2 {
+    color: #e7e9ea;
+}
+
+/* Campos */
+.form-control,
+.form-select {
+    background-color: #202327cc;
+    border: 1px solid #2f3336;
+    color: #e7e9ea;
+}
+
+    .form-control:focus,
+    .form-select:focus {
+        background-color: #202327cc;
+        border-color: #1d9bf0;
+        color: #fff;
+        box-shadow: none;
+    }
+
+/* Botón principal */
+.btn-primary {
+    background-color: #1d9bf0;
+    border-color: #1d9bf0;
+}
+
+    .btn-primary:hover {
+        background-color: #1a8cd8;
+        border-color: #1a8cd8;
+    }
+
+/* Botón secundario */
+.btn-outline-light {
+    border-color: #e7e9ea;
+    color: #e7e9ea;
+}
+
+    .btn-outline-light:hover {
+        background-color: #e7e9ea;
+        color: #000;
+    }
+
+/* Mensaje de error */
+.message-error {
+    font-size: 0.9rem;
+}
