@@ -36,6 +36,12 @@ namespace WebAppGaleriaArte.View
                 return;
             }
 
+            if (!EsCorreoMicrosoft(correo))
+            {
+                lblMensaje.Text = "Solo se permiten correos electrónicos de Microsoft (@outlook.com, @hotmail.com, @epn.edu.ec).";
+                return;
+            }
+
             var nuevoUsuario = new EntityLayer.GaleriaArte.Usuarios
             {
                 nickname = nickname,
@@ -60,6 +66,15 @@ namespace WebAppGaleriaArte.View
         protected void btnVolver_Click(object sender, EventArgs e)
         {
             Response.Redirect("IniciarSesion.aspx");
+        }
+
+        private bool EsCorreoMicrosoft(string correo)
+        {
+            if (string.IsNullOrWhiteSpace(correo))
+                return false;
+
+            correo = correo.ToLower();
+            return correo.EndsWith("@outlook.com") || correo.EndsWith("@hotmail.com") || correo.EndsWith("@epn.edu.ec");
         }
     }
 }
