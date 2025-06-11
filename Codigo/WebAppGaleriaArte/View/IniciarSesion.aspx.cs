@@ -62,17 +62,14 @@ namespace WebAppGaleriaArte.View
 
                 if (usuarioAutenticado.rol == EntityLayer.GaleriaArte.Util.Constants.ID_USUARIO_COMPRADOR)
                 {
-                    FormsAuthentication.RedirectFromLoginPage(usuario, true);
                     Response.Redirect("/View/comprador/Panel.aspx");
                 }
                 else if (usuarioAutenticado.rol == EntityLayer.GaleriaArte.Util.Constants.ID_USUARIO_ARTISTA)
                 {
-                    FormsAuthentication.RedirectFromLoginPage(usuario, true);
                     Response.Redirect("/View/artista/Panel.aspx");
                 }
                 else if (usuarioAutenticado.rol == EntityLayer.GaleriaArte.Util.Constants.ID_USUARIO_ADMIN)
                 {
-                    FormsAuthentication.RedirectFromLoginPage(usuario, true);
                     Response.Redirect("/View/admin/Panel.aspx");
                 }
             }

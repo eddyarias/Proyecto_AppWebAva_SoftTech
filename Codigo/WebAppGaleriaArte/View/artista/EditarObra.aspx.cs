@@ -26,7 +26,7 @@ namespace WebAppGaleriaArte.View.artista
             FormsIdentity identity = (FormsIdentity)User.Identity;
             string rol = identity.Ticket.UserData;
 
-            if (rol != "artista")
+            if (rol != EntityLayer.GaleriaArte.Util.Constants.ID_USUARIO_ARTISTA)
             {
                 Response.Redirect("~/View/IniciarSesion.aspx");
             }
