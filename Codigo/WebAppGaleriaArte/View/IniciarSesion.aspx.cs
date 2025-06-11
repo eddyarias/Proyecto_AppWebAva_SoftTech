@@ -26,8 +26,16 @@ namespace WebAppGaleriaArte.View
 
         protected void btnLogin_Click(object sender, EventArgs e)
         {
+
             string usuario = txtUsuario.Text.Trim();
             string contraseña = txtPassword.Text.Trim();
+
+            if (string.IsNullOrEmpty(usuario) || string.IsNullOrEmpty(contraseña))
+            {
+                lblMensaje.Text = "Debe llenar los campos de usuario y contraseña.";
+                return;
+            }
+
             var negocioUsuarios = new BusinessLayer.GaleriaArte.Usuarios(connectionString);
             EntityLayer.GaleriaArte.Usuarios usuarioAutenticado = negocioUsuarios.Authenticate(usuario, contraseña);
 
