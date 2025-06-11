@@ -180,25 +180,20 @@ namespace DataAccess.GaleriaArte
             return usuario;
         }
 
-        public EntityLayer.GaleriaArte.Usuarios AutenticarUsuario(string nickname, string contraseña_hash)
+        public EntityLayer.GaleriaArte.Usuarios GetByCorreo(string correo)
         {
-            EntityLayer.GaleriaArte.Usuarios usuario = null;
             using (var con = new NpgsqlConnection(strConnectionString))
             {
-                using (var cmd = new NpgsqlCommand())
+                con.Open();
+                string query = @"SELECT id, nickname, correo, rol, estado, fecha_creacion FROM usuarios WHERE correo = @correo";
+                using (var cmd = new NpgsqlCommand(query, con))
                 {
-                    string sentence = "SELECT id, nickname, correo, rol, estado, fecha_creacion FROM Usuarios WHERE nickname = @nickname AND contraseña_hash = @contraseña_hash";
-                    cmd.CommandText = sentence;
-                    cmd.CommandType = System.Data.CommandType.Text;
-                    cmd.Parameters.AddWithValue("@nickname", nickname);
-                    cmd.Parameters.AddWithValue("@contraseña_hash", contraseña_hash);
-                    cmd.Connection = con;
-                    con.Open();
+                    cmd.Parameters.AddWithValue("@correo", correo);
                     using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            usuario = new EntityLayer.GaleriaArte.Usuarios
+                            return new EntityLayer.GaleriaArte.Usuarios
                             {
                                 id = reader.GetInt32(0),
                                 nickname = reader.GetString(1),
@@ -211,7 +206,23 @@ namespace DataAccess.GaleriaArte
                     }
                 }
             }
-            return usuario;
+            return null;
         }
+
+        public void ActualizarPassword(int usuarioId, string nuevaPasswordHash)
+        {
+            using (var con = new NpgsqlConnection(strConnectionString))
+            {
+                con.Open();
+                string query = "UPDATE usuarios SET contraseña_hash = @pass WHERE id = @id";
+                using (var cmd = new NpgsqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@pass", nuevaPasswordHash);
+                    cmd.Parameters.AddWithValue("@id", usuarioId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
     }
 }
