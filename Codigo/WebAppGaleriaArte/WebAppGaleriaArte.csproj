@@ -126,8 +126,9 @@
     <Content Include="View\css\IniciarSesion_styles.css" />
     <Content Include="View\IniciarSesion.aspx" />
     <Content Include="View\CerrarSesion.aspx" />
-    <Content Include="View\RecupearCuenta.aspx" />
+    <Content Include="View\ReestablecerContraseña.aspx" />
     <Content Include="View\Registrarse.aspx" />
+    <Content Include="View\Restablecer.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -167,12 +168,12 @@
     <Compile Include="View\CerrarSesion.aspx.designer.cs">
       <DependentUpon>CerrarSesion.aspx</DependentUpon>
     </Compile>
-    <Compile Include="View\RecupearCuenta.aspx.cs">
-      <DependentUpon>RecupearCuenta.aspx</DependentUpon>
+    <Compile Include="View\ReestablecerContraseña.aspx.cs">
+      <DependentUpon>ReestablecerContraseña.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="View\RecupearCuenta.aspx.designer.cs">
-      <DependentUpon>RecupearCuenta.aspx</DependentUpon>
+    <Compile Include="View\ReestablecerContraseña.aspx.designer.cs">
+      <DependentUpon>ReestablecerContraseña.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Registrarse.aspx.cs">
       <DependentUpon>Registrarse.aspx</DependentUpon>
@@ -180,6 +181,13 @@
     </Compile>
     <Compile Include="View\Registrarse.aspx.designer.cs">
       <DependentUpon>Registrarse.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\Restablecer.aspx.cs">
+      <DependentUpon>Restablecer.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\Restablecer.aspx.designer.cs">
+      <DependentUpon>Restablecer.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

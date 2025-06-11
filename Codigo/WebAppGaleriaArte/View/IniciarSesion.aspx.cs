@@ -67,7 +67,7 @@ namespace WebAppGaleriaArte.View
 
         protected void btnRecuperarCuenta_Click(object sender, EventArgs e)
         {
-            Response.Redirect("RecupearCuenta.aspx");
+            Response.Redirect("ReestablecerContraseña.aspx");
         }
 
         protected void btnRegistrarse_Click(object sender, EventArgs e)
