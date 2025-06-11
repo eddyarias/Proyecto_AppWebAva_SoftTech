@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ReestablecerContraseña.aspx.cs" Inherits="WebAppGaleriaArte.View.Recover" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="RecupearCuenta.aspx.cs" Inherits="WebAppGaleriaArte.View.Recover" %>
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">

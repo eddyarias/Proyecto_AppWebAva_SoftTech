@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <title>Registrarse</title>
-    <link rel="stylesheet" type="text/css" href="css/Registrarse_styles.css"/>
+    <link rel="stylesheet" type="text/css" href="css/Registrarse_styles.css">
 </head>
 <body>
     <form id="form1" runat="server">
@@ -32,6 +32,7 @@
                 <asp:DropDownList ID="ddlRol" runat="server" CssClass="form-control">
                     <asp:ListItem Text="Comprador" Value="comprador" />
                     <asp:ListItem Text="Artista" Value="artista" />
+                    <asp:ListItem Text="Admin" Value="admin" />
                 </asp:DropDownList>
                 <div class="role-info">Selecciona el tipo de cuenta que deseas crear</div>
             </div>

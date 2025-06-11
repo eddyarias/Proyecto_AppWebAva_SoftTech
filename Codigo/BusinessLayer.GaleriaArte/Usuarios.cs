@@ -15,13 +15,6 @@ namespace BusinessLayer.GaleriaArte
 
         public int Save(EntityLayer.GaleriaArte.Usuarios usuario)
         {
-            if (!EsCorreoMicrosoft(usuario.correo))
-                throw new ArgumentException("Solo se permiten correos electrónicos de Microsoft (Outlook, Hotmail, Live).");
-
-
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(usuario.contraseña_hash);
-            usuario.contraseña_hash = hashedPassword;
-
             DataAccess.GaleriaArte.Usuarios dataAccess = new DataAccess.GaleriaArte.Usuarios(strConnectionString);
             return dataAccess.Save(usuario);
         }
@@ -37,11 +30,6 @@ namespace BusinessLayer.GaleriaArte
         }
         public void Update(EntityLayer.GaleriaArte.Usuarios usuario)
         {
-            if (!string.IsNullOrWhiteSpace(usuario.contraseña_hash))
-            {
-                usuario.contraseña_hash = BCrypt.Net.BCrypt.HashPassword(usuario.contraseña_hash);
-            }
-
             DataAccess.GaleriaArte.Usuarios dataAccess = new DataAccess.GaleriaArte.Usuarios(strConnectionString);
             dataAccess.Update(usuario);
         }
@@ -53,34 +41,12 @@ namespace BusinessLayer.GaleriaArte
         public EntityLayer.GaleriaArte.Usuarios Authenticate(string nickname, string password)
         {
             DataAccess.GaleriaArte.Usuarios dataAccess = new DataAccess.GaleriaArte.Usuarios(strConnectionString);
-            var usuario = dataAccess.GetByNickname(nickname);
-
-            if (usuario == null)
-                return null;
-
-            bool isValid = BCrypt.Net.BCrypt.Verify(password, usuario.contraseña_hash);
-
-            if (isValid)
-            {
-                usuario.contraseña_hash = null;
-                return usuario;
-            }
-
-            return null;
+            return dataAccess.AutenticarUsuario(nickname, password);
         }
         public EntityLayer.GaleriaArte.Usuarios GetByNickname(string nickname)
         {
             DataAccess.GaleriaArte.Usuarios dataAccess = new DataAccess.GaleriaArte.Usuarios(strConnectionString);
             return dataAccess.GetByNickname(nickname);
-        }
-
-        private bool EsCorreoMicrosoft(string correo)
-        {
-            if (string.IsNullOrWhiteSpace(correo))
-                return false;
-
-            correo = correo.ToLower();
-            return correo.EndsWith("@outlook.com") || correo.EndsWith("@hotmail.com") || correo.EndsWith("@epn.edu.ec");
         }
     }
 }
