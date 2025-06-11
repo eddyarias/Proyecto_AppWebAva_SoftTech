@@ -1,0 +1,59 @@
+﻿body {
+    background-image: url('imagenesCss/abstract-fractal-534910.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    margin: 0;
+    color: #e7e9ea;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-box {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid #2f3336;
+    max-width: 400px;
+    width: 100%;
+    backdrop-filter: blur(6px);
+}
+
+h2 {
+    color: #e7e9ea;
+}
+
+.form-control {
+    background-color: #202327;
+    border: 1px solid #2f3336;
+    color: #e7e9ea;
+}
+
+    .form-control:focus {
+        background-color: #202327;
+        border-color: #1d9bf0;
+        color: #fff;
+        box-shadow: none;
+    }
+
+.btn-primary {
+    background-color: #1d9bf0;
+    border-color: #1d9bf0;
+}
+
+    .btn-primary:hover {
+        background-color: #1a8cd8;
+        border-color: #1a8cd8;
+    }
+
+.btn-outline-light {
+    border-color: #e7e9ea;
+    color: #e7e9ea;
+}
+
+    .btn-outline-light:hover {
+        background-color: #e7e9ea;
+        color: #000;
+    }
+
+.message-error {
+    font-size: 0.9rem;
+}
