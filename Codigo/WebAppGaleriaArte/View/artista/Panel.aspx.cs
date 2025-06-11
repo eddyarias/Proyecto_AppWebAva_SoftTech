@@ -13,11 +13,11 @@ namespace WebAppGaleriaArte.View.artista
         {
             if (!IsPostBack)
             {
-                // Obtiene el nickname del usuario desde la sesión
-                var nickname = Session["Usuario"] as string;
-                if (!string.IsNullOrEmpty(nickname))
+                // Verifica si hay un usuario en sesión
+                var userSession = Session[EntityLayer.GaleriaArte.Util.Constants.NICKNAME] as EntityLayer.GaleriaArte.Usuarios;
+                if (userSession != null)
                 {
-                    lblWelcome.Text = $"Bienvenido {nickname}";
+                    lblWelcome.Text = $"Bienvenido {userSession.nickname}";
                 }
                 else
                 {
