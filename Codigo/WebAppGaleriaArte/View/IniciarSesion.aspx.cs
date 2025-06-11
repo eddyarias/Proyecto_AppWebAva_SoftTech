@@ -26,8 +26,16 @@ namespace WebAppGaleriaArte.View
 
         protected void btnLogin_Click(object sender, EventArgs e)
         {
+
             string usuario = txtUsuario.Text.Trim();
             string contraseña = txtPassword.Text.Trim();
+
+            if (string.IsNullOrEmpty(usuario) || string.IsNullOrEmpty(contraseña))
+            {
+                lblMensaje.Text = "Debe llenar los campos de usuario y contraseña.";
+                return;
+            }
+
             var negocioUsuarios = new BusinessLayer.GaleriaArte.Usuarios(connectionString);
             EntityLayer.GaleriaArte.Usuarios usuarioAutenticado = negocioUsuarios.Authenticate(usuario, contraseña);
 
@@ -36,6 +44,22 @@ namespace WebAppGaleriaArte.View
                 Session["Usuario"] = usuarioAutenticado.nickname;
                 Session["UsuarioID"] = usuarioAutenticado.id;
                 Session["Rol"] = usuarioAutenticado.rol;
+
+                FormsAuthenticationTicket ticket = new FormsAuthenticationTicket(
+                    1,
+                    usuarioAutenticado.nickname,
+                    DateTime.Now,
+                    DateTime.Now.AddMinutes(60),
+                    true,
+                    usuarioAutenticado.rol,
+                    FormsAuthentication.FormsCookiePath
+                );
+
+                string encryptedTicket = FormsAuthentication.Encrypt(ticket);
+                HttpCookie authCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket);
+                Response.Cookies.Add(authCookie);
+
+
                 if (usuarioAutenticado.rol == EntityLayer.GaleriaArte.Util.Constants.ID_USUARIO_COMPRADOR)
                 {
                     FormsAuthentication.RedirectFromLoginPage(usuario, true);
@@ -60,7 +84,7 @@ namespace WebAppGaleriaArte.View
 
         protected void btnRecuperarCuenta_Click(object sender, EventArgs e)
         {
-            Response.Redirect("RecupearCuenta.aspx");
+            Response.Redirect("ReestablecerContraseña.aspx");
         }
 
         protected void btnRegistrarse_Click(object sender, EventArgs e)
