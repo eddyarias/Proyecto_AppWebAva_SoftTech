@@ -43,6 +43,22 @@ namespace WebAppGaleriaArte.View
             {
                 Session["Usuario"] = usuarioAutenticado.nickname;
                 Session["Rol"] = usuarioAutenticado.rol;
+
+                FormsAuthenticationTicket ticket = new FormsAuthenticationTicket(
+                    1,
+                    usuarioAutenticado.nickname,
+                    DateTime.Now,
+                    DateTime.Now.AddMinutes(60),
+                    true,
+                    usuarioAutenticado.rol,
+                    FormsAuthentication.FormsCookiePath
+                );
+
+                string encryptedTicket = FormsAuthentication.Encrypt(ticket);
+                HttpCookie authCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket);
+                Response.Cookies.Add(authCookie);
+
+
                 if (usuarioAutenticado.rol == EntityLayer.GaleriaArte.Util.Constants.ID_USUARIO_COMPRADOR)
                 {
                     FormsAuthentication.RedirectFromLoginPage(usuario, true);

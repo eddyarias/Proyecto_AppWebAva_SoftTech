@@ -106,6 +106,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Content Include="View\admin\Web.config" />
+    <Content Include="View\artista\Web.config" />
+    <Content Include="View\comprador\Web.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
