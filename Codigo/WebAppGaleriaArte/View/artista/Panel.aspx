@@ -102,11 +102,11 @@
         <div>
             <asp:Label ID="lblWelcome" runat="server" Font-Size="Large" Font-Bold="true" ForeColor="#4a5568" />
         </div>
-        <asp:Label 
-            ID="lblMensajeExito" 
-            runat="server" 
-            ForeColor="Green" 
-            Font-Bold="true" 
+        <asp:Label
+            ID="lblMensajeExito"
+            runat="server"
+            ForeColor="Green"
+            Font-Bold="true"
             EnableViewState="false" />
 
         <div style="margin-top: 20px;">
@@ -139,6 +139,8 @@
                 CssClass="btn btn-secondary"
                 OnClick="btnLimpiarBusqueda_Click"
                 Style="margin-top: 5px;" />
+
+            <asp:Button ID="btnCerrarSesion" runat="server" Text="Cerrar Sesión" CssClass="btn btn-danger" OnClick="btnCerrarSesion_Click" />
 
             <asp:GridView
                 ID="gvObras"
@@ -176,7 +178,7 @@
                                 CommandArgument='<%# Eval("id") %>'
                                 CssClass="btn btn-danger btn-sm"
                                 OnClientClick="return confirm('¿Estás seguro que deseas ocultar esta obra?');" />
-                            
+
                             <asp:Button
                                 ID="btnEliminar"
                                 runat="server"
@@ -189,7 +191,7 @@
                 </Columns>
             </asp:GridView>
         </div>
-         <!-- Botón para abrir el chat -->
+        <!-- Botón para abrir el chat -->
         <div id="chatButton">💬</div>
 
         <!-- Ventana del chat -->
@@ -202,74 +204,74 @@
         </div>
     </form>
     <!-- SignalR Scripts -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="/Scripts/jquery.signalR-2.4.3.min.js"></script>
-<script src="/signalr/hubs"></script>
-<script>
-    $(function () {
-        const userName = $('#userName').val();
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="/Scripts/jquery.signalR-2.4.3.min.js"></script>
+    <script src="/signalr/hubs"></script>
+    <script>
+        $(function () {
+            const userName = $('#userName').val();
 
-        $('#chatButton').click(function () {
-            $('#chatWindow').show();
-            $('#chatMessages').scrollTop(0); // Mostrar último mensaje
-        });
-
-        $('#closeChat').click(function () {
-            $('#chatWindow').hide();
-        });
-
-        $('#messageInput').keydown(function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                $('#sendMessage').click();
-            }
-        });
-
-        function saveMessage(name, message) {
-            let history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-            history.push({ name, message });
-            localStorage.setItem('chatHistory', JSON.stringify(history));
-        }
-
-        function loadHistory() {
-            $('#chatMessages').empty();
-            let history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-            history.reverse().forEach(function (msg) {
-                appendMessage(msg.name, msg.message);
+            $('#chatButton').click(function () {
+                $('#chatWindow').show();
+                $('#chatMessages').scrollTop(0); // Mostrar último mensaje
             });
-        }
 
-        function appendMessage(name, message) {
-            const encodedName = $('<div />').text(name).html();
-            const encodedMsg = $('<div />').text(message).html();
+            $('#closeChat').click(function () {
+                $('#chatWindow').hide();
+            });
 
-            const isOwn = name === userName;
-            const cssClass = isOwn ? 'chat-message own-message' : 'chat-message other-message';
-
-            const $msg = $('<li class="' + cssClass + '">').html(encodedMsg);
-            $('#chatMessages').prepend($msg); // prepend por column-reverse
-        }
-
-        //loadHistory();
-
-        const chat = $.connection.chatHub;
-
-        chat.client.broadcastMessage = function (name, message) {
-            console.log("Mensaje recibido:", name, message); // <-- debug
-            saveMessage(name, message);
-            appendMessage(name, message);
-        };
-
-        $.connection.hub.start().done(function () {
-            $('#sendMessage').click(function () {
-                const msg = $('#messageInput').val();
-                if (msg.trim() !== '') {
-                    chat.server.send(userName, msg);
-                    $('#messageInput').val('').focus();
+            $('#messageInput').keydown(function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#sendMessage').click();
                 }
             });
+
+            function saveMessage(name, message) {
+                let history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+                history.push({ name, message });
+                localStorage.setItem('chatHistory', JSON.stringify(history));
+            }
+
+            function loadHistory() {
+                $('#chatMessages').empty();
+                let history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+                history.reverse().forEach(function (msg) {
+                    appendMessage(msg.name, msg.message);
+                });
+            }
+
+            function appendMessage(name, message) {
+                const encodedName = $('<div />').text(name).html();
+                const encodedMsg = $('<div />').text(message).html();
+
+                const isOwn = name === userName;
+                const cssClass = isOwn ? 'chat-message own-message' : 'chat-message other-message';
+
+                const $msg = $('<li class="' + cssClass + '">').html(encodedMsg);
+                $('#chatMessages').prepend($msg); // prepend por column-reverse
+            }
+
+            //loadHistory();
+
+            const chat = $.connection.chatHub;
+
+            chat.client.broadcastMessage = function (name, message) {
+                console.log("Mensaje recibido:", name, message); // <-- debug
+                saveMessage(name, message);
+                appendMessage(name, message);
+            };
+
+            $.connection.hub.start().done(function () {
+                $('#sendMessage').click(function () {
+                    const msg = $('#messageInput').val();
+                    if (msg.trim() !== '') {
+                        chat.server.send(userName, msg);
+                        $('#messageInput').val('').focus();
+                    }
+                });
+            });
         });
-    });
-</script>
+    </script>
 </body>
 </html>

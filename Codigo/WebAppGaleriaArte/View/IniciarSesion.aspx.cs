@@ -18,8 +18,8 @@ namespace WebAppGaleriaArte.View
         {
             if (!IsPostBack)
             {
-                txtUsuario.Text = "esteban";
-                txtPassword.Text = "123456789";
+                txtUsuario.Text = "Mar";
+                txtPassword.Text = "a";
                 lblMensaje.Text = "";
             }
         }

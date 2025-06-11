@@ -118,6 +118,8 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Scripts\jquery-1.6.4-vsdoc.js" />
+    <Content Include="Recursos\Claves\privada.xml" />
+    <Content Include="Recursos\Claves\publica.xml" />
     <Content Include="Scripts\jquery-1.6.4.js" />
     <Content Include="Scripts\jquery-1.6.4.min.js" />
     <Content Include="Scripts\jquery.signalR-2.4.3.js" />
@@ -133,8 +135,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Recursos\Claves\privada.xml" />
-    <Content Include="Recursos\Claves\publica.xml" />
     <Content Include="Recursos\imagenesFirmadas\04de3092-0d38-45fd-bac1-3e3353d19157.jpeg" />
     <Content Include="Recursos\imagenesFirmadas\80b824d1-dacc-4c5f-ad3d-00b2342be039.jpeg" />
     <Content Include="Recursos\imagenesFirmadas\images %282%29.jfif" />

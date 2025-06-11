@@ -109,7 +109,6 @@ namespace WebAppGaleriaArte.View.artista
             }
         }
 
-
         protected void gvObras_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             int obraId = Convert.ToInt32(e.CommandArgument);
@@ -156,7 +155,6 @@ namespace WebAppGaleriaArte.View.artista
             txtBuscarTitulo.Text = "";
             CargarObras();
         }
-
         private void CargarObras(string filtroTitulo = "")
         {
             if (Session["UsuarioID"] != null)
@@ -179,8 +177,18 @@ namespace WebAppGaleriaArte.View.artista
                 Response.Redirect("IniciarSesion.aspx");
             }
         }
+        protected void btnCerrarSesion_Click(object sender, EventArgs e)
+        {
+            // Limpiar la sesión
+            Session.Clear();
+            Session.Abandon();
 
+            // Cerrar la autenticación Forms
+            FormsAuthentication.SignOut();
 
+            // Redirigir a la página de inicio de sesión
+            Response.Redirect("~/View/IniciarSesion.aspx");
+        }
 
     }
 }
