@@ -66,11 +66,11 @@ namespace WebAppGaleriaArte.View.artista
         {
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
-                // Obtén el objeto vinculado a esta fila
                 var obra = (EntityLayer.GaleriaArte.Obra)e.Row.DataItem;
 
-                // Encuentra el botón "btnOcultar"
+                Button btnEditar = (Button)e.Row.FindControl("btnEditar");
                 Button btnOcultar = (Button)e.Row.FindControl("btnOcultar");
+                Button btnEliminar = (Button)e.Row.FindControl("btnEliminar"); // ← lo agregamos abajo
 
                 if (obra != null && btnOcultar != null)
                 {
@@ -81,16 +81,34 @@ namespace WebAppGaleriaArte.View.artista
                         btnOcultar.OnClientClick = "return confirm('¿Estás seguro que deseas ocultar esta obra?');";
                         btnOcultar.CommandName = "OcultarObra";
                     }
+                    else if (obra.estado == "vendida")
+                    {
+                        // Ocultar ambos botones
+                        if (btnEditar != null) btnEditar.Visible = false;
+                        if (btnOcultar != null) btnOcultar.Visible = false;
+                    }
                     else if (obra.estado == "oculta")
                     {
+
                         btnOcultar.Text = "Mostrar";
                         btnOcultar.CssClass = "btn btn-success btn-sm";
                         btnOcultar.OnClientClick = "return confirm('¿Estás seguro que deseas mostrar esta obra?');";
                         btnOcultar.CommandName = "MostrarObra";
+
+                        // Mostrar botón eliminar solo en estado oculta
+                        if (btnEliminar != null)
+                        {
+                            btnEliminar.Visible = true;
+                            btnEliminar.OnClientClick = "return confirm('¿Deseas eliminar esta obra?');";
+                            btnEliminar.CommandName = "EliminarObra";
+                            btnEliminar.CommandArgument = obra.id.ToString();
+                        }
                     }
                 }
+
             }
         }
+
 
         protected void gvObras_RowCommand(object sender, GridViewCommandEventArgs e)
         {
@@ -117,32 +135,52 @@ namespace WebAppGaleriaArte.View.artista
                     CargarObras();
                 }
             }
+            else if (e.CommandName == "EliminarObra")
+            {
+                bool resultado = negocioObras.EliminarObra(obraId); 
+                if (resultado)
+                {
+                    CargarObras();
+                }
+            }
+
         }
 
-
-
-        private void CargarObras()
+        protected void btnBuscarTitulo_Click(object sender, EventArgs e)
         {
-            // Obtener el ID del artista desde la sesión
+            CargarObras(txtBuscarTitulo.Text.Trim());
+        }
+
+        protected void btnLimpiarBusqueda_Click(object sender, EventArgs e)
+        {
+            txtBuscarTitulo.Text = "";
+            CargarObras();
+        }
+
+        private void CargarObras(string filtroTitulo = "")
+        {
             if (Session["UsuarioID"] != null)
             {
                 int artistaId = Convert.ToInt32(Session["UsuarioID"]);
-
-                // Crear instancia del negocio con la cadena de conexión
                 var negocioObras = new BusinessLayer.GaleriaArte.Obras(connectionString);
 
-                // Obtener las obras del artista
                 var listaObras = negocioObras.ObtenerObrasPorArtista(artistaId);
 
-                // Asignar la fuente de datos y enlazar al GridView
+                if (!string.IsNullOrWhiteSpace(filtroTitulo))
+                {
+                    listaObras = listaObras.FindAll(o => o.titulo.IndexOf(filtroTitulo, StringComparison.OrdinalIgnoreCase) >= 0);
+                }
+
                 gvObras.DataSource = listaObras;
                 gvObras.DataBind();
             }
             else
             {
-                // Opcional: manejar si no hay sesión activa, por ejemplo redirigir a login
                 Response.Redirect("IniciarSesion.aspx");
             }
         }
+
+
+
     }
 }

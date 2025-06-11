@@ -117,6 +117,29 @@
                 OnClick="btnCrearObra_Click"
                 CssClass="btn btn-primary"
                 Style="margin-bottom: 15px;" />
+
+            <asp:TextBox
+                ID="txtBuscarTitulo"
+                runat="server"
+                CssClass="form-control"
+                placeholder="Buscar por título..." />
+
+            <asp:Button
+                ID="btnBuscarTitulo"
+                runat="server"
+                Text="🔍 Buscar"
+                CssClass="btn btn-info"
+                OnClick="btnBuscarTitulo_Click"
+                Style="margin-left: 5px; margin-top: 5px;" />
+
+            <asp:Button
+                ID="btnLimpiarBusqueda"
+                runat="server"
+                Text="Limpiar"
+                CssClass="btn btn-secondary"
+                OnClick="btnLimpiarBusqueda_Click"
+                Style="margin-top: 5px;" />
+
             <asp:GridView
                 ID="gvObras"
                 runat="server"
@@ -153,7 +176,14 @@
                                 CommandArgument='<%# Eval("id") %>'
                                 CssClass="btn btn-danger btn-sm"
                                 OnClientClick="return confirm('¿Estás seguro que deseas ocultar esta obra?');" />
-
+                            
+                            <asp:Button
+                                ID="btnEliminar"
+                                runat="server"
+                                Text="🗑️"
+                                Visible="false"
+                                CssClass="btn btn-outline-danger btn-sm"
+                                ToolTip="Eliminar obra" />
                         </ItemTemplate>
                     </asp:TemplateField>
                 </Columns>
