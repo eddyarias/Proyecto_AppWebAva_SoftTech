@@ -180,38 +180,5 @@ namespace DataAccess.GaleriaArte
             return usuario;
         }
 
-        public EntityLayer.GaleriaArte.Usuarios AutenticarUsuario(string nickname, string contraseña_hash)
-        {
-            EntityLayer.GaleriaArte.Usuarios usuario = null;
-            using (var con = new NpgsqlConnection(strConnectionString))
-            {
-                using (var cmd = new NpgsqlCommand())
-                {
-                    string sentence = "SELECT id, nickname, correo, rol, estado, fecha_creacion FROM Usuarios WHERE nickname = @nickname AND contraseña_hash = @contraseña_hash";
-                    cmd.CommandText = sentence;
-                    cmd.CommandType = System.Data.CommandType.Text;
-                    cmd.Parameters.AddWithValue("@nickname", nickname);
-                    cmd.Parameters.AddWithValue("@contraseña_hash", contraseña_hash);
-                    cmd.Connection = con;
-                    con.Open();
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            usuario = new EntityLayer.GaleriaArte.Usuarios
-                            {
-                                id = reader.GetInt32(0),
-                                nickname = reader.GetString(1),
-                                correo = reader.GetString(2),
-                                rol = reader.GetString(3),
-                                estado = reader.GetBoolean(4),
-                                fecha_creacion = reader.GetDateTime(5)
-                            };
-                        }
-                    }
-                }
-            }
-            return usuario;
-        }
     }
 }
