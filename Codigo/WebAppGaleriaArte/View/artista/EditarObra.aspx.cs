@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Web;
+using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -16,6 +17,20 @@ namespace WebAppGaleriaArte.View.artista
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                Response.Redirect("~/View/IniciarSesion.aspx");
+                return;
+            }
+
+            FormsIdentity identity = (FormsIdentity)User.Identity;
+            string rol = identity.Ticket.UserData;
+
+            if (rol != "artista")
+            {
+                Response.Redirect("~/View/IniciarSesion.aspx");
+            }
+
             lblMensaje.Text = "";
 
             if (!IsPostBack)

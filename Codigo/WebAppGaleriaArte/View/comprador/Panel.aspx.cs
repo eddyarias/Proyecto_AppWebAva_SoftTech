@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using System.Web;
+using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -11,6 +12,20 @@ namespace WebAppGaleriaArte.View.comprador
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                Response.Redirect("~/View/IniciarSesion.aspx");
+                return;
+            }
+
+            FormsIdentity identity = (FormsIdentity)User.Identity;
+            string rol = identity.Ticket.UserData;
+
+            if (rol != "comprador")
+            {
+                Response.Redirect("~/View/IniciarSesion.aspx");
+            }
+
             if (!IsPostBack)
             {
                 // Obtiene el nickname del usuario desde la sesión

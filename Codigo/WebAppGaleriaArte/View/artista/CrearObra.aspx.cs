@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Globalization;
+using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using BusinessLayer.GaleriaArte;
@@ -12,6 +13,20 @@ namespace WebAppGaleriaArte.View.artista
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                Response.Redirect("~/View/IniciarSesion.aspx");
+                return;
+            }
+
+            FormsIdentity identity = (FormsIdentity)User.Identity;
+            string rol = identity.Ticket.UserData;
+
+            if (rol != "artista")
+            {
+                Response.Redirect("~/View/IniciarSesion.aspx");
+            }
+
             lblMensaje.Text = "";
         }
 
