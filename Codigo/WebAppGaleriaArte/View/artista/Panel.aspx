@@ -6,96 +6,165 @@
 <head runat="server">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Panel Artista</title>
-    <style>
-        #chatButton {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background-color: #4a90e2;
-            color: white;
-            padding: 12px 16px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1000;
-            font-size: 20px;
-        }
-
-        #chatWindow {
-            position: fixed;
-            bottom: 80px;
-            left: 20px;
-            width: 320px;
-            background: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 10px;
-            display: none;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        #closeChat {
-            position: absolute;
-            top: 8px;
-            right: 12px;
-            cursor: pointer;
-            font-size: 18px;
-        }
-
-        #chatMessages {
-            display: flex;
-            flex-direction: column-reverse; /* Invertir el orden */
-            height: 250px;
-            overflow-y: auto;
-            padding: 10px;
-            margin-bottom: 10px;
-            list-style: none;
-            background-color: #f0f0f0;
-            border-radius: 6px;
-        }
-
-        .chat-message {
-            max-width: 80%;
-            margin: 5px 0;
-            padding: 8px 12px;
-            border-radius: 15px;
-            clear: both;
-            word-wrap: break-word;
-            font-size: 14px;
-        }
-
-        .own-message {
-            align-self: flex-end;
-            background-color: #dcf8c6;
-            text-align: right;
-        }
-
-        .other-message {
-            align-self: flex-start;
-            background-color: #e5e5ea;
-            text-align: left;
-        }
-
-        #userName,
-        #messageInput {
-            width: 100%;
-            margin-bottom: 5px;
-            padding: 6px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-
-        #sendMessage {
-            width: 100%;
-            padding: 6px;
-            background-color: #4a90e2;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 6px;
-        }
-    </style>
+<style>
+    #chatButton {
+        position: fixed;
+        bottom: 24px;
+        left: 24px;
+        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
+        color: white;
+        padding: 14px 18px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 1000;
+        font-size: 22px;
+        box-shadow: 0 4px 16px rgba(74,144,226,0.18);
+        transition: background 0.2s;
+    }
+    #chatButton:hover {
+        background: linear-gradient(135deg, #357ab8 60%, #4a90e2 100%);
+    }
+    #chatWindow {
+        position: fixed;
+        bottom: 90px;
+        left: 24px;
+        width: 350px;
+        background: #fff;
+        border: none;
+        border-radius: 16px;
+        padding: 0;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        overflow: hidden;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    #chatHeader {
+        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
+        color: #fff;
+        padding: 14px 18px;
+        font-weight: bold;
+        font-size: 17px;
+        letter-spacing: 1px;
+        position: relative;
+    }
+    #closeChat {
+        position: absolute;
+        top: 10px;
+        right: 18px;
+        cursor: pointer;
+        font-size: 22px;
+        color: #fff;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    #closeChat:hover {
+        opacity: 1;
+    }
+    #chatMessages {
+        display: flex;
+        flex-direction: column-reverse;
+        height: 270px;
+        overflow-y: auto;
+        padding: 18px 12px 12px 12px;
+        margin: 0;
+        list-style: none;
+        background: #f7fafd;
+        border-bottom: 1px solid #e3e3e3;
+    }
+    .chat-message {
+        display: flex;
+        align-items: flex-end;
+        margin: 8px 0;
+        font-size: 15px;
+        border-radius: 18px;
+        max-width: 85%;
+        padding: 0;
+        background: none;
+        box-shadow: none;
+    }
+    .own-message {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+    }
+    .other-message {
+        align-self: flex-start;
+    }
+    .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        margin: 0 8px;
+        box-shadow: 0 2px 8px rgba(74,144,226,0.10);
+        flex-shrink: 0;
+    }
+    .bubble {
+        padding: 10px 16px;
+        border-radius: 18px;
+        background: #e5e5ea;
+        color: #222;
+        position: relative;
+        min-width: 60px;
+        word-break: break-word;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .own-message .bubble {
+        background: #dcf8c6;
+        color: #222;
+    }
+    .sender-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: #4a90e2;
+        margin-bottom: 2px;
+        display: block;
+        letter-spacing: 0.5px;
+    }
+    #chatFooter {
+        padding: 12px 14px;
+        background: #f7fafd;
+        display: flex;
+        gap: 6px;
+        border-top: 1px solid #e3e3e3;
+    }
+    #userName {
+        display: none;
+    }
+    #messageInput {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #cfd8dc;
+        border-radius: 18px;
+        font-size: 15px;
+        outline: none;
+        background: #fff;
+        transition: border 0.2s;
+    }
+    #messageInput:focus {
+        border: 1.5px solid #4a90e2;
+    }
+    #sendMessage {
+        padding: 0 18px;
+        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 18px;
+        font-size: 15px;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    #sendMessage:hover {
+        background: linear-gradient(135deg, #357ab8 60%, #4a90e2 100%);
+    }
+</style>
 </head>
 <body>
     <form id="form1" runat="server">
@@ -191,16 +260,22 @@
                 </Columns>
             </asp:GridView>
         </div>
+
         <!-- Botón para abrir el chat -->
         <div id="chatButton">💬</div>
 
         <!-- Ventana del chat -->
         <div id="chatWindow">
-            <span id="closeChat">&times;</span>
+            <div id="chatHeader">
+                Chat en línea
+                <span id="closeChat">&times;</span>
+            </div>
             <ul id="chatMessages"></ul>
-            <input type="text" id="userName" value="<%= Session["Usuario"] %>" readonly />
-            <input type="text" id="messageInput" placeholder="Escribe un mensaje..." />
-            <button type="button" id="sendMessage">Enviar</button>
+            <div id="chatFooter">
+                <input type="text" id="userName" value="<%= Session["Usuario"] %>" readonly />
+                <input type="text" id="messageInput" placeholder="Escribe un mensaje..." />
+                <button type="button" id="sendMessage">Enviar</button>
+            </div>
         </div>
     </form>
     <!-- SignalR Scripts -->
@@ -244,13 +319,27 @@
             function appendMessage(name, message) {
                 const encodedName = $('<div />').text(name).html();
                 const encodedMsg = $('<div />').text(message).html();
-
                 const isOwn = name === userName;
                 const cssClass = isOwn ? 'chat-message own-message' : 'chat-message other-message';
 
-                const $msg = $('<li class="' + cssClass + '">').html(encodedMsg);
-                $('#chatMessages').prepend($msg); // prepend por column-reverse
-            }
+                // Avatar con la inicial del usuario
+                const initial = encodedName.charAt(0).toUpperCase();
+                const avatar = `<div class="avatar">${initial}</div>`;
+
+                // Nombre solo para mensajes de otros usuarios
+                const nameTag = !isOwn ? `<span class="sender-name">${encodedName}</span>` : '';
+
+                const $msg = $(`
+                    <li class="${cssClass}">
+                        ${avatar}
+                        <div class="bubble">
+                            ${nameTag}
+                            ${encodedMsg}
+                        </div>
+                    </li>
+                `);
+                $('#chatMessages').prepend($msg);
+}
 
             //loadHistory();
 
