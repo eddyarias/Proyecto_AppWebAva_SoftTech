@@ -131,6 +131,7 @@
     #messageInput {
         flex: 1;
         padding: 8px 12px;
+        color: #111;
         border: 1px solid #cfd8dc;
         border-radius: 18px;
         font-size: 15px;
