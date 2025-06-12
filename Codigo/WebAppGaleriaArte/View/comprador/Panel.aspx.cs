@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Configuration;
 using System.Web;
 using System.Web.Security;
 using System.Web.UI;
@@ -34,13 +34,31 @@ namespace WebAppGaleriaArte.View.comprador
                 {
                     lblWelcome.Text = $"Bienvenido {nickname}";
                 }
-                else
-                {
-                    // Si no hay sesión activa, redirige al login
-                    //Response.Redirect("IniciarSesion.aspx", true);
-                }
+                CargarObras();
             }
         }
 
+        private void CargarObras()
+        {
+            string connStr = ConfigurationManager.ConnectionStrings["GaleriaArte"].ConnectionString;
+            var obrasBL = new BusinessLayer.GaleriaArte.Obras(connStr);
+            var obrasActivas = obrasBL.ObtenerObrasActivas(10);
+
+            rptObras.DataSource = obrasActivas;
+            rptObras.DataBind();
+        }
+
+        protected void btnCerrarSesion_Click(object sender, EventArgs e)
+        {
+            // Limpiar la sesión
+            Session.Clear();
+            Session.Abandon();
+
+            // Cerrar la autenticación Forms
+            FormsAuthentication.SignOut();
+
+            // Redirigir a la página de inicio de sesión
+            Response.Redirect("~/View/IniciarSesion.aspx");
+        }
     }
 }
