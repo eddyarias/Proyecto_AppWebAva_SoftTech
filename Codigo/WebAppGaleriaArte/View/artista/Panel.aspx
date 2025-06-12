@@ -6,210 +6,56 @@
 <head runat="server">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Panel Artista</title>
-<style>
-    #chatButton {
-        position: fixed;
-        bottom: 24px;
-        left: 24px;
-        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
-        color: white;
-        padding: 14px 18px;
-        border-radius: 50%;
-        cursor: pointer;
-        z-index: 1000;
-        font-size: 22px;
-        box-shadow: 0 4px 16px rgba(74,144,226,0.18);
-        transition: background 0.2s;
-    }
-    #chatButton:hover {
-        background: linear-gradient(135deg, #357ab8 60%, #4a90e2 100%);
-    }
-    #chatWindow {
-        position: fixed;
-        bottom: 90px;
-        left: 24px;
-        width: 350px;
-        background: #fff;
-        border: none;
-        border-radius: 16px;
-        padding: 0;
-        display: none;
-        z-index: 1000;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-        overflow: hidden;
-        font-family: 'Segoe UI', Arial, sans-serif;
-    }
-    #chatHeader {
-        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
-        color: #fff;
-        padding: 14px 18px;
-        font-weight: bold;
-        font-size: 17px;
-        letter-spacing: 1px;
-        position: relative;
-    }
-    #closeChat {
-        position: absolute;
-        top: 10px;
-        right: 18px;
-        cursor: pointer;
-        font-size: 22px;
-        color: #fff;
-        opacity: 0.7;
-        transition: opacity 0.2s;
-    }
-    #closeChat:hover {
-        opacity: 1;
-    }
-    #chatMessages {
-        display: flex;
-        flex-direction: column-reverse;
-        height: 270px;
-        overflow-y: auto;
-        padding: 18px 12px 12px 12px;
-        margin: 0;
-        list-style: none;
-        background: #f7fafd;
-        border-bottom: 1px solid #e3e3e3;
-    }
-    .chat-message {
-        display: flex;
-        align-items: flex-end;
-        margin: 8px 0;
-        font-size: 15px;
-        border-radius: 18px;
-        max-width: 85%;
-        padding: 0;
-        background: none;
-        box-shadow: none;
-    }
-    .own-message {
-        align-self: flex-end;
-        flex-direction: row-reverse;
-    }
-    .other-message {
-        align-self: flex-start;
-    }
-    .avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
-        color: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 18px;
-        margin: 0 8px;
-        box-shadow: 0 2px 8px rgba(74,144,226,0.10);
-        flex-shrink: 0;
-    }
-    .bubble {
-        padding: 10px 16px;
-        border-radius: 18px;
-        background: #e5e5ea;
-        color: #222;
-        position: relative;
-        min-width: 60px;
-        word-break: break-word;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .own-message .bubble {
-        background: #dcf8c6;
-        color: #222;
-    }
-    .sender-name {
-        font-size: 12px;
-        font-weight: 600;
-        color: #4a90e2;
-        margin-bottom: 2px;
-        display: block;
-        letter-spacing: 0.5px;
-    }
-    #chatFooter {
-        padding: 12px 14px;
-        background: #f7fafd;
-        display: flex;
-        gap: 6px;
-        border-top: 1px solid #e3e3e3;
-    }
-    #userName {
-        display: none;
-    }
-    #messageInput {
-        flex: 1;
-        padding: 8px 12px;
-        border: 1px solid #cfd8dc;
-        border-radius: 18px;
-        font-size: 15px;
-        outline: none;
-        background: #fff;
-        transition: border 0.2s;
-    }
-    #messageInput:focus {
-        border: 1.5px solid #4a90e2;
-    }
-    #sendMessage {
-        padding: 0 18px;
-        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
-        color: white;
-        border: none;
-        cursor: pointer;
-        border-radius: 18px;
-        font-size: 15px;
-        font-weight: 600;
-        transition: background 0.2s;
-    }
-    #sendMessage:hover {
-        background: linear-gradient(135deg, #357ab8 60%, #4a90e2 100%);
-    }
-</style>
+    <link rel="stylesheet" type="text/css" href="css/Panel_styles.css" />
+
 </head>
 <body>
+    <!-- Overlay para oscurecer y desenfocar el fondo -->
+    <div class="background-overlay"></div>
     <form id="form1" runat="server">
-        <div>
-            <asp:Label ID="lblWelcome" runat="server" Font-Size="Large" Font-Bold="true" ForeColor="#4a5568" />
-        </div>
-        <asp:Label
-            ID="lblMensajeExito"
-            runat="server"
-            ForeColor="Green"
-            Font-Bold="true"
-            EnableViewState="false" />
-
-        <div style="margin-top: 20px;">
-            <asp:Button
-                ID="btnCrearObra"
+        <div class="panel-box">
+            <!-- Botón cerrar sesión arriba a la derecha -->
+            <div class="top-bar">
+                <asp:Button ID="btnCerrarSesion" runat="server" Text="Cerrar Sesión" CssClass="btn btn-danger btn-logout" OnClick="btnCerrarSesion_Click" />
+            </div>
+            <div>
+                <asp:Label ID="lblWelcome" runat="server" CssClass="welcome-label" Font-Size="Large" Font-Bold="true" />
+            </div>
+            <asp:Label
+                ID="lblMensajeExito"
                 runat="server"
-                Text="Crear Nueva Obra"
-                OnClick="btnCrearObra_Click"
-                CssClass="btn btn-primary"
-                Style="margin-bottom: 15px;" />
+                ForeColor="Green"
+                Font-Bold="true"
+                EnableViewState="false" />
 
-            <asp:TextBox
-                ID="txtBuscarTitulo"
-                runat="server"
-                CssClass="form-control"
-                placeholder="Buscar por título..." />
+            <div class="actions-bar">
+                <asp:Button
+                    ID="btnCrearObra"
+                    runat="server"
+                    Text="Crear Nueva Obra"
+                    OnClick="btnCrearObra_Click"
+                    CssClass="btn btn-primary" />
 
-            <asp:Button
-                ID="btnBuscarTitulo"
-                runat="server"
-                Text="🔍 Buscar"
-                CssClass="btn btn-info"
-                OnClick="btnBuscarTitulo_Click"
-                Style="margin-left: 5px; margin-top: 5px;" />
+                <asp:TextBox
+                    ID="txtBuscarTitulo"
+                    runat="server"
+                    CssClass="form-control"
+                    placeholder="Buscar por título..." />
 
-            <asp:Button
-                ID="btnLimpiarBusqueda"
-                runat="server"
-                Text="Limpiar"
-                CssClass="btn btn-secondary"
-                OnClick="btnLimpiarBusqueda_Click"
-                Style="margin-top: 5px;" />
+                <asp:Button
+                    ID="btnBuscarTitulo"
+                    runat="server"
+                    Text="🔍 Buscar"
+                    CssClass="btn btn-info" 
+                    OnClick="btnBuscarTitulo_Click" />
 
-            <asp:Button ID="btnCerrarSesion" runat="server" Text="Cerrar Sesión" CssClass="btn btn-danger" OnClick="btnCerrarSesion_Click" />
+                <asp:Button
+                    ID="btnLimpiarBusqueda"
+                    runat="server"
+                    Text="Limpiar"
+                    CssClass="btn btn-secondary"
+                    OnClick="btnLimpiarBusqueda_Click" />
+            </div>
 
             <asp:GridView
                 ID="gvObras"
