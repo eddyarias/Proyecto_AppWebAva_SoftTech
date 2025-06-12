@@ -26,23 +26,23 @@
 
                 <asp:Label ID="lblMensaje" runat="server" CssClass="message-error text-danger d-block mb-2" />
 
-                <asp:ValidationSummary 
-                    ID="valSummary" 
-                    runat="server" 
+                <asp:ValidationSummary
+                    ID="valSummary"
+                    runat="server"
                     CssClass="text-danger mb-3"
-                    ShowMessageBox="false" 
+                    ShowMessageBox="false"
                     ShowSummary="true" />
 
                 <div class="mb-3">
                     <asp:Label runat="server" AssociatedControlID="txtTitulo" Text="Título:" CssClass="form-label" />
                     <asp:TextBox ID="txtTitulo" runat="server" CssClass="form-control" MaxLength="255" />
-                    <asp:RequiredFieldValidator 
-                        ID="rfvTitulo" 
-                        runat="server" 
-                        ControlToValidate="txtTitulo" 
-                        ErrorMessage="El campo Título es obligatorio." 
-                        Text="*" 
-                        Display="Dynamic" 
+                    <asp:RequiredFieldValidator
+                        ID="rfvTitulo"
+                        runat="server"
+                        ControlToValidate="txtTitulo"
+                        ErrorMessage="El campo Título es obligatorio."
+                        Text="*"
+                        Display="Dynamic"
                         CssClass="text-danger" />
                 </div>
 
@@ -54,22 +54,22 @@
                 <div class="mb-3">
                     <asp:Label runat="server" AssociatedControlID="txtPrecio" Text="Precio:" CssClass="form-label" />
                     <asp:TextBox ID="txtPrecio" runat="server" CssClass="form-control" />
-                    <asp:RequiredFieldValidator 
-                        ID="rfvPrecio" 
-                        runat="server" 
-                        ControlToValidate="txtPrecio" 
-                        ErrorMessage="El campo Precio es obligatorio." 
-                        Text="*" 
-                        Display="Dynamic" 
+                    <asp:RequiredFieldValidator
+                        ID="rfvPrecio"
+                        runat="server"
+                        ControlToValidate="txtPrecio"
+                        ErrorMessage="El campo Precio es obligatorio."
+                        Text="*"
+                        Display="Dynamic"
                         CssClass="text-danger" />
-                    <asp:RegularExpressionValidator 
-                        ID="revPrecio" 
-                        runat="server" 
-                        ControlToValidate="txtPrecio" 
-                        ErrorMessage="El formato del precio es inválido. Ej: 99.99" 
-                        Text="!" 
-                        Display="Dynamic" 
-                        ValidationExpression="^\d+(\.\d{1,2})?$" 
+                    <asp:RegularExpressionValidator
+                        ID="revPrecio"
+                        runat="server"
+                        ControlToValidate="txtPrecio"
+                        ErrorMessage="El formato del precio es inválido. Ej: 99.99"
+                        Text="!"
+                        Display="Dynamic"
+                        ValidationExpression="^\d+(\.\d{1,2})?$"
                         CssClass="text-danger" />
                 </div>
 

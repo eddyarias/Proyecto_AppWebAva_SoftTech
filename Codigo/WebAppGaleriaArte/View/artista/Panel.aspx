@@ -5,8 +5,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Panel Artista</title>
-    <link rel="stylesheet" type="text/css" href="../css/Panel_styles.css" />
+    <title>Panel de Artista</title>
+    <link rel="stylesheet" type="text/css" href="../css/PanelArtista_styles.css" />
 </head>
 <body>
     <!-- Overlay para oscurecer y desenfocar el fondo -->
@@ -45,7 +45,7 @@
                     ID="btnBuscarTitulo"
                     runat="server"
                     Text="🔍 Buscar"
-                    CssClass="btn btn-info" 
+                    CssClass="btn btn-info"
                     OnClick="btnBuscarTitulo_Click" />
 
                 <asp:Button
@@ -184,7 +184,7 @@
                     </li>
                 `);
                 $('#chatMessages').prepend($msg);
-}
+            }
 
             //loadHistory();
 
