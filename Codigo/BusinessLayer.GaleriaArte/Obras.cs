@@ -60,5 +60,11 @@ namespace BusinessLayer.GaleriaArte
             var dataAccess = new DataAccess.GaleriaArte.Obras(strConnectionString);
             return dataAccess.ActivarObra(obraId);
         }
+
+        public List<EntityLayer.GaleriaArte.Obra> ObtenerObrasActivas(int limite = 10)
+        {
+            var dataAccess = new DataAccess.GaleriaArte.Obras(strConnectionString);
+            return dataAccess.ObtenerObrasActivas(limite);
+        }
     }
 }

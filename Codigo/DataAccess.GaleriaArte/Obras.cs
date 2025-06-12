@@ -220,6 +220,47 @@ namespace DataAccess.GaleriaArte
             return rowsAffected > 0;
         }
 
+        public List<Obra> ObtenerObrasActivas(int limite = 10)
+        {
+            var obras = new List<Obra>();
+
+            using (var con = new NpgsqlConnection(connectionString))
+            {
+                string query = @"SELECT id, titulo, descripcion, archivo_url, firma_digital, artista_id, precio, estado, fecha_publicacion
+                         FROM obras
+                         WHERE estado = 'activa'
+                         ORDER BY fecha_publicacion DESC
+                         LIMIT @limite";
+
+                using (var cmd = new NpgsqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@limite", limite);
+                    con.Open();
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var obra = new Obra
+                            {
+                                id = reader.GetInt32(reader.GetOrdinal("id")),
+                                titulo = reader.GetString(reader.GetOrdinal("titulo")),
+                                descripcion = reader.IsDBNull(reader.GetOrdinal("descripcion")) ? null : reader.GetString(reader.GetOrdinal("descripcion")),
+                                archivo_url = reader.GetString(reader.GetOrdinal("archivo_url")),
+                                firma_digital = reader.GetString(reader.GetOrdinal("firma_digital")),
+                                artista_id = reader.GetInt32(reader.GetOrdinal("artista_id")),
+                                precio = reader.GetDecimal(reader.GetOrdinal("precio")),
+                                estado = reader.GetString(reader.GetOrdinal("estado")),
+                                fecha_publicacion = reader.GetDateTime(reader.GetOrdinal("fecha_publicacion"))
+                            };
+                            obras.Add(obra);
+                        }
+                    }
+                }
+            }
+
+            return obras;
+        }
 
     }
 }
