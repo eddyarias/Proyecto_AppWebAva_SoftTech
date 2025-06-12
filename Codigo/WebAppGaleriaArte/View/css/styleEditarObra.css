@@ -1,0 +1,79 @@
+﻿/* Fondo oscuro con imagen y desenfoque */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-image: url('../css/imagenesCss/abstract-fractal-534910.jpeg'); /* Ajustar si es necesario */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: brightness(40%) blur(8px);
+    z-index: -1;
+}
+
+/* Estilo general del body */
+body {
+    position: relative;
+    margin: 0;
+    color: #e7e9ea;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+}
+
+/* Contenedor del formulario */
+.editar-obra-box {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid #2f3336;
+    max-width: 500px;
+    width: 100%;
+    backdrop-filter: blur(6px);
+}
+
+/* Encabezado */
+h2 {
+    color: #e7e9ea;
+}
+
+/* Inputs */
+.form-control {
+    background-color: #202327cc;
+    border: 1px solid #2f3336;
+    color: #e7e9ea;
+}
+
+    .form-control:focus {
+        background-color: #202327cc;
+        border-color: #1d9bf0;
+        color: #fff;
+        box-shadow: none;
+    }
+
+/* Botón principal */
+.btn-primary {
+    background-color: #1d9bf0;
+    border-color: #1d9bf0;
+}
+
+    .btn-primary:hover {
+        background-color: #1a8cd8;
+        border-color: #1a8cd8;
+    }
+
+/* Botón de regreso */
+.btn-outline-light {
+    border-color: #e7e9ea;
+    color: #e7e9ea;
+}
+
+    .btn-outline-light:hover {
+        background-color: #e7e9ea;
+        color: #000;
+    }
+
+/* Mensajes de error */
+.message-error {
+    font-size: 0.9rem;
+}

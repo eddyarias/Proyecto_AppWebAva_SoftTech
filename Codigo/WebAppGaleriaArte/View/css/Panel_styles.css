@@ -159,7 +159,7 @@
 
     /* Fondo general y fuente */
 body {
-    background-image: url('../../css/imagenesCss/abstract-fractal-534910.jpeg');
+    background-image: url('../css/imagenesCss/abstract-fractal-534910.jpeg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

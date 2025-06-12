@@ -6,8 +6,7 @@
 <head runat="server">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Panel Artista</title>
-    <link rel="stylesheet" type="text/css" href="css/Panel_styles.css" />
-
+    <link rel="stylesheet" type="text/css" href="../css/Panel_styles.css" />
 </head>
 <body>
     <!-- Overlay para oscurecer y desenfocar el fondo -->

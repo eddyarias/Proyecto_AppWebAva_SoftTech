@@ -3,6 +3,7 @@ using System.Web.UI;
 using EntityLayer.GaleriaArte;
 using BusinessLayer.GaleriaArte;
 using System.Configuration;
+using System.Web.UI.WebControls;
 
 namespace WebAppGaleriaArte.View
 {
@@ -13,6 +14,12 @@ namespace WebAppGaleriaArte.View
         protected void Page_Load(object sender, EventArgs e)
         {
             lblMensaje.Text = "";
+            if (!IsPostBack)
+            {
+                ddlRol.Items.Clear(); // Opción por defecto
+                ddlRol.Items.Add(new ListItem("comprador", "comprador"));
+                ddlRol.Items.Add(new ListItem("artista", "artista"));
+            }
         }
 
         protected void btnRegistrar_Click(object sender, EventArgs e)
