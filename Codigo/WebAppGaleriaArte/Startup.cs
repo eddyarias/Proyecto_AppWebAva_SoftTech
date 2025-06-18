@@ -4,6 +4,7 @@ using Owin;
 [assembly: OwinStartup(typeof(WebAppGaleriaArte.Startup))]
 
 
+
 namespace WebAppGaleriaArte
 {
     public class Startup
