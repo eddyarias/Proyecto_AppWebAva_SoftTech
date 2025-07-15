@@ -1,0 +1,6 @@
+@ObraService_HostAddress = http://localhost:5116
+
+GET {{ObraService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
