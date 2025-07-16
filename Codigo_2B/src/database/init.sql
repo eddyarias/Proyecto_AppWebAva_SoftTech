@@ -13,7 +13,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE SCHEMA IF NOT EXISTS usuarios;
 
 CREATE TABLE usuarios.usuarios (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nickname VARCHAR(50) UNIQUE NOT NULL,
     correo VARCHAR(255) UNIQUE NOT NULL,
     contraseña_hash TEXT NOT NULL,
@@ -24,12 +24,12 @@ CREATE TABLE usuarios.usuarios (
 );
 
 CREATE TABLE usuarios.roles (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre VARCHAR(30) UNIQUE NOT NULL,
     descripcion TEXT
 );
 
-CREATE TABLE usuarios.usuario_roles (
+CREATE TABLE usuarios.usuarios_roles (
     usuario_id UUID REFERENCES usuarios.usuarios(id),
     rol_id UUID REFERENCES usuarios.roles(id),
     PRIMARY KEY (usuario_id, rol_id)
@@ -37,7 +37,7 @@ CREATE TABLE usuarios.usuario_roles (
 
 CREATE TABLE usuarios.intentos_recuperacion (
     id SERIAL PRIMARY KEY,
-    usuario_id INT REFERENCES usuarios.usuarios(id),
+    usuario_id UUID REFERENCES usuarios.usuarios(id),
     token_recuperacion UUID NOT NULL,
     expiracion TIMESTAMP NOT NULL,
     usado BOOLEAN DEFAULT FALSE,
