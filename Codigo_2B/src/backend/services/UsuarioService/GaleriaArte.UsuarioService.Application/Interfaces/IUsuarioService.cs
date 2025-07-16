@@ -1,6 +1,6 @@
 using GaleriaArte.UsuarioService.Application.DTOs;
 
-namespace GaleriaArte.UsuarioService.Application.Services;
+namespace GaleriaArte.UsuarioService.Application.Interfaces;
 
 public interface IUsuarioService
 {

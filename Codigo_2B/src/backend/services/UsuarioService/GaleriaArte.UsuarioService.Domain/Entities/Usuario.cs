@@ -10,4 +10,7 @@ public class Usuario
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
     public ICollection<UsuarioRol> Roles { get; set; } = new List<UsuarioRol>();
+
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExp { get; set; }
 }

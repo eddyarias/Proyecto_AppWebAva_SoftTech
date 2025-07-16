@@ -3,6 +3,7 @@ using GaleriaArte.UsuarioService.Domain.Entities;
 using GaleriaArte.UsuarioService.Infrastructure.Data;
 using BCrypt.Net;
 using GaleriaArte.UsuarioService.Infrastructure.Repositories;
+using GaleriaArte.UsuarioService.Application.Interfaces;
 
 namespace GaleriaArte.UsuarioService.Application.Services;
 

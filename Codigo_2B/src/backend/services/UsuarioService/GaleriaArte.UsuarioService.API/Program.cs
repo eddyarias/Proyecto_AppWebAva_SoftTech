@@ -1,3 +1,4 @@
+using GaleriaArte.UsuarioService.Application.Interfaces;
 using GaleriaArte.UsuarioService.Application.Services;
 using GaleriaArte.UsuarioService.Domain.Interfaces;
 using GaleriaArte.UsuarioService.Infrastructure.Data;
@@ -17,6 +18,8 @@ builder.Services.AddDbContext<UsuarioDbContext>(opt =>
 builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<UsuarioLoginService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 var app = builder.Build();

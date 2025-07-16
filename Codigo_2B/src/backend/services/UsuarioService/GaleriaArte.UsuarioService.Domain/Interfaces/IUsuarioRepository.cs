@@ -8,4 +8,6 @@ public interface IUsuarioRepository
     Task<bool> ExisteNicknameAsync(string nickname);
     Task<Rol?> ObtenerRolPorNombreAsync(string nombre);
     Task AgregarUsuarioAsync(Usuario usuario);
+    Task<Usuario?> ObtenerPorNicknameOCorreoAsync(string identificador);
+    Task ActualizarRefreshTokenAsync(Guid id, string refreshToken, DateTime expira);
 }

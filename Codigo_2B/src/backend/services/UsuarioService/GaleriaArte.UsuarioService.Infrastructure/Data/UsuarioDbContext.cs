@@ -25,6 +25,8 @@ public class UsuarioDbContext : DbContext
             entity.Property(e => e.ContraseñaHash).HasColumnName("contraseña_hash");
             entity.Property(e => e.Estado).HasColumnName("estado");
             entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion");
+            entity.Property(e => e.RefreshToken).HasColumnName("refresh_token");
+            entity.Property(e => e.RefreshTokenExp).HasColumnName("refresh_token_exp");
         });
 
         // Configuración de Rol

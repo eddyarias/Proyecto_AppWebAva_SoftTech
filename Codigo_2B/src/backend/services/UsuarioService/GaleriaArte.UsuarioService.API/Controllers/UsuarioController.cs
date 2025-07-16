@@ -1,4 +1,5 @@
 using GaleriaArte.UsuarioService.Application.DTOs;
+using GaleriaArte.UsuarioService.Application.Interfaces;
 using GaleriaArte.UsuarioService.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
