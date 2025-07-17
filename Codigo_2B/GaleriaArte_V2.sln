@@ -55,6 +55,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaleriaArte.CompraService.D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaleriaArte.CompraService.Infrastructure", "src\backend\services\CompraService\GaleriaArte.CompraService.Infrastructure\GaleriaArte.CompraService.Infrastructure.csproj", "{44D7E317-BE5D-4BCA-A885-3529DCDD7550}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AuditoriaService", "AuditoriaService", "{239162BC-496A-4112-9EC0-69B812E494DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaleriaArte.AuditoriaService.API", "src\backend\services\AuditoriaService\GaleriaArte.AuditoriaService.API\GaleriaArte.AuditoriaService.API.csproj", "{C5BF6AAD-AD08-4AE2-A23D-0489BCD3541D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaleriaArte.AuditoriaService.Application", "src\backend\services\AuditoriaService\GaleriaArte.AuditoriaService.Application\GaleriaArte.AuditoriaService.Application.csproj", "{08F22F6D-CEDF-40AF-BB17-35D2E789216A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaleriaArte.AuditoriaService.Domain", "src\backend\services\AuditoriaService\GaleriaArte.AuditoriaService.Domain\GaleriaArte.AuditoriaService.Domain.csproj", "{2E0DE762-2A7E-4264-929C-BD961DFC85EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaleriaArte.AuditoriaService.Infrastructure", "src\backend\services\AuditoriaService\GaleriaArte.AuditoriaService.Infrastructure\GaleriaArte.AuditoriaService.Infrastructure.csproj", "{5272867C-72EB-4711-8A4F-D57D19A11522}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -136,6 +146,22 @@ Global
 		{44D7E317-BE5D-4BCA-A885-3529DCDD7550}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44D7E317-BE5D-4BCA-A885-3529DCDD7550}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44D7E317-BE5D-4BCA-A885-3529DCDD7550}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5BF6AAD-AD08-4AE2-A23D-0489BCD3541D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5BF6AAD-AD08-4AE2-A23D-0489BCD3541D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5BF6AAD-AD08-4AE2-A23D-0489BCD3541D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5BF6AAD-AD08-4AE2-A23D-0489BCD3541D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08F22F6D-CEDF-40AF-BB17-35D2E789216A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08F22F6D-CEDF-40AF-BB17-35D2E789216A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08F22F6D-CEDF-40AF-BB17-35D2E789216A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08F22F6D-CEDF-40AF-BB17-35D2E789216A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E0DE762-2A7E-4264-929C-BD961DFC85EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E0DE762-2A7E-4264-929C-BD961DFC85EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E0DE762-2A7E-4264-929C-BD961DFC85EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E0DE762-2A7E-4264-929C-BD961DFC85EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5272867C-72EB-4711-8A4F-D57D19A11522}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5272867C-72EB-4711-8A4F-D57D19A11522}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5272867C-72EB-4711-8A4F-D57D19A11522}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5272867C-72EB-4711-8A4F-D57D19A11522}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{492B82CC-8F54-4389-83A9-4002E308AE0D} = {587B63CD-B826-4EBE-842B-9EABA2EB1BE0}
@@ -163,5 +189,10 @@ Global
 		{793321D1-F480-4E1F-8816-3170714E1135} = {26A83959-FBA3-448B-A195-888F9F7B854B}
 		{B9AE4DEE-A99D-40ED-8A44-A19259BD7C0A} = {26A83959-FBA3-448B-A195-888F9F7B854B}
 		{44D7E317-BE5D-4BCA-A885-3529DCDD7550} = {26A83959-FBA3-448B-A195-888F9F7B854B}
+		{239162BC-496A-4112-9EC0-69B812E494DA} = {06FEED5E-8AA2-4C15-8E41-5ACA8C50DDAE}
+		{C5BF6AAD-AD08-4AE2-A23D-0489BCD3541D} = {239162BC-496A-4112-9EC0-69B812E494DA}
+		{08F22F6D-CEDF-40AF-BB17-35D2E789216A} = {239162BC-496A-4112-9EC0-69B812E494DA}
+		{2E0DE762-2A7E-4264-929C-BD961DFC85EE} = {239162BC-496A-4112-9EC0-69B812E494DA}
+		{5272867C-72EB-4711-8A4F-D57D19A11522} = {239162BC-496A-4112-9EC0-69B812E494DA}
 	EndGlobalSection
 EndGlobal
