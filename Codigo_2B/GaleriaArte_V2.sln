@@ -45,6 +45,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaleriaArte.MediaService.Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaleriaArte.MediaService.Domain", "src\backend\services\MediaService\GaleriaArte.MediaService.Domain\GaleriaArte.MediaService.Domain.csproj", "{F0DCF0B5-61C9-4A37-AE48-9E168851D0BE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CompraService", "CompraService", "{26A83959-FBA3-448B-A195-888F9F7B854B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaleriaArte.CompraService.API", "src\backend\services\CompraService\GaleriaArte.CompraService.API\GaleriaArte.CompraService.API.csproj", "{B3CE7F9E-F3D1-4B3E-848C-C311BAABCC44}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaleriaArte.CompraService.Application", "src\backend\services\CompraService\GaleriaArte.CompraService.Application\GaleriaArte.CompraService.Application.csproj", "{793321D1-F480-4E1F-8816-3170714E1135}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaleriaArte.CompraService.Domain", "src\backend\services\CompraService\GaleriaArte.CompraService.Domain\GaleriaArte.CompraService.Domain.csproj", "{B9AE4DEE-A99D-40ED-8A44-A19259BD7C0A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaleriaArte.CompraService.Infrastructure", "src\backend\services\CompraService\GaleriaArte.CompraService.Infrastructure\GaleriaArte.CompraService.Infrastructure.csproj", "{44D7E317-BE5D-4BCA-A885-3529DCDD7550}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +120,22 @@ Global
 		{F0DCF0B5-61C9-4A37-AE48-9E168851D0BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0DCF0B5-61C9-4A37-AE48-9E168851D0BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F0DCF0B5-61C9-4A37-AE48-9E168851D0BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3CE7F9E-F3D1-4B3E-848C-C311BAABCC44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3CE7F9E-F3D1-4B3E-848C-C311BAABCC44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3CE7F9E-F3D1-4B3E-848C-C311BAABCC44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3CE7F9E-F3D1-4B3E-848C-C311BAABCC44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{793321D1-F480-4E1F-8816-3170714E1135}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{793321D1-F480-4E1F-8816-3170714E1135}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{793321D1-F480-4E1F-8816-3170714E1135}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{793321D1-F480-4E1F-8816-3170714E1135}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9AE4DEE-A99D-40ED-8A44-A19259BD7C0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9AE4DEE-A99D-40ED-8A44-A19259BD7C0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9AE4DEE-A99D-40ED-8A44-A19259BD7C0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9AE4DEE-A99D-40ED-8A44-A19259BD7C0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44D7E317-BE5D-4BCA-A885-3529DCDD7550}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44D7E317-BE5D-4BCA-A885-3529DCDD7550}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44D7E317-BE5D-4BCA-A885-3529DCDD7550}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44D7E317-BE5D-4BCA-A885-3529DCDD7550}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{492B82CC-8F54-4389-83A9-4002E308AE0D} = {587B63CD-B826-4EBE-842B-9EABA2EB1BE0}
@@ -132,5 +158,10 @@ Global
 		{BBF8E8B2-F172-4338-B92A-A0F01F7EFF61} = {1AE73273-CAED-4F1A-9D41-6683B8BC45E7}
 		{07135CFE-F372-478A-8B2F-C29F9BEC710F} = {1AE73273-CAED-4F1A-9D41-6683B8BC45E7}
 		{F0DCF0B5-61C9-4A37-AE48-9E168851D0BE} = {1AE73273-CAED-4F1A-9D41-6683B8BC45E7}
+		{26A83959-FBA3-448B-A195-888F9F7B854B} = {06FEED5E-8AA2-4C15-8E41-5ACA8C50DDAE}
+		{B3CE7F9E-F3D1-4B3E-848C-C311BAABCC44} = {26A83959-FBA3-448B-A195-888F9F7B854B}
+		{793321D1-F480-4E1F-8816-3170714E1135} = {26A83959-FBA3-448B-A195-888F9F7B854B}
+		{B9AE4DEE-A99D-40ED-8A44-A19259BD7C0A} = {26A83959-FBA3-448B-A195-888F9F7B854B}
+		{44D7E317-BE5D-4BCA-A885-3529DCDD7550} = {26A83959-FBA3-448B-A195-888F9F7B854B}
 	EndGlobalSection
 EndGlobal
