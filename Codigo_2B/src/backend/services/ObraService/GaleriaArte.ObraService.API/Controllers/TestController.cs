@@ -5,7 +5,7 @@ namespace GaleriaArte.ObraService.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ObrasController : ControllerBase
+public class TestController : ControllerBase
 {
     [HttpGet("publicas")]
     [AllowAnonymous]
@@ -18,7 +18,7 @@ public class ObrasController : ControllerBase
     [Authorize]
     public IActionResult GetObrasProtegidas()
     {
-        var correo = User.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
-        return Ok(new { mensaje = "Autenticado correctamente", usuario = correo });
+        var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+        return Ok(new { mensaje = "Autenticado correctamente", claims });
     }
 }
