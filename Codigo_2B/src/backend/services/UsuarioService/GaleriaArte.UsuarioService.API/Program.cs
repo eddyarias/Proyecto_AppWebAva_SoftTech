@@ -3,7 +3,9 @@ using GaleriaArte.UsuarioService.Application.Services;
 using GaleriaArte.UsuarioService.Domain.Interfaces;
 using GaleriaArte.UsuarioService.Infrastructure.Data;
 using GaleriaArte.UsuarioService.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +24,49 @@ builder.Services.AddScoped<UsuarioLoginService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 
+//Configuracion para pruebas de autenticación con Swagger UI
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Galeria Arte Obra API", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Ingresa 'Bearer' seguido de tu token JWT. Ejemplo: Bearer eyJhbGciOiJIUzI1..."
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header,
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+builder.Services.AddAuthentication("ManualScheme")
+    .AddScheme<AuthenticationSchemeOptions, ManualAuthenticationHandler>("ManualScheme", options => { });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

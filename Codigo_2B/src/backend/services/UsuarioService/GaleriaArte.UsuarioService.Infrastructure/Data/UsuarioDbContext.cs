@@ -1,5 +1,6 @@
 using GaleriaArte.UsuarioService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GaleriaArte.UsuarioService.Infrastructure.Data;
 
@@ -12,6 +13,20 @@ public class UsuarioDbContext : DbContext
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                {
+                    property.SetValueConverter(new ValueConverter<DateTime, DateTime>(
+                        v => v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+                    ));
+                }
+            }
+        }
+
         modelBuilder.HasDefaultSchema("usuarios");
 
         // Configuración de Usuario
