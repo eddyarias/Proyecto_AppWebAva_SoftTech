@@ -41,6 +41,11 @@ public class UsuarioRepository : IUsuarioRepository
             .FirstOrDefaultAsync(u => u.Correo == identificador || u.Nickname == identificador);
     }
 
+    public async Task<Usuario?> ObtenerPorIdAsync(Guid id)
+    {
+        return await _context.Usuarios.FindAsync(id);
+    }
+
     public async Task ActualizarRefreshTokenAsync(Guid id, string token, DateTime expira)
     {
         var user = await _context.Usuarios.FindAsync(id);
@@ -48,6 +53,12 @@ public class UsuarioRepository : IUsuarioRepository
 
         user.RefreshToken = token;
         user.RefreshTokenExp = expira;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task ActualizarUsuarioAsync(Usuario usuario)
+    {
+        _context.Usuarios.Update(usuario);
         await _context.SaveChangesAsync();
     }
 }
