@@ -1,13 +1,28 @@
+using GaleriaArte.ObraService.Application.Interfaces;
+using GaleriaArte.ObraService.Application.Services;
+using GaleriaArte.ObraService.Domain.Interfaces;
+using GaleriaArte.ObraService.Infrastructure.Data;
+using GaleriaArte.ObraService.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Agrega servicios
+// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Database configuration
+builder.Services.AddDbContext<ObraDbContext>(opt =>
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+
+// Register services and repositories
+builder.Services.AddScoped<ObraRepository>();
+builder.Services.AddScoped<IObraService, ObraService>();
+builder.Services.AddScoped<IObraRepository, ObraRepository>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -30,17 +45,17 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 app.Run();
 
 //app.UseHttpsRedirection();
