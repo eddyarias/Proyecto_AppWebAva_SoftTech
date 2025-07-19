@@ -36,21 +36,16 @@ public class UsuarioService : IUsuarioService
         if (rol == null)
             throw new Exception("Rol inválido.");
 
-        usuario.Roles.Add(new UsuarioRol
-        {
-            RolId = rol.Id,
-            Usuario = usuario
-        });
+        usuario.Rol = rol;
+        usuario.RolId = rol.Id;
 
         await _repositorio.AgregarUsuarioAsync(usuario);
         
         // Devolvemos un objeto anónimo con los datos necesarios
         return new
         {
-            id = usuario.Id,
-            nickname = usuario.Nickname,
-            correo = usuario.Correo,
-            rol = rol.Nombre
+            success = true,
+            message = "Usuario registrado exitosamente.",
         };
     }
 }

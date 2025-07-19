@@ -26,15 +26,10 @@ public class AuthService : IAuthService
             // Claims estándar
             new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, usuario.Correo),
-            new Claim("nickname", usuario.Nickname),            
+            new Claim("nickname", usuario.Nickname),
+            // Claims rol
+            new Claim(ClaimTypes.Role, usuario.RolId.ToString()),        
         };
-
-        //Claimd de roles
-        var rolId = usuario.Roles.FirstOrDefault()?.RolId;
-        if (rolId != null)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, rolId.ToString()));
-        }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Secret"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
