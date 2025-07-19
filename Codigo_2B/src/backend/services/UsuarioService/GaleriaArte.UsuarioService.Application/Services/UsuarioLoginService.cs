@@ -26,6 +26,9 @@ public class UsuarioLoginService
         if (!BCrypt.Net.BCrypt.Verify(req.Contraseña, usuario.ContraseñaHash))
             throw new Exception("Credenciales inválidas");
 
+        if (!usuario.Estado)
+            throw new Exception("Usuario inactivo");
+
         var tokenAcceso = _authService.GenerarJwt(usuario);
         var refreshToken = _authService.GenerarRefreshToken();
         var exp = DateTime.UtcNow.AddDays(7);
