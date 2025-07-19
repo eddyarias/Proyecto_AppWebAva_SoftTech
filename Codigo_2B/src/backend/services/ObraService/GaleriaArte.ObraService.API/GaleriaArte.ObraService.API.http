@@ -1,4 +1,47 @@
-@GaleriaArte.ObraService.API_HostAddress = http://localhost:5055
+@GaleriaArte.ObraService.API_HostAddress = http://localhost:5000
+
+### Crear una nueva obra
+POST {{GaleriaArte.ObraService.API_HostAddress}}/api/obra/crear
+Content-Type: application/json
+
+{
+  "titulo": "La Mona Lisa Digital",
+  "descripcion": "Una interpretación digital moderna de la famosa obra de Da Vinci",
+  "archivoUrl": "https://ejemplo.com/monalisa.jpg",
+  "firmaDigital": "d4f7e8a9b2c3e5f6g7h8i9j0k1l2m3n4",
+  "artistaNickname": "leonardo_digital",
+  "precio": 1500.50
+}
+
+### Obtener obra por ID
+GET {{GaleriaArte.ObraService.API_HostAddress}}/api/obra/1
+
+### Obtener todas las obras de un artista
+GET {{GaleriaArte.ObraService.API_HostAddress}}/api/obra/artista/leonardo_digital
+
+### Obtener obras activas (con límite opcional)
+GET {{GaleriaArte.ObraService.API_HostAddress}}/api/obra/activas?limite=5
+
+### Actualizar una obra
+PUT {{GaleriaArte.ObraService.API_HostAddress}}/api/obra/1
+Content-Type: application/json
+
+{
+  "titulo": "La Mona Lisa Digital - Actualizada",
+  "descripcion": "Una interpretación digital moderna y mejorada de la famosa obra de Da Vinci",
+  "archivoUrl": "https://ejemplo.com/monalisa_v2.jpg",
+  "firmaDigital": "d4f7e8a9b2c3e5f6g7h8i9j0k1l2m3n5",
+  "precio": 1750.75
+}
+
+### Ocultar una obra
+PATCH {{GaleriaArte.ObraService.API_HostAddress}}/api/obra/1/ocultar
+
+### Activar una obra
+PATCH {{GaleriaArte.ObraService.API_HostAddress}}/api/obra/1/activar
+
+### Eliminar una obra
+DELETE {{GaleriaArte.ObraService.API_HostAddress}}/api/obra/1leriaArte.ObraService.API_HostAddress = http://localhost:5055
 
 GET {{GaleriaArte.ObraService.API_HostAddress}}/weatherforecast/
 Accept: application/json

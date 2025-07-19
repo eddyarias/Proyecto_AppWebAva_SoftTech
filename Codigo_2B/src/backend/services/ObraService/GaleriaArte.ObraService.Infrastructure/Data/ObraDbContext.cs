@@ -25,7 +25,13 @@ public class ObraDbContext : DbContext
             entity.Property(e => e.ArtistaNickname).HasColumnName("artista_nickname").IsRequired();
             entity.Property(e => e.Precio).HasColumnName("precio").HasColumnType("decimal(10,2)");
             entity.Property(e => e.Estado).HasColumnName("estado").IsRequired();
-            entity.Property(e => e.FechaPublicacion).HasColumnName("fecha_publicacion");
+            
+            // 🔧 CONFIGURACIÓN ESPECÍFICA PARA DATETIME UTC
+            entity.Property(e => e.FechaPublicacion)
+                  .HasColumnName("fecha_publicacion")
+                  .HasConversion(
+                      v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
+                      v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
         });
     }
 }
