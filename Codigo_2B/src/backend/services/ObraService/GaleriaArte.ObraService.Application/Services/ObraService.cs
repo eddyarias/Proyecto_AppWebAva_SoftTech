@@ -2,45 +2,83 @@
 using GaleriaArte.ObraService.Domain.Entities;
 using GaleriaArte.ObraService.Domain.Interfaces;
 using GaleriaArte.ObraService.Application.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace GaleriaArte.ObraService.Application.Services;
 
 public class ObraService : IObraService
 {
     private readonly IObraRepository _repositorio;
+    private readonly IDigitalSignatureService _digitalSignatureService;
+    private readonly IConfiguration _configuration;
 
-    public ObraService(IObraRepository repositorio)
+    public ObraService(IObraRepository repositorio, IDigitalSignatureService digitalSignatureService, IConfiguration configuration)
     {
         _repositorio = repositorio;
+        _digitalSignatureService = digitalSignatureService;
+        _configuration = configuration;
     }
 
     public async Task<object> CrearObraAsync(CreateObraDto dto)
     {
-        var obra = new Obra
+        // Convertir archivo a base64
+        string archivoBase64 = await FileService.ConvertToBase64Async(dto.Archivo);
+        
+        // Crear archivo temporal para la firma
+        string rutaArchivoTemporal = await FileService.CreateTemporaryFileFromBase64Async(archivoBase64);
+        
+        try
         {
-            Titulo = dto.Titulo,
-            Descripcion = dto.Descripcion,
-            ArchivoUrl = dto.ArchivoUrl,
-            FirmaDigital = dto.FirmaDigital,
-            ArtistaNickname = dto.ArtistaNickname,
-            Precio = dto.Precio,
-            Estado = Obra.Estados.Activa,
-            FechaPublicacion = DateTime.UtcNow
-        };
+            // Obtener la clave privada desde la configuración
+            string? rutaClavePrivada = _configuration["DigitalSignature:PrivateKeyPath"];
+            if (string.IsNullOrEmpty(rutaClavePrivada))
+                throw new InvalidOperationException("No se ha configurado la ruta de la clave privada");
 
-        await _repositorio.AgregarObraAsync(obra);
+            if (!File.Exists(rutaClavePrivada))
+                throw new FileNotFoundException($"No se encontró el archivo de clave privada en: {rutaClavePrivada}");
 
-        return new
+            // Leer la clave privada
+            string clavePrivadaXml = await File.ReadAllTextAsync(rutaClavePrivada);
+
+            // Generar la firma digital
+            string firmaDigital = await _digitalSignatureService.FirmarArchivoAsync(rutaArchivoTemporal, clavePrivadaXml);
+
+            // Crear la obra con la firma
+            var obra = new Obra
+            {
+                Titulo = dto.Titulo,
+                Descripcion = dto.Descripcion,
+                ArchivoBase64 = archivoBase64,
+                FirmaDigital = firmaDigital,
+                ArtistaNickname = dto.ArtistaNickname,
+                Precio = dto.Precio,
+                Estado = Obra.Estados.Activa,
+                FechaPublicacion = DateTime.UtcNow
+            };
+
+            await _repositorio.AgregarObraAsync(obra);
+
+            return new
+            {
+                id = obra.Id,
+                titulo = obra.Titulo,
+                descripcion = obra.Descripcion,
+                archivoBase64 = obra.ArchivoBase64,
+                firmaDigital = obra.FirmaDigital,
+                artistaNickname = obra.ArtistaNickname,
+                precio = obra.Precio,
+                estado = obra.Estado,
+                fechaPublicacion = obra.FechaPublicacion
+            };
+        }
+        finally
         {
-            id = obra.Id,
-            titulo = obra.Titulo,
-            descripcion = obra.Descripcion,
-            archivoUrl = obra.ArchivoUrl,
-            artistaNickname = obra.ArtistaNickname,
-            precio = obra.Precio,
-            estado = obra.Estado,
-            fechaPublicacion = obra.FechaPublicacion
-        };
+            // Limpiar archivo temporal
+            if (File.Exists(rutaArchivoTemporal))
+            {
+                File.Delete(rutaArchivoTemporal);
+            }
+        }
     }
 
     public async Task<ObraDto?> ObtenerObraPorIdAsync(int id)
@@ -129,12 +167,46 @@ public class ObraService : IObraService
             Id = obra.Id,
             Titulo = obra.Titulo,
             Descripcion = obra.Descripcion,
-            ArchivoUrl = obra.ArchivoUrl,
+            ArchivoBase64 = obra.ArchivoBase64,
             FirmaDigital = obra.FirmaDigital,
             ArtistaNickname = obra.ArtistaNickname,
             Precio = obra.Precio,
             Estado = obra.Estado,
             FechaPublicacion = obra.FechaPublicacion
         };
+    }
+
+    public async Task<bool> ValidarFirmaObraAsync(int obraId)
+    {
+        var obra = await _repositorio.ObtenerObraPorIdAsync(obraId);
+        if (obra == null) return false;
+
+        // Crear archivo temporal desde base64
+        string rutaArchivoTemporal = await FileService.CreateTemporaryFileFromBase64Async(obra.ArchivoBase64);
+        
+        try
+        {
+            // Obtener la clave pública desde la configuración
+            string? rutaClavePublica = _configuration["DigitalSignature:PublicKeyPath"];
+            if (string.IsNullOrEmpty(rutaClavePublica))
+                throw new InvalidOperationException("No se ha configurado la ruta de la clave pública");
+
+            if (!File.Exists(rutaClavePublica))
+                throw new FileNotFoundException($"No se encontró el archivo de clave pública en: {rutaClavePublica}");
+
+            // Leer la clave pública
+            string clavePublicaXml = await File.ReadAllTextAsync(rutaClavePublica);
+
+            // Validar la firma
+            return await _digitalSignatureService.ValidarFirmaAsync(rutaArchivoTemporal, obra.FirmaDigital, clavePublicaXml);
+        }
+        finally
+        {
+            // Limpiar archivo temporal
+            if (File.Exists(rutaArchivoTemporal))
+            {
+                File.Delete(rutaArchivoTemporal);
+            }
+        }
     }
 }

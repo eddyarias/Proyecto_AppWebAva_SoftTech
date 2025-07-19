@@ -4,7 +4,7 @@ namespace GaleriaArte.ObraService.Application.Interfaces;
 
 public interface IObraService
 {
-    Task<object> CrearObraAsync(CreateObraDto dto);
+    Task<object> CrearObraAsync(CreateObraDto dto); // Este método automáticamente firma la obra
     Task<ObraDto?> ObtenerObraPorIdAsync(int id);
     Task<List<ObraDto>> ObtenerObrasPorArtistaAsync(string artistaNickname);
     Task<List<ObraDto>> ObtenerObrasActivasAsync(int limite = 10);
@@ -12,4 +12,5 @@ public interface IObraService
     Task<(bool success, string message)> OcultarObraAsync(int obraId);
     Task<(bool success, string message)> ActivarObraAsync(int obraId);
     Task<(bool success, string message)> EliminarObraAsync(int obraId);
+    Task<bool> ValidarFirmaObraAsync(int obraId);
 }

@@ -26,6 +26,7 @@ builder.Services.AddDbContext<ObraDbContext>(opt =>
 builder.Services.AddScoped<ObraRepository>();
 builder.Services.AddScoped<IObraService, ObraService>();
 builder.Services.AddScoped<IObraRepository, ObraRepository>();
+builder.Services.AddScoped<IDigitalSignatureService, DigitalSignatureService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

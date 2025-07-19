@@ -60,7 +60,7 @@ CREATE TABLE obras.obras (
     id SERIAL PRIMARY KEY,
     titulo VARCHAR(255) NOT NULL,
     descripcion TEXT,
-    archivo_url TEXT NOT NULL,
+    archivo_base64 TEXT NOT NULL, -- Imagen JPG en formato base64
     firma_digital TEXT NOT NULL,
     artista_nickname VARCHAR(50) NOT NULL,
     precio DECIMAL(10,2) NOT NULL,

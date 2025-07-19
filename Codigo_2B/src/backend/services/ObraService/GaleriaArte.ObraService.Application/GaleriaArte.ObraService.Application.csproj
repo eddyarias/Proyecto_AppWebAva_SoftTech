@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GaleriaArte.ObraService.Infrastructure\GaleriaArte.ObraService.Infrastructure.csproj" />
     <ProjectReference Include="..\GaleriaArte.ObraService.Domain\GaleriaArte.ObraService.Domain.csproj" />
   </ItemGroup>

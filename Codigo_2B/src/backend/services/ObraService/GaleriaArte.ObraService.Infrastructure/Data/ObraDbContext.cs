@@ -20,7 +20,7 @@ public class ObraDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Titulo).HasColumnName("titulo").IsRequired();
             entity.Property(e => e.Descripcion).HasColumnName("descripcion");
-            entity.Property(e => e.ArchivoUrl).HasColumnName("archivo_url").IsRequired();
+            entity.Property(e => e.ArchivoBase64).HasColumnName("archivo_base64").IsRequired();
             entity.Property(e => e.FirmaDigital).HasColumnName("firma_digital").IsRequired();
             entity.Property(e => e.ArtistaNickname).HasColumnName("artista_nickname").IsRequired();
             entity.Property(e => e.Precio).HasColumnName("precio").HasColumnType("decimal(10,2)");

@@ -18,12 +18,24 @@ public class ObraController : ControllerBase
 
     [HttpPost("crear")]
     //[Authorize]
-    public async Task<IActionResult> Crear([FromBody] CreateObraDto dto)
+    public async Task<IActionResult> Crear([FromForm] CreateObraDto dto)
     {
         try
         {
             var result = await _obraService.CrearObraAsync(dto);
             return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (FileNotFoundException ex)
+        {
+            return BadRequest(new { error = $"Archivo no encontrado: {ex.Message}" });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = $"Error de configuración: {ex.Message}" });
         }
         catch (Exception ex)
         {
@@ -159,6 +171,33 @@ public class ObraController : ControllerBase
             }
 
             return Ok(new { message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpPost("{id}/validar-firma")]
+    public async Task<IActionResult> ValidarFirma(int id)
+    {
+        try
+        {
+            bool esValida = await _obraService.ValidarFirmaObraAsync(id);
+            
+            return Ok(new { 
+                obraId = id,
+                firmaValida = esValida,
+                mensaje = esValida ? "La firma digital es válida" : "La firma digital no es válida"
+            });
+        }
+        catch (FileNotFoundException ex)
+        {
+            return BadRequest(new { error = $"Archivo no encontrado: {ex.Message}" });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = $"Error de configuración: {ex.Message}" });
         }
         catch (Exception ex)
         {

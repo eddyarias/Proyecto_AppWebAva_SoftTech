@@ -5,7 +5,7 @@ public class Obra
     public int Id { get; set; } // SERIAL en la base de datos
     public string Titulo { get; set; } = string.Empty;
     public string? Descripcion { get; set; }
-    public string ArchivoUrl { get; set; } = string.Empty;
+    public string ArchivoBase64 { get; set; } = string.Empty; // Imagen JPG en formato base64
     public string FirmaDigital { get; set; } = string.Empty;
     public string ArtistaNickname { get; set; } = string.Empty;
     public decimal Precio { get; set; }
