@@ -61,4 +61,19 @@ public class UsuarioRepository : IUsuarioRepository
         _context.Usuarios.Update(usuario);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<Usuario?> ObtenerPorCorreoAsync(string correo)
+    {
+        return await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == correo);
+    }
+
+    public async Task ActualizarPasswordAsync(Guid usuarioId, string hash)
+    {
+        var usuario = await _context.Usuarios.FindAsync(usuarioId);
+        if (usuario != null)
+        {
+            usuario.ContraseñaHash = hash;
+            await _context.SaveChangesAsync();
+        }
+    }
 }

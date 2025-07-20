@@ -124,6 +124,8 @@ CREATE TABLE notificaciones.notificaciones (
 CREATE USER galeria_user WITH PASSWORD 'galeria_pass';
 GRANT ALL PRIVILEGES ON SCHEMA usuarios TO galeria_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA usuarios TO galeria_user;
+GRANT ALL ON TABLE usuarios.intentos_recuperacion TO galeria_user;
+GRANT USAGE, SELECT, UPDATE ON SEQUENCE usuarios.intentos_recuperacion_id_seq TO galeria_user;
 
 CREATE USER obra_user WITH PASSWORD 'obra_pass';
 GRANT ALL PRIVILEGES ON SCHEMA obras TO obra_user;

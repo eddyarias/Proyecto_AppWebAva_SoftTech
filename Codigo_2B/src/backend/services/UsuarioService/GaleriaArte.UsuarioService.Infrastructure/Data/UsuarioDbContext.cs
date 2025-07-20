@@ -10,7 +10,9 @@ public class UsuarioDbContext : DbContext
 
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Rol> Roles => Set<Rol>();
-    
+
+    public DbSet<IntentoRecuperacion> IntentosRecuperacion => Set<IntentoRecuperacion>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -58,6 +60,22 @@ public class UsuarioDbContext : DbContext
                 .HasDefaultValueSql("gen_random_uuid()");
             entity.Property(e => e.Nombre).HasColumnName("nombre");
             entity.Property(e => e.Descripcion).HasColumnName("descripcion");
+        });
+
+        // Configuración de IntentoRecuperacion
+        modelBuilder.Entity<IntentoRecuperacion>(entity =>
+        {
+            entity.ToTable("intentos_recuperacion");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.UsuarioId).HasColumnName("usuario_id");
+            entity.Property(e => e.TokenRecuperacion).HasColumnName("token_recuperacion");
+            entity.Property(e => e.Expiracion).HasColumnName("expiracion");
+            entity.Property(e => e.Usado).HasColumnName("usado");
+            entity.Property(e => e.FechaSolicitud).HasColumnName("fecha_solicitud");
+            entity.HasOne<Usuario>()
+                .WithMany()
+                .HasForeignKey(e => e.UsuarioId)
+                .HasConstraintName("fk_intento_recuperacion_usuario");
         });
     }
 }
