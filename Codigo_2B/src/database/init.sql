@@ -43,10 +43,10 @@ CREATE TABLE usuarios.intentos_recuperacion (
 );
 
 -- Insertar roles por defecto
-INSERT INTO usuarios.roles (nombre, descripcion) VALUES
-('artista', 'Usuario que publica y firma obras de arte'),
-('comprador', 'Usuario que puede adquirir obras'),
-('administrador', 'Usuario con privilegios de gestión de cuentas y contenido');
+INSERT INTO usuarios.roles (id,nombre, descripcion) VALUES
+('e8fbf5fb-4753-4fa0-8d21-8be95284e3d7','artista', 'Usuario que publica y firma obras de arte'),
+('203164f9-6261-4be8-a3a6-185d62ce0777','comprador', 'Usuario que puede adquirir obras'),
+('f50fdbe5-2e16-4e91-9e7b-a39219d57031','administrador', 'Usuario con privilegios de gestión de cuentas y contenido');
 
 -- =============================
 -- 🎨 OBRA SERVICE (GaleriaArteObras)

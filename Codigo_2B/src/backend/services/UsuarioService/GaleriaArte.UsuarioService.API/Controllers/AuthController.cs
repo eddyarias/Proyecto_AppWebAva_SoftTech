@@ -23,7 +23,27 @@ public class AuthController : ControllerBase
         try
         {
             var result = await _loginService.LoginAsync(request);
-            return Ok(result);
+            // Enviar refreshToken como cookie segura
+            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, // usa HTTPS en producción
+                SameSite = SameSiteMode.Strict, // o Lax si se necesita compatibilidad
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
+            Response.Cookies.Append("acces_token", result.TokenAcceso, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, // usa HTTPS en producción
+                SameSite = SameSiteMode.Strict, // o Lax si se necesita compatibilidad
+                Expires = DateTime.UtcNow.AddMinutes(15)
+            });
+            
+            return Ok(new
+            {
+                mensaje = "Inicio de sesión exitoso."
+            });
         }
         catch (Exception ex)
         {

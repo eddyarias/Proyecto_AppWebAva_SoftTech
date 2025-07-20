@@ -29,7 +29,7 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpPatch("cambiar-estado")]
-    [Authorize]
+    [Authorize (Roles="f50fdbe5-2e16-4e91-9e7b-a39219d57031")]
     public async Task<IActionResult> CambiarEstadoUsuario([FromBody] CambiarEstadoUsuarioDto dto)
     {
         var resultado = await _usuarioService.CambiarEstadoUsuarioAsync(dto.UsuarioId, dto.NuevoEstado);
