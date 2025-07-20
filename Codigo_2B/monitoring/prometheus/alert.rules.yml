@@ -1,0 +1,94 @@
+groups:
+- name: usuario_service_alerts
+  rules:
+  - alert: UsuarioServiceDown
+    expr: up{job="usuario-service"} == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "Usuario Service is down"
+      description: "Usuario Service has been down for more than 30 seconds."
+
+  - alert: HighRequestLatency
+    expr: histogram_quantile(0.95, sum(rate(usuario_service_request_duration_seconds_bucket{job="usuario-service"}[5m])) by (le)) > 0.1
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High request latency on Usuario Service"
+      description: "95th percentile latency is above 100ms for more than 1 minute."
+
+  - alert: HighErrorRate
+    expr: sum(rate(usuario_service_requests_total{job="usuario-service",status_code=~"[45].."}[5m])) / sum(rate(usuario_service_requests_total{job="usuario-service"}[5m])) > 0.05
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High error rate on Usuario Service"
+      description: "Error rate (4xx and 5xx) is above 5% for more than 1 minute."
+
+  - alert: TooManyRequests
+    expr: sum(rate(usuario_service_requests_total{job="usuario-service"}[1m])) > 10
+    for: 30s
+    labels:
+      severity: info
+    annotations:
+      summary: "High request volume on Usuario Service"
+      description: "Request rate is above 10 requests per second for more than 30 seconds."
+
+  - alert: DatabaseConnectionFailure
+    expr: rate(usuario_service_requests_total{endpoint="/health",status_code="503"}[5m]) > 0
+    for: 3m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Database connection failure"
+      description: "Usuario Service health check is failing (HTTP 503) for more than 1 minute."
+
+- name: obra_service_alerts
+  rules:
+  - alert: ObraServiceDown
+    expr: up{job="obra-service"} == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "Obra Service is down"
+      description: "Obra Service has been down for more than 30 seconds."
+
+  - alert: ObraServiceHighRequestLatency
+    expr: histogram_quantile(0.95, sum(rate(obra_service_request_duration_seconds_bucket{job="obra-service"}[5m])) by (le)) > 0.1
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High request latency on Obra Service"
+      description: "95th percentile latency is above 100ms for more than 1 minute."
+
+  - alert: ObraServiceHighErrorRate
+    expr: sum(rate(obra_service_requests_total{job="obra-service",status_code=~"[45].."}[5m])) / sum(rate(obra_service_requests_total{job="obra-service"}[5m])) > 0.05
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High error rate on Obra Service"
+      description: "Error rate (4xx and 5xx) is above 5% for more than 1 minute."
+
+  - alert: ObraServiceTooManyRequests
+    expr: sum(rate(obra_service_requests_total{job="obra-service"}[1m])) > 10
+    for: 30s
+    labels:
+      severity: info
+    annotations:
+      summary: "High request volume on Obra Service"
+      description: "Request rate is above 10 requests per second for more than 30 seconds."
+
+  - alert: ObraServiceDatabaseConnectionFailure
+    expr: rate(obra_service_requests_total{endpoint="/health",status_code="503"}[5m]) > 0
+    for: 3m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Obra Service database connection failure"
+      description: "Obra Service health check is failing (HTTP 503) for more than 3 minutes."
