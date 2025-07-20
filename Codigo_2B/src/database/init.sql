@@ -58,7 +58,7 @@ CREATE TABLE obras.obras (
     id SERIAL PRIMARY KEY,
     titulo VARCHAR(255) NOT NULL,
     descripcion TEXT,
-    archivo_url TEXT NOT NULL,
+    archivo_base64 TEXT NOT NULL, -- Imagen JPG en formato base64
     firma_digital TEXT NOT NULL,
     artista_nickname VARCHAR(50) NOT NULL,
     precio DECIMAL(10,2) NOT NULL,
@@ -128,6 +128,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA usuarios TO galeria_user;
 CREATE USER obra_user WITH PASSWORD 'obra_pass';
 GRANT ALL PRIVILEGES ON SCHEMA obras TO obra_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA obras TO obra_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA obras TO obra_user;
 
 CREATE USER compra_user WITH PASSWORD 'compra_pass';
 GRANT ALL PRIVILEGES ON SCHEMA compras TO compra_user;

@@ -1,4 +1,10 @@
+using GaleriaArte.ObraService.Application.Interfaces;
+using GaleriaArte.ObraService.Application.Services;
+using GaleriaArte.ObraService.Domain.Interfaces;
+using GaleriaArte.ObraService.Infrastructure.Data;
+using GaleriaArte.ObraService.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
@@ -7,9 +13,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 
+// CONFIGURACIÓN GLOBAL PARA POSTGRESQL Y UTC
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Agrega servicios
+// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -49,6 +58,16 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddAuthentication("ManualScheme")
     .AddScheme<AuthenticationSchemeOptions, ManualAuthenticationHandler>("ManualScheme", options => { });
+
+// Database configuration
+builder.Services.AddDbContext<ObraDbContext>(opt =>
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+
+// Register services and repositories
+builder.Services.AddScoped<ObraRepository>();
+builder.Services.AddScoped<IObraService, ObraService>();
+builder.Services.AddScoped<IObraRepository, ObraRepository>();
+builder.Services.AddScoped<IDigitalSignatureService, DigitalSignatureService>();
 
 builder.Services.AddAuthorization();
 
