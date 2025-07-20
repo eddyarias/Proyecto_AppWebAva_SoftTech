@@ -45,9 +45,7 @@ public class AuthController : ControllerBase
 
             return Ok(new
             {
-                mensaje = "Inicio de sesión exitoso.",
-                accessToken = result.TokenAcceso,
-                refreshToken = result.RefreshToken,
+                mensaje = "Inicio de sesión exitoso."
             });
         }
         catch (Exception ex)
