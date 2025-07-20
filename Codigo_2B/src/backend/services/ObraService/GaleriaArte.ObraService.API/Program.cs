@@ -81,7 +81,20 @@ builder.Services.AddSingleton(Metrics.DefaultRegistry);
 
 builder.Services.AddAuthorization();
 
+// Configuración de CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5001")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
 
@@ -105,4 +118,4 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.MapControllers();
-app.Run();
+await app.RunAsync();
