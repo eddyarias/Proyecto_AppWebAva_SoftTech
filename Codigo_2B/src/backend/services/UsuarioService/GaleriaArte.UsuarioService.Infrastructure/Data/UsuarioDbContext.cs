@@ -1,5 +1,6 @@
 using GaleriaArte.UsuarioService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GaleriaArte.UsuarioService.Infrastructure.Data;
 
@@ -9,10 +10,23 @@ public class UsuarioDbContext : DbContext
 
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Rol> Roles => Set<Rol>();
-    public DbSet<UsuarioRol> UsuarioRoles => Set<UsuarioRol>();
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                {
+                    property.SetValueConverter(new ValueConverter<DateTime, DateTime>(
+                        v => v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+                    ));
+                }
+            }
+        }
+
         modelBuilder.HasDefaultSchema("usuarios");
 
         // Configuración de Usuario
@@ -27,6 +41,11 @@ public class UsuarioDbContext : DbContext
             entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion");
             entity.Property(e => e.RefreshToken).HasColumnName("refresh_token");
             entity.Property(e => e.RefreshTokenExp).HasColumnName("refresh_token_exp");
+            entity.Property(e => e.RolId).HasColumnName("rol_id");
+            entity.HasOne(e => e.Rol)
+                .WithMany()
+                .HasForeignKey(e => e.RolId)
+                .HasConstraintName("fk_usuario_rol");
         });
 
         // Configuración de Rol
@@ -39,31 +58,6 @@ public class UsuarioDbContext : DbContext
                 .HasDefaultValueSql("gen_random_uuid()");
             entity.Property(e => e.Nombre).HasColumnName("nombre");
             entity.Property(e => e.Descripcion).HasColumnName("descripcion");
-        });
-
-        // Configuración de UsuarioRol
-        modelBuilder.Entity<UsuarioRol>(entity =>
-        {
-            entity.ToTable("usuarios_roles");
-            
-            // Configurar clave primaria compuesta
-            entity.HasKey(ur => new { ur.UsuarioId, ur.RolId });
-
-            // Mapear nombres de columnas
-            entity.Property(ur => ur.UsuarioId).HasColumnName("usuario_id");
-            entity.Property(ur => ur.RolId).HasColumnName("rol_id");
-
-            // Configurar relación con Usuario
-            entity.HasOne(ur => ur.Usuario)
-                .WithMany(u => u.Roles)
-                .HasForeignKey(ur => ur.UsuarioId)
-                .HasConstraintName("fk_usuarios_roles_usuario");
-
-            // Configurar relación con Rol
-            entity.HasOne(ur => ur.Rol)
-                .WithMany(r => r.Usuarios)
-                .HasForeignKey(ur => ur.RolId)
-                .HasConstraintName("fk_usuarios_roles_rol");
         });
     }
 }

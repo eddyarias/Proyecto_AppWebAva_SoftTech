@@ -31,26 +31,40 @@ public class UsuarioService : IUsuarioService
             Correo = dto.Correo,
             ContraseñaHash = hash
         };
-        
+
         var rol = await _repositorio.ObtenerRolPorNombreAsync(dto.Rol.ToLower());
         if (rol == null)
             throw new Exception("Rol inválido.");
 
-        usuario.Roles.Add(new UsuarioRol
-        {
-            RolId = rol.Id,
-            Usuario = usuario
-        });
+        usuario.Rol = rol;
+        usuario.RolId = rol.Id;
 
         await _repositorio.AgregarUsuarioAsync(usuario);
-        
+
         // Devolvemos un objeto anónimo con los datos necesarios
         return new
         {
-            id = usuario.Id,
-            nickname = usuario.Nickname,
-            correo = usuario.Correo,
-            rol = rol.Nombre
+            success = true,
+            message = "Usuario registrado exitosamente.",
         };
+    }
+    
+    public async Task<bool> CambiarEstadoUsuarioAsync(Guid usuarioId, bool nuevoEstado)
+    {
+        var usuario = await _repositorio.ObtenerPorIdAsync(usuarioId);
+        if (usuario == null)
+            return false;
+
+        try
+        {
+            usuario.Estado = nuevoEstado;
+            await _repositorio.ActualizarUsuarioAsync(usuario);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al desactivar usuario: {ex.Message}");
+            return false;
+        }
     }
 }

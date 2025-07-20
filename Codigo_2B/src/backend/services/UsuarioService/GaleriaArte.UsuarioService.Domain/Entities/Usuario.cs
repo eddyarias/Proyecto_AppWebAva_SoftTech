@@ -8,9 +8,8 @@ public class Usuario
     public string ContraseñaHash { get; set; } = null!;
     public bool Estado { get; set; } = true;
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
-
-    public ICollection<UsuarioRol> Roles { get; set; } = new List<UsuarioRol>();
-
     public string? RefreshToken { get; set; }
-    public DateTime? RefreshTokenExp { get; set; }
+    public DateTime RefreshTokenExp { get; set; } = DateTime.UtcNow;
+    public Guid RolId { get; set; }
+    public Rol Rol { get; set; } = default!;
 }

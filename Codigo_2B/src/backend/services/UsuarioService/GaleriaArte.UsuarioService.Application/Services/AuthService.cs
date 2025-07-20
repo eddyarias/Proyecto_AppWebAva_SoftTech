@@ -21,11 +21,14 @@ public class AuthService : IAuthService
 
     public string GenerarJwt(Usuario usuario)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
+            // Claims estándar
             new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, usuario.Correo),
-            new Claim("nickname", usuario.Nickname)
+            new Claim("nickname", usuario.Nickname),
+            // Claims rol
+            new Claim(ClaimTypes.Role, usuario.RolId.ToString()),        
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Secret"]!));
