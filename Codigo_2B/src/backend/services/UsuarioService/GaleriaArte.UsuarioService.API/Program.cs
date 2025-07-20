@@ -6,6 +6,9 @@ using GaleriaArte.UsuarioService.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Prometheus;
+using GaleriaArte.UsuarioService.API.Middleware;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +25,13 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<UsuarioLoginService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<UsuarioDbContext>();
+
+// Add Prometheus metrics
+builder.Services.AddSingleton(Metrics.DefaultRegistry);
 
 
 //Configuracion para pruebas de autenticación con Swagger UI
@@ -76,6 +86,16 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
+
+// Enable custom metrics middleware
+app.UseCustomMetrics();
+
+// Enable Prometheus metrics collection
+app.UseMetricServer();
+app.UseHttpMetrics();
+
+// Enable health checks
+app.MapHealthChecks("/health");
 
 app.MapControllers();
 
