@@ -6,4 +6,5 @@ public interface IUsuarioService
 {
     Task<bool> CambiarEstadoUsuarioAsync(Guid usuarioId, bool nuevoEstado);
     Task<object> RegistrarUsuarioAsync(UsuarioDto dto);
+    Task<TokenResponseDto?> RenovarTokenAsync(string refreshToken);
 }
