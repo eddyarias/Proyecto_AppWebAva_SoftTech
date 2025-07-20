@@ -25,6 +25,9 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<UsuarioLoginService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IRecuperacionService, RecuperacionService>();
+builder.Services.AddScoped<IRecuperacionRepository, RecuperacionRepository>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Add health checks
 builder.Services.AddHealthChecks()

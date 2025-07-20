@@ -10,4 +10,6 @@ public interface IUsuarioRepository
     Task AgregarUsuarioAsync(Usuario usuario);
     Task<Usuario?> ObtenerPorNicknameOCorreoAsync(string identificador);
     Task ActualizarRefreshTokenAsync(Guid id, string refreshToken, DateTime expira);
+    Task<Usuario?> ObtenerPorCorreoAsync(string correo);
+    Task ActualizarPasswordAsync(Guid usuarioId, string hash);
 }
