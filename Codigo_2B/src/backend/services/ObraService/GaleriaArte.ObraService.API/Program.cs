@@ -12,6 +12,9 @@ using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using Prometheus;
+using GaleriaArte.ObraService.API.Middleware;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 // CONFIGURACIÓN GLOBAL PARA POSTGRESQL Y UTC
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -69,11 +72,29 @@ builder.Services.AddScoped<IObraService, ObraService>();
 builder.Services.AddScoped<IObraRepository, ObraRepository>();
 builder.Services.AddScoped<IDigitalSignatureService, DigitalSignatureService>();
 
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ObraDbContext>();
+
+// Add Prometheus metrics
+builder.Services.AddSingleton(Metrics.DefaultRegistry);
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+
+// Enable custom metrics middleware
+app.UseCustomMetrics();
+
+// Enable Prometheus metrics collection
+app.UseMetricServer();
+app.UseHttpMetrics();
+
+// Enable health checks
+app.MapHealthChecks("/health");
+
 // Configurar la autenticacion y autorizacion para las URLs
 app.UseAuthentication();
 app.UseAuthorization();
