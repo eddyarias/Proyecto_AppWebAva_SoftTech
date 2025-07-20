@@ -1,6 +1,7 @@
 
 using GaleriaArte.UsuarioService.Application.DTOs;
 using GaleriaArte.UsuarioService.Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GaleriaArte.UsuarioService.API.Controllers;
@@ -19,6 +20,7 @@ public class RecuperacionController : ControllerBase
 
 
     [HttpPost("solicitar")]
+    [AllowAnonymous]
     public async Task<IActionResult> SolicitarRecuperacion([FromBody] SolicitarRecuperacionDto dto)
     {
         var resultado = await _service.SolicitarRecuperacionAsync(dto.Correo);
@@ -28,6 +30,7 @@ public class RecuperacionController : ControllerBase
     }
 
     [HttpPost("restablecer")]
+    [AllowAnonymous]
     public async Task<IActionResult> Restablecer([FromBody] RestablecerPasswordDto dto)
     {
         var resultado = await _service.RestablecerPasswordAsync(dto.Token, dto.NuevaPassword);

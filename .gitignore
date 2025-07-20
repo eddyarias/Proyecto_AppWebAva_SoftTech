@@ -49,4 +49,5 @@ _ReSharper*/
 *.scc
 *.vssscc
 *.vspscc
+.sonarqube/
 /Codigo/WebAppGaleriaArte/Recursos/Claves

@@ -10,12 +10,13 @@ namespace GaleriaArte.UsuarioService.Application.Services;
 public class UsuarioService : IUsuarioService
 {
     private readonly UsuarioRepository _repositorio;
+    private readonly UsuarioLoginService _loginService;
 
-    public UsuarioService(UsuarioRepository repository)
+    public UsuarioService(UsuarioRepository repository, UsuarioLoginService loginService)
     {
         _repositorio = repository;
+        _loginService = loginService;
     }
-
     public async Task<object> RegistrarUsuarioAsync(UsuarioDto dto)
     {
         if (await _repositorio.ExisteCorreoAsync(dto.Correo))
@@ -66,5 +67,26 @@ public class UsuarioService : IUsuarioService
             Console.WriteLine($"Error al desactivar usuario: {ex.Message}");
             return false;
         }
+    }
+
+    public async Task<TokenResponseDto?> RenovarTokenAsync(string refreshToken)
+    {
+        var usuario = await _repositorio.ObtenerPorRefreshTokenAsync(refreshToken);
+
+        if (usuario == null)
+            return null; // Token inexistente
+
+        var expirationDate = usuario.RefreshTokenExp;
+        if (expirationDate < DateTime.UtcNow)
+            return null; // Token expirado
+
+        // Genera nuevos tokens
+        (string tokenAcceso, string newRefreshToken) = await _loginService.generarYGuardarTokens(usuario);
+
+        return new TokenResponseDto
+        {
+            AccessToken = tokenAcceso,
+            RefreshToken = newRefreshToken
+        };
     }
 }

@@ -29,16 +29,22 @@ public class UsuarioLoginService
         if (!usuario.Estado)
             throw new Exception("Usuario inactivo");
 
-        var tokenAcceso = _authService.GenerarJwt(usuario);
-        var refreshToken = _authService.GenerarRefreshToken();
-        var exp = DateTime.UtcNow.AddDays(7);
-
-        await _repo.ActualizarRefreshTokenAsync(usuario.Id, refreshToken, exp);
+        (string tokenAcceso, string refreshToken) = await generarYGuardarTokens(usuario);
 
         return new LoginResponse
         {
             TokenAcceso = tokenAcceso,
             RefreshToken = refreshToken
         };
+    }
+
+    public async Task<(string tokenAcceso, string refreshToken)> generarYGuardarTokens(Usuario usuario)
+    {
+        var tokenAcceso = _authService.GenerarJwt(usuario);
+        var refreshToken = _authService.GenerarRefreshToken();
+        var exp = DateTime.UtcNow.AddDays(7);
+
+        await _repo.ActualizarRefreshTokenAsync(usuario.Id, refreshToken, exp);
+        return (tokenAcceso, refreshToken);
     }
 }
