@@ -1,4 +1,116 @@
 @page "/artista/panel"
+@using GaleriaArteFrontend.Models
+@inject NavigationManager Navigation
+@inject GaleriaArteFrontend.Services.ObrasService ObrasService
+@inject IJSRuntime JS
 
-<h3>Panel de Artista</h3>
-<!-- Panel principal para el artista -->
+<h3>Mis Obras</h3>
+
+<button class="btn btn-success mb-3" @onclick="SubirObra">Subir Obra</button>
+
+@if (obras == null)
+{
+    <p>Cargando obras...</p>
+}
+else if (!obras.Any())
+{
+    <p>No tienes obras registradas.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Obra</th>
+                <th>Título</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th>Fecha de Publicación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var obra in obras)
+            {
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(obra.ArchivoBase64))
+                        {
+                            <img src="@($"data:image/jpeg;base64,{obra.ArchivoBase64}")" alt="Obra" style="max-width: 80px; max-height: 80px; border-radius: 4px;" />
+                        }
+                    </td>
+                    <td>@obra.Titulo</td>
+                    <td>@obra.Descripcion</td>
+                    <td>@obra.Precio.ToString("C")</td>
+                    <td>@obra.Estado</td>
+                    <td>@obra.FechaPublicacion.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm me-1" @onclick="() => EditarObra(obra.Id)">Actualizar</button>
+                        @if (obra.Estado == "activa")
+                        {
+                            <button class="btn btn-warning btn-sm" @onclick="async () => await CambiarEstadoObra(obra.Id, false)">Ocultar</button>
+                        }
+                        else if (obra.Estado == "oculta")
+                        {
+                            <button class="btn btn-success btn-sm me-1" @onclick="async () => await CambiarEstadoObra(obra.Id, true)">Activar</button>
+                            <button class="btn btn-danger btn-sm" title="Eliminar" @onclick="async () => await EliminarObra(obra.Id)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Obra> obras;
+
+    protected override async Task OnInitializedAsync()
+    {
+        obras = await ObrasService.GetObrasAsync();
+    }
+
+    private void EditarObra(int id)
+    {
+        Navigation.NavigateTo($"/artista/editar-obra/{id}");
+    }
+
+    private void SubirObra()
+    {
+        Navigation.NavigateTo("/artista/crear-obra");
+    }
+
+    private async Task CambiarEstadoObra(int id, bool activar)
+    {
+        string mensaje = activar
+            ? "¿Estás seguro de que deseas activar esta obra?"
+            : "¿Estás seguro de que deseas ocultar esta obra?";
+        var confirm = await JS.InvokeAsync<bool>("confirm", mensaje);
+        if (!confirm) return;
+        bool result;
+        if (activar)
+            result = await ObrasService.ActivarObraAsync(id);
+        else
+            result = await ObrasService.OcultarObraAsync(id);
+        if (result)
+        {
+            obras = await ObrasService.GetObrasAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task EliminarObra(int id)
+    {
+        var confirm = await JS.InvokeAsync<bool>("confirm", "¿Estás seguro de que deseas eliminar esta obra? Esta acción no se puede deshacer.");
+        if (!confirm) return;
+        var result = await ObrasService.EliminarObraAsync(id);
+        if (result)
+        {
+            obras = await ObrasService.GetObrasAsync();
+            StateHasChanged();
+        }
+    }
+}
