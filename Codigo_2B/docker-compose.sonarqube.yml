@@ -1,0 +1,109 @@
+services:
+  # Base de datos para SonarQube
+  sonarqube-db:
+    image: postgres:15
+    container_name: sonarqube_postgres
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar
+    volumes:
+      - sonarqube_db_data:/var/lib/postgresql/data
+    networks:
+      - sonarqube_net
+
+  # SonarQube Server
+  sonarqube:
+    image: sonarqube:latest
+    container_name: sonarqube_server
+    depends_on:
+      - sonarqube-db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - sonarqube_net
+
+  # Analizador de código - Scanner para .NET
+  sonar-scanner-dotnet:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    container_name: sonar_scanner_dotnet
+    depends_on:
+      - sonarqube
+    environment:
+      SONAR_HOST_URL: http://sonarqube:9000
+      SONAR_TOKEN: sqa_bb3ebaa6788eb9f76158cfd76718e9fe28a9fbbc
+    volumes:
+      - .:/src
+    working_dir: /src
+    networks:
+      - sonarqube_net
+    profiles:
+      - dotnet-analysis
+    command: >
+      bash -c "
+        # Instalar Java 17 (requerido por SonarScanner)
+        apt-get update &&
+        apt-get install -y wget openjdk-17-jdk &&
+        export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 &&
+        
+        # Instalar SonarScanner for .NET globalmente
+        dotnet tool install --global dotnet-sonarscanner &&
+        export PATH=\"$$PATH:/root/.dotnet/tools\" &&
+        
+        # Verificar instalación
+        dotnet sonarscanner --version &&
+        
+        # Ejecutar análisis completo
+        echo 'Iniciando análisis SonarScanner for .NET...' &&
+        dotnet sonarscanner begin /k:\"galeria-arte-backend\" /d:sonar.host.url=\"http://sonarqube:9000\" /d:sonar.token=\"$$SONAR_TOKEN\" &&
+        
+        # Restaurar dependencias y compilar
+        echo 'Restaurando dependencias...' &&
+        dotnet restore src/backend/services/ObraService/GaleriaArte.ObraService.API/GaleriaArte.ObraService.API.csproj &&
+        dotnet restore src/backend/services/UsuarioService/GaleriaArte.UsuarioService.API/GaleriaArte.UsuarioService.API.csproj &&
+        
+        echo 'Compilando proyectos...' &&
+        dotnet build src/backend/services/ObraService/GaleriaArte.ObraService.API/GaleriaArte.ObraService.API.csproj --no-restore --configuration Release &&
+        dotnet build src/backend/services/UsuarioService/GaleriaArte.UsuarioService.API/GaleriaArte.UsuarioService.API.csproj --no-restore --configuration Release &&
+        
+        # Finalizar análisis
+        echo 'Finalizando análisis y enviando a SonarQube...' &&
+        dotnet sonarscanner end /d:sonar.token=\"$$SONAR_TOKEN\"
+      "
+
+  # Analizador de código - Scanner básico (mantenemos para compatibilidad)
+  sonar-scanner:
+    image: sonarsource/sonar-scanner-cli:latest
+    container_name: sonar_scanner
+    depends_on:
+      - sonarqube
+    environment:
+      SONAR_HOST_URL: http://sonarqube:9000
+      SONAR_LOGIN: admin
+      SONAR_PASSWORD: admin
+    volumes:
+      - .:/usr/src
+      - ./sonar-project.properties:/usr/src/sonar-project.properties
+    working_dir: /usr/src
+    networks:
+      - sonarqube_net
+    profiles:
+      - analysis
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  sonarqube_db_data:
+
+networks:
+  sonarqube_net:
+    driver: bridge
