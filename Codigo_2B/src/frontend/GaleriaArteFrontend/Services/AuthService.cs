@@ -30,11 +30,19 @@ namespace GaleriaArteFrontend.Services
             try
             {
                 var response = await _httpClient.PostAsJsonAsync("auth/login", request);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadFromJsonAsync<JsonElement>();
                     var mensaje = result.GetProperty("mensaje").GetString() ?? "Login exitoso";
+                    string? accessToken = null;
+                    if (result.TryGetProperty("accessToken", out var tokenProp))
+                        accessToken = tokenProp.GetString();
+
+                    if (!string.IsNullOrEmpty(accessToken))
+                    {
+                        await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "jwt_token", accessToken);
+                    }
 
                     // Simular obtención del usuario desde las cookies o JWT
                     // En una implementación real, decodificarías el JWT del token de acceso
@@ -58,7 +66,7 @@ namespace GaleriaArteFrontend.Services
                     var errorContent = await response.Content.ReadAsStringAsync();
                     var errorResult = JsonSerializer.Deserialize<JsonElement>(errorContent);
                     var mensaje = errorResult.GetProperty("mensaje").GetString() ?? "Error de autenticación";
-                    
+
                     return new ApiResponse { Exito = false, Mensaje = mensaje };
                 }
             }
@@ -81,26 +89,21 @@ namespace GaleriaArteFrontend.Services
                 };
 
                 var response = await _httpClient.PostAsJsonAsync("usuario/registrar", usuarioDto);
-                
+
+                // Imprimir el response en consola
+
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<JsonElement>();
-                    var mensaje = result.GetProperty("mensaje").GetString() ?? "Registro exitoso";
-                    
-                    return new ApiResponse { Exito = true, Mensaje = mensaje };
+                    return new ApiResponse { Exito = true, Mensaje = "Registro exitoso" };
                 }
                 else
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    var errorResult = JsonSerializer.Deserialize<JsonElement>(errorContent);
-                    var mensaje = errorResult.GetProperty("mensaje").GetString() ?? "Error en el registro";
-                    
-                    return new ApiResponse { Exito = false, Mensaje = mensaje };
+                    return new ApiResponse { Exito = false, Mensaje = "Nickname/correo ya en uso" };
                 }
             }
             catch (Exception ex)
             {
-                return new ApiResponse { Exito = false, Mensaje = $"Error de conexión: {ex.Message}" };
+                return new ApiResponse { Exito = false, Mensaje = $"Hubo un error intente de nuevo" };
             }
         }
 
@@ -109,12 +112,12 @@ namespace GaleriaArteFrontend.Services
             try
             {
                 var response = await _httpClient.PostAsJsonAsync("recuperacion/solicitar", request);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadFromJsonAsync<JsonElement>();
                     var mensaje = result.GetProperty("mensaje").GetString() ?? "Instrucciones enviadas";
-                    
+
                     return new ApiResponse { Exito = true, Mensaje = mensaje };
                 }
                 else
@@ -122,7 +125,7 @@ namespace GaleriaArteFrontend.Services
                     var errorContent = await response.Content.ReadAsStringAsync();
                     var errorResult = JsonSerializer.Deserialize<JsonElement>(errorContent);
                     var mensaje = errorResult.GetProperty("mensaje").GetString() ?? "Error al solicitar recuperación";
-                    
+
                     return new ApiResponse { Exito = false, Mensaje = mensaje };
                 }
             }
@@ -143,12 +146,12 @@ namespace GaleriaArteFrontend.Services
                 };
 
                 var response = await _httpClient.PostAsJsonAsync("recuperacion/restablecer", dto);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadFromJsonAsync<JsonElement>();
                     var mensaje = result.GetProperty("mensaje").GetString() ?? "Contraseña restablecida";
-                    
+
                     return new ApiResponse { Exito = true, Mensaje = mensaje };
                 }
                 else
@@ -156,7 +159,7 @@ namespace GaleriaArteFrontend.Services
                     var errorContent = await response.Content.ReadAsStringAsync();
                     var errorResult = JsonSerializer.Deserialize<JsonElement>(errorContent);
                     var mensaje = errorResult.GetProperty("mensaje").GetString() ?? "Error al restablecer contraseña";
-                    
+
                     return new ApiResponse { Exito = false, Mensaje = mensaje };
                 }
             }
@@ -169,13 +172,17 @@ namespace GaleriaArteFrontend.Services
         public async Task LogoutAsync()
         {
             _usuarioActual = null;
-            
+
             // Limpiar localStorage
             await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "isAuthenticated");
             await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "userNickname");
-            
+
+            // Eliminar JWT
+            var jwtService = new JwtService(_jsRuntime);
+            await jwtService.EliminarTokenAsync();
+
             OnAuthStateChanged?.Invoke();
-            
+
             _navigationManager.NavigateTo("/login");
         }
 
@@ -185,7 +192,7 @@ namespace GaleriaArteFrontend.Services
             {
                 var isAuthenticated = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "isAuthenticated");
                 var userNickname = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "userNickname");
-                
+
                 if (isAuthenticated == "true" && !string.IsNullOrEmpty(userNickname))
                 {
                     _usuarioActual = new Usuario
@@ -193,11 +200,11 @@ namespace GaleriaArteFrontend.Services
                         Nickname = userNickname,
                         Rol = "cliente" // En una implementación real, deberías obtener esto de manera más segura
                     };
-                    
+
                     OnAuthStateChanged?.Invoke();
                     return true;
                 }
-                
+
                 return false;
             }
             catch

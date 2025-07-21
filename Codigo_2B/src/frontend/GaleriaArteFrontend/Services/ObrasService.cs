@@ -96,15 +96,17 @@ namespace GaleriaArteFrontend.Services
 
         private readonly HttpClient _httpClient;
         private readonly AuthService _authService;
-        public ObrasService(HttpClient httpClient, AuthService authService)
+        private readonly JwtService _jwtService;
+        public ObrasService(HttpClient httpClient, AuthService authService, JwtService jwtService)
         {
             _httpClient = httpClient;
             _authService = authService;
+            _jwtService = jwtService;
         }
 
         private async Task AddJwtHeaderAsync()
         {
-            var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5Mzc5NjczYy01MjAyLTQ2MjQtYTQ3ZS00NzEzMjQ2YTkyOWEiLCJlbWFpbCI6Im1pbHRvbi5hLnBhc3Rvci5mQGdtYWlsLmNvbSIsIm5pY2tuYW1lIjoibWlsdG9uIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiNjJkMmI2MWYtZDkyYi00NGQ4LWFkYTgtOWQ1ZGFjZTdlNmJjIiwiZXhwIjoxNzUzMDU2NzU0LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDIiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUwMDIifQ.Tommj-_hnVha-_6j56LhehuY4l0iSEitsKyXMcmONNk";
+            var token = await _jwtService.ObtenerTokenAsync();
             if (!string.IsNullOrEmpty(token))
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);

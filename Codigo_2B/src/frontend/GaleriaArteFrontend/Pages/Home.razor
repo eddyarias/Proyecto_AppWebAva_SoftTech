@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inject AuthService AuthService
 @inject NavigationManager Navigation
+@inject JwtService JwtService
 @using GaleriaArteFrontend.Services
 
 <PageTitle>Galería de Arte - Inicio</PageTitle>
@@ -17,26 +18,31 @@
                                 ¡Bienvenido, @AuthService.UsuarioActual?.Nickname!
                             </h1>
                             <p class="lead">
-                                Explora nuestra colección de arte único y descubre obras extraordinarias de artistas talentosos.
+                                Explora nuestra colección de arte único y descubre obras extraordinarias de artistas
+                                talentosos.
                             </p>
                             <div class="cta-buttons">
                                 <a href="/obras" class="btn btn-primary btn-lg me-3">
                                     <i class="fas fa-images"></i>
                                     Explorar Obras
                                 </a>
-                                @if (AuthService.UsuarioActual?.Rol == "artista")
+                                @if (RolId == ArtistaId)
                                 {
-                                    <a href="/mis-obras" class="btn btn-outline-primary btn-lg">
+                                    <a href="/artista/panel" class="btn btn-outline-primary btn-lg">
                                         <i class="fas fa-paint-brush"></i>
                                         Mis Obras
                                     </a>
                                 }
-                                else
+                                else if (RolId == CompradorId)
                                 {
                                     <a href="/favoritos" class="btn btn-outline-primary btn-lg">
                                         <i class="fas fa-heart"></i>
                                         Favoritos
                                     </a>
+                                }
+                                else
+                                {
+                                    <span class="text-danger">Rol no reconocido</span>
                                 }
                             </div>
                         </div>
@@ -90,7 +96,7 @@
                                 <span class="text-gradient">Extraordinario</span>
                             </h1>
                             <p class="lead mb-5">
-                                Conecta con artistas talentosos, explora obras únicas y encuentra la pieza perfecta 
+                                Conecta con artistas talentosos, explora obras únicas y encuentra la pieza perfecta
                                 que hable a tu alma. Únete a nuestra comunidad de amantes del arte.
                             </p>
                             <div class="cta-buttons">
@@ -190,7 +196,8 @@
         background-clip: text;
     }
 
-    .hero-content, .welcome-content {
+    .hero-content,
+    .welcome-content {
         padding: 2rem 0;
     }
 
@@ -228,7 +235,8 @@
         transform: translateY(-2px);
     }
 
-    .hero-illustration, .welcome-illustration {
+    .hero-illustration,
+    .welcome-illustration {
         text-align: center;
         position: relative;
         height: 400px;
@@ -268,12 +276,14 @@
         left: 50%;
     }
 
-    .stats-section, .features-section {
+    .stats-section,
+    .features-section {
         padding: 4rem 0;
         background-color: #f8f9fa;
     }
 
-    .stat-card, .feature-card {
+    .stat-card,
+    .feature-card {
         padding: 2rem;
         text-align: center;
         background: white;
@@ -283,11 +293,13 @@
         height: 100%;
     }
 
-    .stat-card:hover, .feature-card:hover {
+    .stat-card:hover,
+    .feature-card:hover {
         transform: translateY(-5px);
     }
 
-    .stat-icon, .feature-icon {
+    .stat-icon,
+    .feature-icon {
         font-size: 3rem;
         color: #667eea;
         margin-bottom: 1rem;
@@ -306,7 +318,8 @@
         font-weight: 600;
     }
 
-    .stat-card p, .feature-card p {
+    .stat-card p,
+    .feature-card p {
         color: #6c757d;
         margin: 0;
     }
@@ -322,8 +335,26 @@
 </style>
 
 @code {
+    private string? RolId;
+    private readonly string ArtistaId = "9a66346f-164e-4ce2-8e5b-568b8f643799";
+    private readonly string CompradorId = "62d2b61f-d92b-44d8-ada8-9d5dace7e6bc";
+
     protected override async Task OnInitializedAsync()
     {
         await AuthService.CheckAuthStateAsync();
+        if (AuthService.EstaAutenticado)
+        {
+            var token = await JwtService.ObtenerTokenAsync();
+            var payload = JwtService.ObtenerPayload(token);
+            RolId = JwtService.ObtenerClaim(payload, "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+        }
     }
 }
+
+
+
+
+
+
+
+

@@ -40,7 +40,7 @@ namespace GaleriaArteFrontend.Models
         public string ConfirmarContraseña { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Selecciona un tipo de usuario")]
-        public string Rol { get; set; } = "cliente"; // Rol por defecto
+        public string Rol { get; set; } = "comprador"; // Rol por defecto
     }
 
     public class SolicitarRecuperacionRequest
