@@ -1,0 +1,218 @@
+/* Animaciones globales */
+@keyframes float {
+    0%, 100% { 
+        transform: translateY(0px); 
+    }
+    50% { 
+        transform: translateY(-20px); 
+    }
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes slideInLeft {
+    from { 
+        opacity: 0; 
+        transform: translateX(-50px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateX(0); 
+    }
+}
+
+@keyframes slideInRight {
+    from { 
+        opacity: 0; 
+        transform: translateX(50px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateX(0); 
+    }
+}
+
+/* Clases de animación */
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+    animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-1 {
+    animation: float 4s ease-in-out infinite;
+    animation-delay: 0s;
+}
+
+.animate-float-2 {
+    animation: float 4s ease-in-out infinite;
+    animation-delay: 1s;
+}
+
+.animate-float-3 {
+    animation: float 4s ease-in-out infinite;
+    animation-delay: 2s;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft 0.6s ease-out;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 0.6s ease-out;
+}
+
+/* Media queries responsivas */
+@media (max-width: 768px) {
+    .home-container .display-3 {
+        font-size: 2.5rem !important;
+    }
+    
+    .home-container .hero-section, 
+    .home-container .welcome-section {
+        text-align: center !important;
+    }
+    
+    .home-container .hero-illustration, 
+    .home-container .welcome-illustration {
+        height: 200px !important;
+        margin-top: 2rem !important;
+    }
+    
+    .home-container .floating-element {
+        font-size: 2rem !important;
+    }
+    
+    .home-container .welcome-icon {
+        font-size: 4rem !important;
+    }
+    
+    .home-container .btn-lg {
+        padding: 0.7rem 1.5rem !important;
+        font-size: 1rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .home-container .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .home-container .btn-lg {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .home-container .btn-lg:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Responsive para páginas de autenticación */
+@media (max-width: 480px) {
+    .login-container,
+    .register-container,
+    .recovery-container,
+    .reset-container {
+        padding: 10px !important;
+    }
+    
+    .login-card,
+    .register-card,
+    .recovery-card,
+    .reset-card {
+        max-width: 100% !important;
+    }
+    
+    .login-header,
+    .login-form,
+    .register-header,
+    .register-form,
+    .recovery-header,
+    .recovery-form,
+    .reset-header,
+    .reset-form {
+        padding: 30px 20px !important;
+    }
+    
+    .login-header h2,
+    .register-header h2,
+    .recovery-header h2,
+    .reset-header h2 {
+        font-size: 24px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .access-denied-content h1 {
+        font-size: 2rem !important;
+    }
+    
+    .access-denied-content .error-icon {
+        font-size: 3rem !important;
+    }
+    
+    .access-denied-content .action-buttons {
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+    
+    .access-denied-content .btn {
+        padding: 0.7rem 1.5rem !important;
+    }
+}
+
+/* Media queries para navbar */
+@media (max-width: 768px) {
+    .main-layout .navbar-nav {
+        padding: 1rem 0 !important;
+    }
+    
+    .main-layout .nav-item {
+        margin: 0.25rem 0 !important;
+    }
+    
+    .main-layout .btn-primary {
+        margin-top: 0.5rem !important;
+        display: inline-block !important;
+    }
+    
+    .main-layout .footer .text-end {
+        text-align: left !important;
+        margin-top: 1rem !important;
+    }
+}
+
+/* Utilidades de animación */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.hover-scale {
+    transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}

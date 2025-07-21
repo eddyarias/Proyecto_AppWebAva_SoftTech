@@ -30,7 +30,7 @@ public class AuthController : ControllerBase
             Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true, // usa HTTPS en producción
+                Secure = false, // usa HTTPS en producción
                 SameSite = SameSiteMode.Strict, // o Lax si se necesita compatibilidad
                 Expires = DateTime.UtcNow.AddDays(7)
             });
@@ -38,7 +38,7 @@ public class AuthController : ControllerBase
             Response.Cookies.Append("acces_token", result.TokenAcceso, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true, // usa HTTPS en producción
+                Secure = false, // usa HTTPS en producción
                 SameSite = SameSiteMode.Strict, // o Lax si se necesita compatibilidad
                 Expires = DateTime.UtcNow.AddMinutes(15)
             });

@@ -52,7 +52,7 @@ namespace GaleriaArteFrontend.Services
             fileContent.Headers.ContentType = new MediaTypeHeaderValue(archivo.ContentType);
             content.Add(fileContent, "Archivo", archivo.Name);
 
-            var response = await _httpClient.PostAsync("api/obra/crear", content);
+            var response = await _httpClient.PostAsync("obra/crear", content);
             return response.IsSuccessStatusCode;
         }
 

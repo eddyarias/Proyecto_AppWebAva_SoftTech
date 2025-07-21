@@ -1,7 +1,329 @@
 ﻿@page "/"
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@using GaleriaArteFrontend.Services
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Galería de Arte - Inicio</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="home-container">
+    @if (AuthService.EstaAutenticado)
+    {
+        <div class="welcome-section">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <div class="welcome-content">
+                            <h1 class="display-4 fw-bold">
+                                ¡Bienvenido, @AuthService.UsuarioActual?.Nickname!
+                            </h1>
+                            <p class="lead">
+                                Explora nuestra colección de arte único y descubre obras extraordinarias de artistas talentosos.
+                            </p>
+                            <div class="cta-buttons">
+                                <a href="/obras" class="btn btn-primary btn-lg me-3">
+                                    <i class="fas fa-images"></i>
+                                    Explorar Obras
+                                </a>
+                                @if (AuthService.UsuarioActual?.Rol == "artista")
+                                {
+                                    <a href="/mis-obras" class="btn btn-outline-primary btn-lg">
+                                        <i class="fas fa-paint-brush"></i>
+                                        Mis Obras
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="/favoritos" class="btn btn-outline-primary btn-lg">
+                                        <i class="fas fa-heart"></i>
+                                        Favoritos
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="welcome-illustration">
+                            <i class="fas fa-palette welcome-icon animate-float"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-Welcome to your new app.
+        <div class="stats-section">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="stat-card hover-lift">
+                            <i class="fas fa-images stat-icon"></i>
+                            <h3>1,250+</h3>
+                            <p>Obras de Arte</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="stat-card hover-lift">
+                            <i class="fas fa-users stat-icon"></i>
+                            <h3>350+</h3>
+                            <p>Artistas</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="stat-card hover-lift">
+                            <i class="fas fa-heart stat-icon"></i>
+                            <h3>5,000+</h3>
+                            <p>Usuarios Activos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="hero-section">
+            <div class="container-fluid">
+                <div class="row align-items-center min-vh-100">
+                    <div class="col-lg-6">
+                        <div class="hero-content">
+                            <h1 class="display-3 fw-bold mb-4">
+                                Descubre el Arte
+                                <span class="text-gradient">Extraordinario</span>
+                            </h1>
+                            <p class="lead mb-5">
+                                Conecta con artistas talentosos, explora obras únicas y encuentra la pieza perfecta 
+                                que hable a tu alma. Únete a nuestra comunidad de amantes del arte.
+                            </p>
+                            <div class="cta-buttons">
+                                <a href="/registro" class="btn btn-primary btn-lg me-3">
+                                    <i class="fas fa-user-plus"></i>
+                                    Comenzar Ahora
+                                </a>
+                                <a href="/login" class="btn btn-outline-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Iniciar Sesión
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="hero-illustration">
+                            <div class="floating-elements">
+                                <div class="floating-element floating-element-1 animate-float-1">
+                                    <i class="fas fa-palette"></i>
+                                </div>
+                                <div class="floating-element floating-element-2 animate-float-2">
+                                    <i class="fas fa-paint-brush"></i>
+                                </div>
+                                <div class="floating-element floating-element-3 animate-float-3">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="features-section">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 text-center mb-5">
+                        <h2 class="display-5 fw-bold">¿Por qué elegir nuestra galería?</h2>
+                        <p class="lead">Ofrecemos la mejor experiencia para artistas y coleccionistas</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card hover-lift">
+                            <div class="feature-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h4>Calidad Premium</h4>
+                            <p>Obras cuidadosamente curadas por expertos en arte</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card hover-lift">
+                            <div class="feature-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h4>Compra Segura</h4>
+                            <p>Transacciones protegidas y autenticidad garantizada</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card hover-lift">
+                            <div class="feature-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h4>Comunidad</h4>
+                            <p>Conecta con artistas y coleccionistas de todo el mundo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .home-container {
+        min-height: 100vh;
+    }
+
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+    }
+
+    .welcome-section {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 4rem 0;
+    }
+
+    .text-gradient {
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-content, .welcome-content {
+        padding: 2rem 0;
+    }
+
+    .cta-buttons {
+        margin-top: 2rem;
+    }
+
+    .btn-lg {
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+        border: none;
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    }
+
+    .btn-outline-primary {
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        color: white;
+        background: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: white;
+        transform: translateY(-2px);
+    }
+
+    .hero-illustration, .welcome-illustration {
+        text-align: center;
+        position: relative;
+        height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .welcome-icon {
+        font-size: 8rem;
+        opacity: 0.7;
+    }
+
+    .floating-elements {
+        position: relative;
+        height: 100%;
+    }
+
+    .floating-element {
+        position: absolute;
+        font-size: 3rem;
+        opacity: 0.8;
+    }
+
+    .floating-element-1 {
+        top: 20%;
+        left: 20%;
+    }
+
+    .floating-element-2 {
+        top: 60%;
+        right: 20%;
+    }
+
+    .floating-element-3 {
+        bottom: 20%;
+        left: 50%;
+    }
+
+    .stats-section, .features-section {
+        padding: 4rem 0;
+        background-color: #f8f9fa;
+    }
+
+    .stat-card, .feature-card {
+        padding: 2rem;
+        text-align: center;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        height: 100%;
+    }
+
+    .stat-card:hover, .feature-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-icon, .feature-icon {
+        font-size: 3rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+
+    .stat-card h3 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-card h4 {
+        color: #333;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .stat-card p, .feature-card p {
+        color: #6c757d;
+        margin: 0;
+    }
+
+    /* Responsive styles - mobile first approach */
+    .mobile-responsive {
+        display: block;
+    }
+
+    .desktop-large {
+        font-size: 3rem;
+    }
+</style>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.CheckAuthStateAsync();
+    }
+}

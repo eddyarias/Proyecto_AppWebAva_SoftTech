@@ -7,8 +7,14 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
+// Configurar HttpClient con la URL base del API Gateway
 builder.Services.AddScoped(sp =>
-    new HttpClient { BaseAddress = new Uri("http://localhost:5000/") });
+{
+    var httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:5000/") };
+    // Configurar para incluir cookies en las requests
+    httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+    return httpClient;
+});
 
 // Registro de servicios personalizados
 builder.Services.AddScoped<ObrasService>();
