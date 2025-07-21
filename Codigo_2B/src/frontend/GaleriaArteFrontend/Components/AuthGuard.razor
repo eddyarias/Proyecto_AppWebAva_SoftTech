@@ -1,0 +1,82 @@
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@using GaleriaArteFrontend.Services
+
+@if (mostrarContenido)
+{
+    @ChildContent
+}
+else if (cargando)
+{
+    <div class="loading-auth">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Verificando autenticación...</span>
+        </div>
+    </div>
+}
+
+<style>
+    .loading-auth {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 50vh;
+    }
+</style>
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; } = default!;
+    [Parameter] public bool RequiereAutenticacion { get; set; } = true;
+    [Parameter] public string? RolRequerido { get; set; }
+    [Parameter] public string RedirigirSiNoAutenticado { get; set; } = "/login";
+    [Parameter] public string RedirigirSiNoAutorizado { get; set; } = "/acceso-denegado";
+
+    private bool mostrarContenido = false;
+    private bool cargando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await VerificarAutorizacion();
+        AuthService.OnAuthStateChanged += StateHasChanged;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await VerificarAutorizacion();
+    }
+
+    private async Task VerificarAutorizacion()
+    {
+        cargando = true;
+        
+        if (!RequiereAutenticacion)
+        {
+            mostrarContenido = true;
+            cargando = false;
+            return;
+        }
+
+        var estaAutenticado = await AuthService.CheckAuthStateAsync();
+        
+        if (!estaAutenticado)
+        {
+            Navigation.NavigateTo(RedirigirSiNoAutenticado);
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(RolRequerido) && 
+            AuthService.UsuarioActual?.Rol != RolRequerido)
+        {
+            Navigation.NavigateTo(RedirigirSiNoAutorizado);
+            return;
+        }
+
+        mostrarContenido = true;
+        cargando = false;
+    }
+
+    public void Dispose()
+    {
+        AuthService.OnAuthStateChanged -= StateHasChanged;
+    }
+}

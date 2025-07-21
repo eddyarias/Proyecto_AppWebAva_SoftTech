@@ -1,0 +1,418 @@
+@page "/registro"
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@using GaleriaArteFrontend.Models
+@using GaleriaArteFrontend.Services
+@using System.ComponentModel.DataAnnotations
+
+<PageTitle>Registro - Galería de Arte</PageTitle>
+
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <h2>Crear Cuenta</h2>
+            <p>Únete a nuestra comunidad de arte</p>
+        </div>
+
+        <div class="register-form">
+            <EditForm Model="registroRequest" OnValidSubmit="HandleRegistro">
+                <DataAnnotationsValidator />
+
+                <div class="form-group">
+                    <label for="nickname">Nombre de Usuario</label>
+                    <InputText id="nickname" @bind-Value="registroRequest.Nickname" class="form-control"
+                        placeholder="Elige un nombre de usuario único" />
+                    <ValidationMessage For="@(() => registroRequest.Nickname)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="correo">Correo Electrónico</label>
+                    <InputText id="correo" @bind-Value="registroRequest.Correo" type="email" class="form-control"
+                        placeholder="tu@email.com" />
+                    <ValidationMessage For="@(() => registroRequest.Correo)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="rol">Tipo de Usuario</label>
+                    <InputSelect id="rol" @bind-Value="registroRequest.Rol" class="form-control">
+                        <option value="comprador">Comprador</option>
+                        <option value="artista">Artista</option>
+                    </InputSelect>
+                    <ValidationMessage For="@(() => registroRequest.Rol)" TValue="string" />
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <div class="password-input">
+                        <InputText id="password" @bind-Value="registroRequest.Contraseña"
+                            type="@(mostrarPassword ? "text" : "password")" class="form-control"
+                            placeholder="Mínimo 8 caracteres" />
+                        <button type="button" class="password-toggle" @onclick="TogglePasswordVisibility">
+                            <i class="@(mostrarPassword ? "fas fa-eye-slash" : "fas fa-eye")"></i>
+                        </button>
+                    </div>
+                    <ValidationMessage For="@(() => registroRequest.Contraseña)" />
+                    <div class="password-requirements">
+                        <small>La contraseña debe tener al menos 8 caracteres</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmarPassword">Confirmar Contraseña</label>
+                    <div class="password-input">
+                        <InputText id="confirmarPassword" @bind-Value="registroRequest.ConfirmarContraseña"
+                            type="@(mostrarConfirmPassword ? "text" : "password")" class="form-control"
+                            placeholder="Repite tu contraseña" />
+                        <button type="button" class="password-toggle" @onclick="ToggleConfirmPasswordVisibility">
+                            <i class="@(mostrarConfirmPassword ? "fas fa-eye-slash" : "fas fa-eye")"></i>
+                        </button>
+                    </div>
+                    <ValidationMessage For="@(() => registroRequest.ConfirmarContraseña)" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(mensajeError))
+                {
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        @mensajeError
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(mensajeExito))
+                {
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        @mensajeExito
+                    </div>
+                }
+
+                <button type="submit" class="btn btn-primary btn-register" disabled="@cargando">
+                    @if (cargando)
+                    {
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Creando cuenta...</span>
+                    }
+                    else
+                    {
+                        <i class="fas fa-user-plus"></i>
+                        <span>Crear Cuenta</span>
+                    }
+                </button>
+            </EditForm>
+
+            <div class="register-links">
+                <div class="login-link">
+                    <span>¿Ya tienes cuenta?</span>
+                    <a href="/login" class="link-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Inicia sesión aquí
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .register-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        padding: 20px;
+    }
+
+    .register-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 480px;
+        overflow: hidden;
+    }
+
+    .register-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 40px 30px;
+        text-align: center;
+    }
+
+    .register-header h2 {
+        margin: 0 0 10px 0;
+        font-size: 28px;
+        font-weight: 600;
+    }
+
+    .register-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 16px;
+    }
+
+    .register-form {
+        padding: 40px 30px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #374151;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #4facfe;
+        box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+    }
+
+    .password-input {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 16px;
+    }
+
+    .password-toggle:hover {
+        color: #374151;
+    }
+
+    .password-requirements {
+        margin-top: 4px;
+    }
+
+    .password-requirements small {
+        color: #6b7280;
+        font-size: 12px;
+    }
+
+    .btn-register {
+        width: 100%;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        border: none;
+        padding: 14px 20px;
+        border-radius: 8px;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 24px;
+    }
+
+    .btn-register:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+    }
+
+    .btn-register:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .register-links {
+        text-align: center;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 24px;
+    }
+
+    .login-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .login-link span {
+        color: #6b7280;
+    }
+
+    .login-link a {
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .link-primary {
+        color: #4facfe;
+    }
+
+    .link-primary:hover {
+        color: #00f2fe;
+    }
+
+    .alert {
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .alert-danger {
+        background-color: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+
+    .alert-success {
+        background-color: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
+    }
+
+    .validation-message {
+        color: #dc2626;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+</style>
+
+@code {
+    private RegistroRequest registroRequest = new() { Rol = "comprador" };
+    private bool cargando = false;
+    private bool mostrarPassword = false;
+    private bool mostrarConfirmPassword = false;
+    private string mensajeError = "";
+    private string mensajeExito = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Verificar si ya está autenticado
+        if (await AuthService.CheckAuthStateAsync())
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task HandleRegistro()
+    {
+        mensajeError = "";
+        mensajeExito = "";
+
+        // Validaciones del lado cliente
+        if (string.IsNullOrWhiteSpace(registroRequest.Nickname))
+        {
+            mensajeError = "El nombre de usuario es requerido.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(registroRequest.Correo))
+        {
+            mensajeError = "El correo electrónico es requerido.";
+            return;
+        }
+
+        if (!IsValidEmail(registroRequest.Correo))
+        {
+            mensajeError = "Por favor, ingresa un correo electrónico válido.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(registroRequest.Contraseña))
+        {
+            mensajeError = "La contraseña es requerida.";
+            return;
+        }
+
+        if (registroRequest.Contraseña.Length < 8)
+        {
+            mensajeError = "La contraseña debe tener al menos 8 caracteres.";
+            return;
+        }
+
+        if (registroRequest.Contraseña != registroRequest.ConfirmarContraseña)
+        {
+            mensajeError = "Las contraseñas no coinciden.";
+            return;
+        }
+
+        cargando = true;
+
+        try
+        {
+            var resultado = await AuthService.RegistrarAsync(registroRequest);
+
+            if (resultado.Exito)
+            {
+                mensajeExito = resultado.Mensaje + " Redirigiendo al login...";
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                mensajeError = resultado.Mensaje;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensajeError = $"Error inesperado: {ex.Message}";
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        mostrarPassword = !mostrarPassword;
+    }
+
+    private void ToggleConfirmPasswordVisibility()
+    {
+        mostrarConfirmPassword = !mostrarConfirmPassword;
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}
