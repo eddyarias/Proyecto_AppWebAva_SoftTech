@@ -15,7 +15,7 @@ namespace GaleriaArteFrontend.Services
         {
             await AddJwtHeaderAsync();
             // Obtiene las obras del artista autenticado
-            var response = await _httpClient.GetAsync("api/obra/mis-obras");
+            var response = await _httpClient.GetAsync("obra/mis-obras");
             if (!response.IsSuccessStatusCode)
                 return new List<Obra>();
             var obras = await response.Content.ReadFromJsonAsync<List<Obra>>();
@@ -25,7 +25,7 @@ namespace GaleriaArteFrontend.Services
         public async Task<Obra?> GetObraByIdAsync(int id)
         {
             await AddJwtHeaderAsync();
-            var response = await _httpClient.GetAsync($"api/obra/{id}");
+            var response = await _httpClient.GetAsync($"obra/{id}");
             if (!response.IsSuccessStatusCode)
                 return null;
             return await response.Content.ReadFromJsonAsync<Obra>();
@@ -69,28 +69,28 @@ namespace GaleriaArteFrontend.Services
                 Descripcion = model.Descripcion,
                 Precio = model.Precio
             };
-            var response = await _httpClient.PutAsJsonAsync($"api/obra/{id}", updateDto);
+            var response = await _httpClient.PutAsJsonAsync($"obra/{id}", updateDto);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> OcultarObraAsync(int id)
         {
             await AddJwtHeaderAsync();
-            var response = await _httpClient.PatchAsync($"api/obra/{id}/ocultar", null);
+            var response = await _httpClient.PatchAsync($"obra/{id}/ocultar", null);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> ActivarObraAsync(int id)
         {
             await AddJwtHeaderAsync();
-            var response = await _httpClient.PatchAsync($"api/obra/{id}/activar", null);
+            var response = await _httpClient.PatchAsync($"obra/{id}/activar", null);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> EliminarObraAsync(int id)
         {
             await AddJwtHeaderAsync();
-            var response = await _httpClient.DeleteAsync($"api/obra/{id}");
+            var response = await _httpClient.DeleteAsync($"obra/{id}");
             return response.IsSuccessStatusCode;
         }
 
@@ -104,7 +104,7 @@ namespace GaleriaArteFrontend.Services
 
         private async Task AddJwtHeaderAsync()
         {
-            var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5Mzc5NjczYy01MjAyLTQ2MjQtYTQ3ZS00NzEzMjQ2YTkyOWEiLCJlbWFpbCI6Im1pbHRvbi5hLnBhc3Rvci5mQGdtYWlsLmNvbSIsIm5pY2tuYW1lIjoibWlsdG9uIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiNjJkMmI2MWYtZDkyYi00NGQ4LWFkYTgtOWQ1ZGFjZTdlNmJjIiwiZXhwIjoxNzUzMDM5NzQwLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDIiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUwMDIifQ.kIeR7NTzJNHYt3eBz2mCHUBLt2bFzpNAR-b1T8DshzQ";
+            var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5Mzc5NjczYy01MjAyLTQ2MjQtYTQ3ZS00NzEzMjQ2YTkyOWEiLCJlbWFpbCI6Im1pbHRvbi5hLnBhc3Rvci5mQGdtYWlsLmNvbSIsIm5pY2tuYW1lIjoibWlsdG9uIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiNjJkMmI2MWYtZDkyYi00NGQ4LWFkYTgtOWQ1ZGFjZTdlNmJjIiwiZXhwIjoxNzUzMDU2NzU0LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDIiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUwMDIifQ.Tommj-_hnVha-_6j56LhehuY4l0iSEitsKyXMcmONNk";
             if (!string.IsNullOrEmpty(token))
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
