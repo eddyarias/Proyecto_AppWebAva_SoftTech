@@ -33,7 +33,7 @@ public class RecuperacionService : IRecuperacionService
 
         await _recuperacionRepo.GuardarIntentoAsync(intento);
 
-        var url = $"http://localhost:5002/api/usuario/restablecer?token={token}";
+        var url = $"http://localhost:5001/restablecer-password/{token}";
         var mensaje = $"Hola {usuario.Nickname}, haz clic en el siguiente enlace para restablecer tu contraseña: {url}";
 
         return await _emailService.EnviarCorreoAsync(usuario.Correo, "Recuperar contraseña", mensaje);
