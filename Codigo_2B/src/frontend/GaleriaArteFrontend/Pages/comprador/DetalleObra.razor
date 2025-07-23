@@ -1,0 +1,673 @@
+@page "/obra/{Id:int}"
+@inject AuthService AuthService
+@inject ObrasService ObrasService
+@inject NavigationManager Navigation
+@inject JwtService JwtService
+@inject IJSRuntime JSRuntime
+@using GaleriaArteFrontend.Services
+@using GaleriaArteFrontend.Models
+@using Microsoft.AspNetCore.Components.Web
+
+<PageTitle>@(obra?.Titulo ?? "Cargando...") - Galería de Arte</PageTitle>
+
+<div class="obra-detalle">
+    <div class="container-fluid">
+        <!-- Botón de regreso -->
+        <div class="navigation-header">
+            <button class="btn btn-outline-secondary btn-back" @onclick="Regresar">
+                <i class="fas fa-arrow-left"></i>
+                Volver al catálogo
+            </button>
+        </div>
+
+        @if (cargando)
+        {
+            <div class="loading-container">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p>Cargando detalles de la obra...</p>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(mensajeError))
+        {
+            <div class="error-container">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    @mensajeError
+                    <div class="mt-3">
+                        <button class="btn btn-outline-danger me-2" @onclick="CargarObra">
+                            <i class="fas fa-redo"></i>
+                            Reintentar
+                        </button>
+                        <button class="btn btn-secondary" @onclick="Regresar">
+                            <i class="fas fa-arrow-left"></i>
+                            Volver
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (obra != null)
+        {
+            <div class="obra-content">
+                <div class="row">
+                    <!-- Imagen de la obra -->
+                    <div class="col-lg-7">
+                        <div class="imagen-container">
+                            @if (!string.IsNullOrEmpty(obra.ArchivoBase64))
+                            {
+                                <img src="@($"data:image/jpeg;base64,{obra.ArchivoBase64}")" 
+                                     alt="@obra.Titulo" 
+                                     class="img-fluid obra-imagen">
+                            }
+                            else
+                            {
+                                <div class="no-image-large">
+                                    <i class="fas fa-image"></i>
+                                    <span>Imagen no disponible</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Información de la obra -->
+                    <div class="col-lg-5">
+                        <div class="info-container">
+                            <div class="obra-header">
+                                <h1 class="obra-titulo">@obra.Titulo</h1>
+                                <div class="obra-estado">
+                                    <span class="badge badge-success">
+                                        <i class="fas fa-check-circle"></i>
+                                        @obra.Estado
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="artista-info">
+                                <h3 class="artista-nombre">
+                                    <i class="fas fa-user-circle"></i>
+                                    @obra.ArtistaNickname
+                                </h3>
+                                <div class="fecha-publicacion">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Publicado el @obra.FechaPublicacion.ToString("dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-ES"))
+                                </div>
+                            </div>
+
+                            @if (obra.Precio > 0)
+                            {
+                                <div class="precio-container">
+                                    <div class="precio-label">Precio</div>
+                                    <div class="precio-valor">$@obra.Precio.ToString("N0")</div>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(obra.Descripcion))
+                            {
+                                <div class="descripcion-container">
+                                    <h4>Descripción</h4>
+                                    <p class="descripcion-texto">@obra.Descripcion</p>
+                                </div>
+                            }
+
+                            <!-- Información técnica -->
+                            <div class="info-tecnica">
+                                <h4>Información técnica</h4>
+                                <div class="info-item">
+                                    <span class="info-label">ID de la obra:</span>
+                                    <span class="info-value">#@obra.Id.ToString("D6")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Estado:</span>
+                                    <span class="info-value">@obra.Estado</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Fecha de publicación:</span>
+                                    <span class="info-value">@obra.FechaPublicacion.ToString("dd/MM/yyyy HH:mm")</span>
+                                </div>
+                            </div>
+
+                            <!-- Acciones -->
+                            <div class="acciones-container">
+                                <button class="btn btn-primary btn-contactar" @onclick="ContactarArtista">
+                                    <i class="fas fa-envelope"></i>
+                                    Contactar Artista
+                                </button>
+                                <button class="btn btn-success btn-comprar" @onclick="ComprarObra">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    Comprar
+                                </button>
+                                <button class="btn btn-outline-secondary btn-compartir" @onclick="CompartirObra">
+                                    <i class="fas fa-share-alt"></i>
+                                    Compartir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="not-found-container">
+                <div class="text-center">
+                    <i class="fas fa-search"></i>
+                    <h2>Obra no encontrada</h2>
+                    <p>La obra que buscas no existe o no está disponible.</p>
+                    <button class="btn btn-primary" @onclick="Regresar">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver al catálogo
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal para imagen completa -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white">@obra?.Titulo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body d-flex align-items-center justify-content-center">
+                @if (obra != null && !string.IsNullOrEmpty(obra.ArchivoBase64))
+                {
+                    <img src="@($"data:image/jpeg;base64,{obra.ArchivoBase64}")" 
+                         alt="@obra.Titulo" 
+                         class="img-fluid max-height-100">
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .obra-detalle {
+        padding: 2rem 0;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+    }
+
+    .navigation-header {
+        margin-bottom: 2rem;
+    }
+
+    .btn-back {
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .obra-content {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .imagen-container {
+        position: relative;
+        background: #f8f9fa;
+        min-height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .obra-imagen {
+        max-width: 100%;
+        max-height: 600px;
+        object-fit: contain;
+        cursor: zoom-in;
+        transition: transform 0.3s ease;
+        border-radius: 8px;
+    }
+
+    .obra-imagen:hover {
+        transform: scale(1.02);
+    }
+
+    .imagen-overlay {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .imagen-container:hover .imagen-overlay {
+        opacity: 1;
+    }
+
+    .btn-zoom {
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .no-image-large {
+        width: 100%;
+        height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af;
+        background-color: #f3f4f6;
+    }
+
+    .no-image-large i {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-container {
+        padding: 3rem;
+    }
+
+    .obra-header {
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 1.5rem;
+    }
+
+    .obra-titulo {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+
+    .obra-estado .badge {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+    }
+
+    .badge-success {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .artista-info {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 12px;
+    }
+
+    .artista-nombre {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .artista-nombre i {
+        color: #667eea;
+    }
+
+    .fecha-publicacion {
+        color: #6b7280;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .precio-container {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+        border-radius: 12px;
+        border-left: 4px solid #10b981;
+    }
+
+    .precio-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #065f46;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .precio-valor {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #059669;
+    }
+
+    .descripcion-container {
+        margin-bottom: 2rem;
+    }
+
+    .descripcion-container h4 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+    }
+
+    .descripcion-texto {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        color: #4b5563;
+        margin: 0;
+    }
+
+    .info-tecnica {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f9fafb;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .info-tecnica h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 500;
+        color: #6b7280;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .acciones-container {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-contactar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        flex: 1;
+        min-width: 150px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-contactar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-comprar {
+        background-color: #10b981;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        flex: 1;
+        min-width: 150px;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .btn-comprar:hover {
+        background-color: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-compartir {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .btn-compartir:hover {
+        border-color: #667eea;
+        color: #667eea;
+        transform: translateY(-1px);
+    }
+
+    .loading-container,
+    .error-container,
+    .not-found-container {
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .loading-container .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .not-found-container i {
+        font-size: 4rem;
+        color: #d1d5db;
+        margin-bottom: 1rem;
+    }
+
+    .not-found-container h2 {
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+
+    .not-found-container p {
+        color: #6b7280;
+        margin-bottom: 2rem;
+    }
+
+    .max-height-100 {
+        max-height: 90vh;
+        max-width: 90vw;
+        object-fit: contain;
+    }
+
+    .modal-content.bg-dark {
+        background-color: rgba(0, 0, 0, 0.95) !important;
+    }
+
+    @@media (max-width: 768px) {
+        .obra-titulo {
+            font-size: 2rem;
+        }
+
+        .info-container {
+            padding: 2rem;
+        }
+
+        .precio-valor {
+            font-size: 2rem;
+        }
+
+        .acciones-container {
+            flex-direction: column;
+        }
+
+        .btn-contactar,
+        .btn-compartir {
+            flex: none;
+            width: 100%;
+        }
+
+        .imagen-container {
+            min-height: 300px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .obra-detalle {
+            padding: 1rem 0;
+        }
+
+        .info-container {
+            padding: 1.5rem;
+        }
+
+        .obra-titulo {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Obra? obra;
+    private bool cargando = true;
+    private string mensajeError = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await VerificarAutenticacion();
+        await CargarObra();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id > 0)
+        {
+            await CargarObra();
+        }
+    }
+
+    private async Task VerificarAutenticacion()
+    {
+        await AuthService.CheckAuthStateAsync();
+        
+        if (!AuthService.EstaAutenticado)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        // Verificar que sea un comprador
+        var token = await JwtService.ObtenerTokenAsync();
+        if (!string.IsNullOrEmpty(token))
+        {
+            var payload = JwtService.ObtenerPayload(token);
+            if (payload != null)
+            {
+                var rolId = JwtService.ObtenerClaim(payload, "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+                var compradorId = "62d2b61f-d92b-44d8-ada8-9d5dace7e6bc";
+
+                if (rolId != compradorId)
+                {
+                    Navigation.NavigateTo("/");
+                    return;
+                }
+            }
+        }
+    }
+
+    private async Task CargarObra()
+    {
+        try
+        {
+            cargando = true;
+            mensajeError = "";
+
+            obra = await ObrasService.GetObraByIdAsync(Id);
+            
+            if (obra == null)
+            {
+                mensajeError = "La obra solicitada no fue encontrada o no está disponible.";
+            }
+            else if (obra.Estado != "activa")
+            {
+                mensajeError = "Esta obra no está disponible para visualización.";
+                obra = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensajeError = $"Error al cargar la obra: {ex.Message}";
+            Console.Error.WriteLine($"Error al cargar obra {Id}: {ex}");
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private void Regresar()
+    {
+        Navigation.NavigateTo("/comprador/panel");
+    }
+
+    private async Task ContactarArtista()
+    {
+        if (obra != null)
+        {
+            // Aquí podrías implementar la funcionalidad de contacto
+            // Por ejemplo, abrir un modal de contacto o navegar a una página de mensajes
+            await JSRuntime.InvokeVoidAsync("alert", $"Funcionalidad de contacto con {obra.ArtistaNickname} próximamente disponible.");
+        }
+    }
+
+    private async Task ComprarObra()
+    {
+        await JSRuntime.InvokeVoidAsync("alert", "Funcionalidad de compra próximamente disponible.");
+    }
+
+    private async Task CompartirObra()
+    {
+        if (obra != null)
+        {
+            var url = Navigation.Uri;
+            
+            // Intentar usar la API Web Share si está disponible
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("navigator.share", new
+                {
+                    title = obra.Titulo,
+                    text = $"Mira esta increíble obra de {obra.ArtistaNickname}",
+                    url = url
+                });
+            }
+            catch
+            {
+                // Fallback: copiar al portapapeles
+                await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", url);
+                await JSRuntime.InvokeVoidAsync("alert", "Enlace copiado al portapapeles");
+            }
+        }
+    }
+}
