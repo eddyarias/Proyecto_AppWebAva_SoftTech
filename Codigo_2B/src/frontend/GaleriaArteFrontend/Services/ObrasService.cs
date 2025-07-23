@@ -94,13 +94,22 @@ namespace GaleriaArteFrontend.Services
             return response.IsSuccessStatusCode;
         }
 
+        public async Task<List<Obra>> GetObrasActivasAsync(int limite = 10)
+        {
+            await AddJwtHeaderAsync();
+            var response = await _httpClient.GetAsync($"obra/activas?limite={limite}");
+            if (!response.IsSuccessStatusCode)
+                return new List<Obra>();
+
+            var obras = await response.Content.ReadFromJsonAsync<List<Obra>>();
+            return obras ?? new List<Obra>();
+        }
+
         private readonly HttpClient _httpClient;
-        private readonly AuthService _authService;
         private readonly JwtService _jwtService;
-        public ObrasService(HttpClient httpClient, AuthService authService, JwtService jwtService)
+        public ObrasService(HttpClient httpClient, JwtService jwtService)
         {
             _httpClient = httpClient;
-            _authService = authService;
             _jwtService = jwtService;
         }
 

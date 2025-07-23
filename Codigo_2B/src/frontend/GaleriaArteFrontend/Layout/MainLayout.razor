@@ -26,24 +26,6 @@
                             Inicio
                         </a>
                     </li>
-                    @if (AuthService.EstaAutenticado)
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link" href="/mi-perfil">
-                                <i class="fas fa-user"></i>
-                                Mi Perfil
-                            </a>
-                        </li>
-                        @if (AuthService.UsuarioActual?.Rol == "artista")
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" href="/mis-obras">
-                                    <i class="fas fa-paint-brush"></i>
-                                    Mis Obras
-                                </a>
-                            </li>
-                        }
-                    }
                 </ul>
 
                 <ul class="navbar-nav">

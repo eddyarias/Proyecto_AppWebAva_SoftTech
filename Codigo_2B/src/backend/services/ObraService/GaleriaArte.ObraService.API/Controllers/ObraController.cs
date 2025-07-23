@@ -17,9 +17,21 @@ public class ObraController : ControllerBase
         _obraService = obraService;
     }
 
+    private const string ROLE_ARTISTA = "9a66346f-164e-4ce2-8e5b-568b8f643799";
+    private const string ROLE_COMPRADOR = "62d2b61f-d92b-44d8-ada8-9d5dace7e6bc";
+    private const string ROLE_ADMIN = "f50fdbe5-2e16-4e91-9e7b-a39219d57031";
+
+    private string GetRoleIdFromJwt()
+    {
+        return User.Claims.FirstOrDefault(c => c.Type == "role" || c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+    }
+
     [HttpPost("crear")]
     public async Task<IActionResult> Crear([FromForm] CreateObraDto dto)
     {
+        var roleId = GetRoleIdFromJwt();
+        if (roleId != ROLE_ARTISTA && roleId != ROLE_ADMIN)
+            return Forbid();
         var nickname = GetNicknameFromJwt();
         if (string.IsNullOrEmpty(nickname))
             return Unauthorized(new { error = "No se pudo obtener el nickname del usuario autenticado." });
@@ -96,6 +108,9 @@ public class ObraController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Actualizar(int id, [FromBody] UpdateObraDto dto)
     {
+        var roleId = GetRoleIdFromJwt();
+        if (roleId != ROLE_ARTISTA && roleId != ROLE_ADMIN)
+            return Forbid();
         try
         {
             var resultado = await _obraService.ActualizarObraAsync(id, dto);
@@ -113,6 +128,9 @@ public class ObraController : ControllerBase
     [HttpPatch("{id}/ocultar")]
     public async Task<IActionResult> Ocultar(int id)
     {
+        var roleId = GetRoleIdFromJwt();
+        if (roleId != ROLE_ARTISTA && roleId != ROLE_ADMIN)
+            return Forbid();
         try
         {
             var (success, message) = await _obraService.OcultarObraAsync(id);
@@ -136,6 +154,9 @@ public class ObraController : ControllerBase
     [HttpPatch("{id}/activar")]
     public async Task<IActionResult> Activar(int id)
     {
+        var roleId = GetRoleIdFromJwt();
+        if (roleId != ROLE_ARTISTA && roleId != ROLE_ADMIN)
+            return Forbid();
         try
         {
             var (success, message) = await _obraService.ActivarObraAsync(id);
@@ -159,6 +180,9 @@ public class ObraController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Eliminar(int id)
     {
+        var roleId = GetRoleIdFromJwt();
+        if (roleId != ROLE_ARTISTA && roleId != ROLE_ADMIN)
+            return Forbid();
         try
         {
             var (success, message) = await _obraService.EliminarObraAsync(id);
@@ -182,6 +206,9 @@ public class ObraController : ControllerBase
     [HttpPost("{id}/validar-firma")]
     public async Task<IActionResult> ValidarFirma(int id)
     {
+        var roleId = GetRoleIdFromJwt();
+        if (roleId != ROLE_ARTISTA && roleId != ROLE_ADMIN)
+            return Forbid();
         try
         {
             bool esValida = await _obraService.ValidarFirmaObraAsync(id);
@@ -210,6 +237,9 @@ public class ObraController : ControllerBase
     [HttpGet("mis-obras")]
     public async Task<IActionResult> ObtenerMisObras()
     {
+        var roleId = GetRoleIdFromJwt();
+        if (roleId != ROLE_ARTISTA && roleId != ROLE_ADMIN)
+            return Forbid();
         var nickname = GetNicknameFromJwt();
         if (string.IsNullOrEmpty(nickname))
             return Unauthorized(new { error = "No se pudo obtener el nickname del usuario autenticado." });

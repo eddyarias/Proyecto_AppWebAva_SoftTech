@@ -44,13 +44,28 @@ namespace GaleriaArteFrontend.Services
                         await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "jwt_token", accessToken);
                     }
 
-                    // Simular obtención del usuario desde las cookies o JWT
-                    // En una implementación real, decodificarías el JWT del token de acceso
+                    // Obtener datos reales del usuario desde el JWT
+                    string nickname = request.Identificador;
+                    string correo = request.Identificador.Contains("@") ? request.Identificador : "";
+                    string rol = "";
+                    if (!string.IsNullOrEmpty(accessToken))
+                    {
+                        var jwtService = new JwtService(_jsRuntime);
+                        var payload = jwtService.ObtenerPayload(accessToken);
+                        // El claim de rol es el ID, usar el mismo claim que en el backend
+                        rol = jwtService.ObtenerClaim(payload, "http://schemas.microsoft.com/ws/2008/06/identity/claims/role") ?? "";
+                        // Si el nickname está en el token, úsalo
+                        var nickFromToken = jwtService.ObtenerClaim(payload, "nickname");
+                        if (!string.IsNullOrEmpty(nickFromToken)) nickname = nickFromToken;
+                        var correoFromToken = jwtService.ObtenerClaim(payload, "email");
+                        if (!string.IsNullOrEmpty(correoFromToken)) correo = correoFromToken;
+                    }
+
                     _usuarioActual = new Usuario
                     {
-                        Nickname = request.Identificador,
-                        Correo = request.Identificador.Contains("@") ? request.Identificador : "",
-                        Rol = "cliente" // Por ahora asumimos cliente, deberías obtener esto del JWT
+                        Nickname = nickname,
+                        Correo = correo,
+                        Rol = rol
                     };
 
                     // Guardar estado en localStorage
@@ -190,25 +205,29 @@ namespace GaleriaArteFrontend.Services
         {
             try
             {
-                var isAuthenticated = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "isAuthenticated");
-                var userNickname = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "userNickname");
-
-                if (isAuthenticated == "true" && !string.IsNullOrEmpty(userNickname))
+                var jwtService = new JwtService(_jsRuntime);
+                var token = await jwtService.ObtenerTokenAsync();
+                if (!string.IsNullOrEmpty(token))
                 {
+                    var payload = jwtService.ObtenerPayload(token);
+                    var rol = jwtService.ObtenerClaim(payload, "http://schemas.microsoft.com/ws/2008/06/identity/claims/role") ?? "";
+                    var nickname = jwtService.ObtenerClaim(payload, "nickname") ?? "";
+                    var correo = jwtService.ObtenerClaim(payload, "email") ?? "";
                     _usuarioActual = new Usuario
                     {
-                        Nickname = userNickname,
-                        Rol = "cliente" // En una implementación real, deberías obtener esto de manera más segura
+                        Nickname = nickname,
+                        Correo = correo,
+                        Rol = rol
                     };
-
                     OnAuthStateChanged?.Invoke();
                     return true;
                 }
-
+                _usuarioActual = null;
                 return false;
             }
             catch
             {
+                _usuarioActual = null;
                 return false;
             }
         }

@@ -22,22 +22,17 @@
                                 talentosos.
                             </p>
                             <div class="cta-buttons">
-                                <a href="/obras" class="btn btn-primary btn-lg me-3">
-                                    <i class="fas fa-images"></i>
-                                    Explorar Obras
-                                </a>
                                 @if (RolId == ArtistaId)
                                 {
                                     <a href="/artista/panel" class="btn btn-outline-primary btn-lg">
                                         <i class="fas fa-paint-brush"></i>
                                         Mis Obras
                                     </a>
-                                }
-                                else if (RolId == CompradorId)
+                                }                                else if (RolId == CompradorId)
                                 {
-                                    <a href="/favoritos" class="btn btn-outline-primary btn-lg">
-                                        <i class="fas fa-heart"></i>
-                                        Favoritos
+                                    <a href="/comprador/panel" class="btn btn-outline-primary btn-lg">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        Explorar Obras
                                     </a>
                                 }
                                 else

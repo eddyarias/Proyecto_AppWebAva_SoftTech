@@ -3,13 +3,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Configuración de CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
+    options.AddPolicy("AllowFrontend", builder =>
     {
-        builder.AllowAnyOrigin()
+        builder.WithOrigins("http://localhost:5000", "http://localhost:5001") // 👈 Pon el dominio exacto
                .AllowAnyMethod()
-               .AllowAnyHeader();
+               .AllowAnyHeader()
+               .AllowCredentials(); // 👈 Esto permite cookies
     });
 });
+
 
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
@@ -17,7 +19,7 @@ builder.Services.AddReverseProxy()
 var app = builder.Build();
 
 // Usar CORS
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 
 app.MapReverseProxy();
 

@@ -31,21 +31,14 @@ public class AuthController : ControllerBase
             {
                 HttpOnly = true,
                 Secure = false, // usa HTTPS en producción
-                SameSite = SameSiteMode.Strict, // o Lax si se necesita compatibilidad
+                SameSite = SameSiteMode.None, // o Lax si se necesita compatibilidad
                 Expires = DateTime.UtcNow.AddDays(7)
-            });
-
-            Response.Cookies.Append("acces_token", result.TokenAcceso, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false, // usa HTTPS en producción
-                SameSite = SameSiteMode.Strict, // o Lax si se necesita compatibilidad
-                Expires = DateTime.UtcNow.AddMinutes(15)
             });
 
             return Ok(new
             {
-                mensaje = "Inicio de sesión exitoso."
+                mensaje = "Inicio de sesión exitoso.",
+                accessToken = result.TokenAcceso
             });
         }
         catch (Exception ex)
@@ -53,7 +46,7 @@ public class AuthController : ControllerBase
             return Unauthorized(new { mensaje = ex.Message });
         }
     }
-    
+
     [HttpPost("refresh-token")]
     [AllowAnonymous]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto dto)
@@ -70,14 +63,6 @@ public class AuthController : ControllerBase
             Secure = true, // usa HTTPS en producción
             SameSite = SameSiteMode.Strict, // o Lax si se necesita compatibilidad
             Expires = DateTime.UtcNow.AddDays(7)
-        });
-
-        Response.Cookies.Append("acces_token", resultado.AccessToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true, // usa HTTPS en producción
-            SameSite = SameSiteMode.Strict, // o Lax si se necesita compatibilidad
-            Expires = DateTime.UtcNow.AddMinutes(15)
         });
 
         return Ok();

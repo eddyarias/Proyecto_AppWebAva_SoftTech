@@ -1,69 +1,72 @@
 @page "/artista/panel"
 @using GaleriaArteFrontend.Models
+@using GaleriaArteFrontend.Components
 @inject NavigationManager Navigation
 @inject GaleriaArteFrontend.Services.ObrasService ObrasService
 @inject IJSRuntime JS
 
-<h3>Mis Obras</h3>
+<AuthGuard RolRequerido="9a66346f-164e-4ce2-8e5b-568b8f643799">
+    <h3>Mis Obras</h3>
 
-<button class="btn btn-success mb-3" @onclick="SubirObra">Subir Obra</button>
+    <button class="btn btn-success mb-3" @onclick="SubirObra">Subir Obra</button>
 
-@if (obras == null)
-{
-    <p>Cargando obras...</p>
-}
-else if (!obras.Any())
-{
-    <p>No tienes obras registradas.</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Obra</th>
-                <th>Título</th>
-                <th>Descripción</th>
-                <th>Precio</th>
-                <th>Estado</th>
-                <th>Fecha de Publicación</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var obra in obras)
-            {
+    @if (obras == null)
+    {
+        <p>Cargando obras...</p>
+    }
+    else if (!obras.Any())
+    {
+        <p>No tienes obras registradas.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
                 <tr>
-                    <td>
-                        @if (!string.IsNullOrEmpty(obra.ArchivoBase64))
-                        {
-                            <img src="@($"data:image/jpeg;base64,{obra.ArchivoBase64}")" alt="Obra" style="max-width: 80px; max-height: 80px; border-radius: 4px;" />
-                        }
-                    </td>
-                    <td>@obra.Titulo</td>
-                    <td>@obra.Descripcion</td>
-                    <td>@obra.Precio.ToString("C")</td>
-                    <td>@obra.Estado</td>
-                    <td>@obra.FechaPublicacion.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm me-1" @onclick="() => EditarObra(obra.Id)">Actualizar</button>
-                        @if (obra.Estado == "activa")
-                        {
-                            <button class="btn btn-warning btn-sm" @onclick="async () => await CambiarEstadoObra(obra.Id, false)">Ocultar</button>
-                        }
-                        else if (obra.Estado == "oculta")
-                        {
-                            <button class="btn btn-success btn-sm me-1" @onclick="async () => await CambiarEstadoObra(obra.Id, true)">Activar</button>
-                            <button class="btn btn-danger btn-sm" title="Eliminar" @onclick="async () => await EliminarObra(obra.Id)">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        }
-                    </td>
+                    <th>Obra</th>
+                    <th>Título</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                    <th>Fecha de Publicación</th>
+                    <th>Acciones</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @foreach (var obra in obras)
+                {
+                    <tr>
+                        <td>
+                            @if (!string.IsNullOrEmpty(obra.ArchivoBase64))
+                            {
+                                <img src="@($"data:image/jpeg;base64,{obra.ArchivoBase64}")" alt="Obra" style="max-width: 80px; max-height: 80px; border-radius: 4px;" />
+                            }
+                        </td>
+                        <td>@obra.Titulo</td>
+                        <td>@obra.Descripcion</td>
+                        <td>@obra.Precio.ToString("C")</td>
+                        <td>@obra.Estado</td>
+                        <td>@obra.FechaPublicacion.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm me-1" @onclick="() => EditarObra(obra.Id)">Actualizar</button>
+                            @if (obra.Estado == "activa")
+                            {
+                                <button class="btn btn-warning btn-sm" @onclick="async () => await CambiarEstadoObra(obra.Id, false)">Ocultar</button>
+                            }
+                            else if (obra.Estado == "oculta")
+                            {
+                                <button class="btn btn-success btn-sm me-1" @onclick="async () => await CambiarEstadoObra(obra.Id, true)">Activar</button>
+                                <button class="btn btn-danger btn-sm" title="Eliminar" @onclick="async () => await EliminarObra(obra.Id)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</AuthGuard>
 
 @code {
     private List<Obra> obras;
