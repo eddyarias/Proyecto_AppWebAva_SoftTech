@@ -142,6 +142,8 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA compras TO compra_user;
 CREATE USER auditoria_user WITH PASSWORD 'auditoria_pass';
 GRANT ALL PRIVILEGES ON SCHEMA auditoria TO auditoria_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA auditoria TO auditoria_user;
+GRANT ALL ON TABLE auditoria.logs_eventos TO auditoria_user;
+GRANT USAGE, SELECT, UPDATE ON SEQUENCE auditoria.logs_eventos_id_seq TO auditoria_user;
 
 CREATE USER notificacion_user WITH PASSWORD 'notificacion_pass';
 GRANT ALL PRIVILEGES ON SCHEMA notificaciones TO notificacion_user;

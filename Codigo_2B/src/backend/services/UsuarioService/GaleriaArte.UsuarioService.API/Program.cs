@@ -20,6 +20,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<UsuarioDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -28,6 +30,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRecuperacionService, RecuperacionService>();
 builder.Services.AddScoped<IRecuperacionRepository, RecuperacionRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<IAuditoriaPublisher, RabbitMQPublisher>();
 
 // Add health checks
 builder.Services.AddHealthChecks()
@@ -88,7 +91,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 // Enable custom metrics middleware
 app.UseCustomMetrics();

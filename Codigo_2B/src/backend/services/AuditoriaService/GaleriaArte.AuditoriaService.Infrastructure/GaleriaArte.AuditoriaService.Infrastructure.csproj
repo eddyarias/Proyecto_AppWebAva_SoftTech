@@ -4,6 +4,12 @@
     <ProjectReference Include="..\GaleriaArte.AuditoriaService.Domain\GaleriaArte.AuditoriaService.Domain.csproj" />
   </ItemGroup>
 
+    <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+    </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
