@@ -98,6 +98,9 @@ CREATE TABLE auditoria.logs_eventos (
     id SERIAL PRIMARY KEY,
     microservicio TEXT NOT NULL,
     evento TEXT NOT NULL,
+    usuario_id TEXT,
+    rol_id TEXT,
+    ip TEXT,
     datos JSONB,
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
