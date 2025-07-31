@@ -3,6 +3,7 @@ using GaleriaArte.AuditoriaService.Infrastructure.Data;
 using GaleriaArte.AuditoriaService.Infrastructure.Repositories;
 using GaleriaArte.AuditoriaService.Application.Services;
 using GaleriaArte.AuditoriaService.Domain.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +33,15 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddAuthentication("ManualScheme")
+    .AddScheme<AuthenticationSchemeOptions, ManualAuthenticationHandler>("ManualScheme", options => { });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
