@@ -15,8 +15,29 @@ services:
     networks:
       - galeria_net
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: galeria_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_DEFAULT_VHOST: galeria_arte
+    ports:
+      - "5672:5672"     # Puerto para conexiones
+      - "15672:15672"   # Puerto para management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - galeria_net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 volumes:
   pgdata:
+  rabbitmq_data:
 
 networks:
   galeria_net:

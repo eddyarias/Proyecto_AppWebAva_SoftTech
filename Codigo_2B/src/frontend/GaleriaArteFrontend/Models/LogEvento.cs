@@ -1,0 +1,21 @@
+namespace GaleriaArteFrontend.Models
+{
+    public class LogEvento
+    {
+        public int Id { get; set; }
+        public string Microservicio { get; set; } = string.Empty;
+        public string Evento { get; set; } = string.Empty;
+        public string? UsuarioId { get; set; }
+        public string? RolId { get; set; }
+        public string? Ip { get; set; }
+        public string? Datos { get; set; } // JSON serializado
+        public DateTime Fecha { get; set; }
+    }
+
+    public class FiltrosAuditoria
+    {
+        public string? Microservicio { get; set; }
+        public string? UsuarioId { get; set; }
+        public int Limite { get; set; } = 100;
+    }
+}

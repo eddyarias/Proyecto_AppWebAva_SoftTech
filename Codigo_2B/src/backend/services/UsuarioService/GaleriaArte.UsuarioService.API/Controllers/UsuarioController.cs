@@ -18,7 +18,7 @@ public class UsuarioController : ControllerBase
     {
         _usuarioService = usuarioService;
     }
-    
+
 
     [HttpPost("registrar")]
     [AllowAnonymous]
@@ -29,7 +29,7 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpPatch("cambiar-estado")]
-    [Authorize (Roles="f50fdbe5-2e16-4e91-9e7b-a39219d57031")]
+    [Authorize(Roles = "f50fdbe5-2e16-4e91-9e7b-a39219d57031")]
     public async Task<IActionResult> CambiarEstadoUsuario([FromBody] CambiarEstadoUsuarioDto dto)
     {
         var resultado = await _usuarioService.CambiarEstadoUsuarioAsync(dto.UsuarioId, dto.NuevoEstado);
@@ -41,6 +41,17 @@ public class UsuarioController : ControllerBase
         }
 
         return NotFound(new { mensaje = "Usuario no encontrado." });
+    }
+
+
+
+    //Metodo para que el administrador obtenga todos los usuarios artista y comprador y muestre su nickname y estado
+    [HttpGet("listar")]
+    [Authorize(Roles = "f50fdbe5-2e16-4e91-9e7b-a39219d57031")]
+    public async Task<IActionResult> ListarUsuarios()
+    {
+        var usuarios = await _usuarioService.ListarUsuariosAsync();
+        return Ok(usuarios);
     }
 
 }
