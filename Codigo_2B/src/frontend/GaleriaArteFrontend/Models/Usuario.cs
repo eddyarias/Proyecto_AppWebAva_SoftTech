@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace GaleriaArteFrontend.Models
 {
@@ -75,6 +77,35 @@ namespace GaleriaArteFrontend.Models
         public string Nickname { get; set; } = string.Empty;
         public string Correo { get; set; } = string.Empty;
         public string Rol { get; set; } = string.Empty;
+
+        [JsonConverter(typeof(EstadoStringToBoolConverter))]
         public bool Estado { get; set; }
+    }
+
+    public class EstadoStringToBoolConverter : JsonConverter<bool>
+    {
+        public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                string? value = reader.GetString();
+                return value?.ToLower() == "activo";
+            }
+            else if (reader.TokenType == JsonTokenType.True)
+            {
+                return true;
+            }
+            else if (reader.TokenType == JsonTokenType.False)
+            {
+                return false;
+            }
+
+            throw new JsonException($"Cannot convert {reader.TokenType} to bool");
+        }
+
+        public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value ? "Activo" : "Inactivo");
+        }
     }
 }
