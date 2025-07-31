@@ -43,4 +43,19 @@ public class UsuarioController : ControllerBase
         return NotFound(new { mensaje = "Usuario no encontrado." });
     }
 
+    [HttpGet("listar")]
+    [Authorize (Roles="f50fdbe5-2e16-4e91-9e7b-a39219d57031")]
+    public async Task<IActionResult> ListarUsuarios()
+    {
+        try
+        {
+            var usuarios = await _usuarioService.ListarUsuariosAsync();
+            return Ok(usuarios);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
 }

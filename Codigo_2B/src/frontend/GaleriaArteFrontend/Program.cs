@@ -26,6 +26,7 @@ builder.Services.AddScoped(sp =>
 builder.Services.AddScoped<ObrasService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<UsuarioService>();
 
 
 await builder.Build().RunAsync();

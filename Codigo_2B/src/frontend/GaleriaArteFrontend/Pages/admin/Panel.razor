@@ -1,0 +1,205 @@
+@page "/admin/panel"
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@using GaleriaArteFrontend.Components
+@using GaleriaArteFrontend.Services
+
+<PageTitle>Panel de Administración - Galería de Arte</PageTitle>
+
+<AuthGuard RolRequerido="f50fdbe5-2e16-4e91-9e7b-a39219d57031">
+    <div class="admin-panel">
+        <div class="admin-header">
+            <h1>Panel de Administración</h1>
+            <p>Bienvenido, @AuthService.UsuarioActual?.Nickname</p>
+        </div>
+
+        <div class="admin-content">
+            <div class="admin-cards">
+                <div class="admin-card" @onclick="NavigateToUsuarios">>
+                    <div class="card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Gestión de Usuarios</h3>
+                        <p>Administrar usuarios del sistema</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="admin-card disabled">
+                    <div class="card-icon">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Gestión de Obras</h3>
+                        <p>Administrar obras de arte</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="admin-card disabled">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Reportes</h3>
+                        <p>Ver estadísticas del sistema</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="admin-card disabled">
+                    <div class="card-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Configuración</h3>
+                        <p>Configurar sistema</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</AuthGuard>
+
+<style>
+    .admin-panel {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 40px 20px;
+    }
+
+    .admin-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .admin-header h1 {
+        color: #2d3748;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .admin-header p {
+        color: #718096;
+        font-size: 1.1rem;
+    }
+
+    .admin-content {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .admin-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-top: 40px;
+    }
+
+    .admin-card {
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        border: 2px solid transparent;
+    }
+
+    .admin-card:not(.disabled):hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        border-color: #667eea;
+    }
+
+    .admin-card.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: #f7fafc;
+    }
+
+    .card-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .admin-card.disabled .card-icon {
+        background: #a0aec0;
+    }
+
+    .card-content {
+        flex: 1;
+    }
+
+    .card-content h3 {
+        color: #2d3748;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .card-content p {
+        color: #718096;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .card-arrow {
+        color: #a0aec0;
+        font-size: 18px;
+        transition: all 0.3s ease;
+    }
+
+    .admin-card:not(.disabled):hover .card-arrow {
+        color: #667eea;
+        transform: translateX(4px);
+    }
+
+    @@media (max-width: 768px) {
+        .admin-panel {
+            padding: 20px 10px;
+        }
+
+        .admin-header h1 {
+            font-size: 2rem;
+        }
+
+        .admin-cards {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .admin-card {
+            padding: 24px;
+        }
+    }
+</style>
+
+@code {
+    private void NavigateToUsuarios()
+    {
+        Navigation.NavigateTo("/admin/usuarios");
+    }
+}

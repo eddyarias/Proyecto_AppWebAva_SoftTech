@@ -1,0 +1,638 @@
+@page "/admin/usuarios"
+@inject UsuarioService UsuarioService
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@using GaleriaArteFrontend.Components
+@using GaleriaArteFrontend.Models
+@using GaleriaArteFrontend.Services
+
+<PageTitle>Gestión de Usuarios - Panel de Administración</PageTitle>
+
+<AuthGuard RolRequerido="f50fdbe5-2e16-4e91-9e7b-a39219d57031">
+    <div class="usuarios-admin">
+        <div class="usuarios-header">
+            <div class="header-content">
+                <button class="btn-back" @onclick="NavigateToPanel">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al Panel
+                </button>
+                <h1>Gestión de Usuarios</h1>
+                <p>Administra los usuarios del sistema</p>
+            </div>
+        </div>
+
+        <div class="usuarios-content">
+            @if (cargando)
+            {
+                <div class="loading-container">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando usuarios...</span>
+                    </div>
+                    <p>Cargando usuarios...</p>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(mensajeError))
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    @mensajeError
+                </div>
+            }
+            else
+            {
+                @if (!string.IsNullOrEmpty(mensajeExito))
+                {
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        @mensajeExito
+                    </div>
+                }
+
+                <div class="usuarios-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>@usuarios.Count</h3>
+                            <p>Total Usuarios</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon active">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>@usuarios.Count(u => u.Estado)</h3>
+                            <p>Usuarios Activos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon inactive">
+                            <i class="fas fa-user-times"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>@usuarios.Count(u => !u.Estado)</h3>
+                            <p>Usuarios Inactivos</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="usuarios-table-container">
+                    <div class="table-header">
+                        <h2>Lista de Usuarios</h2>
+                        <button class="btn-refresh" @onclick="CargarUsuarios" disabled="@cargando">
+                            <i class="fas fa-sync-alt @(cargando ? "fa-spin" : "")"></i>
+                            Actualizar
+                        </button>
+                    </div>
+
+                    @if (usuarios.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="usuarios-table">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Correo</th>
+                                        <th>Rol</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var usuario in usuariosFiltrados)
+                                    {
+                                        <tr class="@(usuario.Estado ? "" : "inactive-row")">
+                                            <td>
+                                                <div class="user-info">
+                                                    <div class="user-avatar">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                    <span class="user-nickname">@usuario.Nickname</span>
+                                                </div>
+                                            </td>
+                                            <td>@usuario.Correo</td>
+                                            <td>
+                                                <span class="role-badge @GetRoleCssClass(usuario.Rol)">
+                                                    @GetRoleDisplayName(usuario.Rol)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="status-badge @(usuario.Estado ? "active" : "inactive")">
+                                                    <i class="fas fa-circle"></i>
+                                                    @(usuario.Estado ? "Activo" : "Inactivo")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (usuario.Rol != "f50fdbe5-2e16-4e91-9e7b-a39219d57031")
+                                                {
+                                                    <button class="btn-action @(usuario.Estado ? "btn-deactivate" : "btn-activate")"
+                                                        @onclick="() => CambiarEstadoUsuario(usuario)" disabled="@procesando">
+                                                        @if (procesando && usuarioSeleccionado?.Id == usuario.Id)
+                                                        {
+                                                            <i class="fas fa-spinner fa-spin"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas @(usuario.Estado ? "fa-user-slash" : "fa-user-check")"></i>
+                                                        }
+                                                        @(usuario.Estado ? "Desactivar" : "Activar")
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span class="admin-label">Administrador</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-users-slash"></i>
+                            <h3>No hay usuarios</h3>
+                            <p>No se encontraron usuarios en el sistema</p>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</AuthGuard>
+
+<style>
+    .usuarios-admin {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .usuarios-header {
+        background: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px 0;
+    }
+
+    .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .usuarios-header h1 {
+        color: #2d3748;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+    }
+
+    .usuarios-header p {
+        color: #718096;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .usuarios-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .loading-container {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .loading-container p {
+        color: #718096;
+        margin-top: 20px;
+        font-size: 1.1rem;
+    }
+
+    .usuarios-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: white;
+    }
+
+    .stat-icon.active {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    }
+
+    .stat-icon.inactive {
+        background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    }
+
+    .stat-info h3 {
+        color: #2d3748;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .stat-info p {
+        color: #718096;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .usuarios-table-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .table-header {
+        padding: 24px 32px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-header h2 {
+        color: #2d3748;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .btn-refresh {
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        color: #4a5568;
+        padding: 10px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-refresh:hover {
+        background: #edf2f7;
+        border-color: #cbd5e0;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .usuarios-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .usuarios-table th {
+        background: #f7fafc;
+        color: #4a5568;
+        font-weight: 600;
+        padding: 16px 32px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .usuarios-table td {
+        padding: 20px 32px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    .usuarios-table tr:hover {
+        background: #f8fafc;
+    }
+
+    .inactive-row {
+        opacity: 0.7;
+        background: #fafafa;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+    }
+
+    .user-nickname {
+        font-weight: 500;
+        color: #2d3748;
+    }
+
+    .role-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .role-badge.admin {
+        background: #fed7d7;
+        color: #c53030;
+    }
+
+    .role-badge.artista {
+        background: #bee3f8;
+        color: #2b6cb0;
+    }
+
+    .role-badge.comprador {
+        background: #c6f6d5;
+        color: #2f855a;
+    }
+
+    .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .status-badge.active {
+        color: #38a169;
+    }
+
+    .status-badge.inactive {
+        color: #e53e3e;
+    }
+
+    .status-badge i {
+        font-size: 8px;
+    }
+
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-activate {
+        background: #c6f6d5;
+        color: #2f855a;
+    }
+
+    .btn-activate:hover {
+        background: #9ae6b4;
+    }
+
+    .btn-deactivate {
+        background: #fed7d7;
+        color: #c53030;
+    }
+
+    .btn-deactivate:hover {
+        background: #feb2b2;
+    }
+
+    .admin-label {
+        color: #718096;
+        font-style: italic;
+        font-size: 13px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #718096;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+
+    .alert {
+        padding: 16px 20px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+    }
+
+    .alert-danger {
+        background: #fed7d7;
+        color: #c53030;
+        border: 1px solid #feb2b2;
+    }
+
+    .alert-success {
+        background: #c6f6d5;
+        color: #2f855a;
+        border: 1px solid #9ae6b4;
+    }
+
+    @@media (max-width: 768px) {
+        .usuarios-content {
+            padding: 20px 10px;
+        }
+
+        .usuarios-stats {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .table-header {
+            padding: 20px;
+            flex-direction: column;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .usuarios-table th,
+        .usuarios-table td {
+            padding: 12px 16px;
+        }
+
+        .usuarios-header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+@code {
+    private List<UsuarioListItem> usuarios = new();
+    private List<UsuarioListItem> usuariosFiltrados = new();
+    private bool cargando = true;
+    private bool procesando = false;
+    private string mensajeError = "";
+    private string mensajeExito = "";
+    private UsuarioListItem? usuarioSeleccionado;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarUsuarios();
+    }
+
+    private async Task CargarUsuarios()
+    {
+        try
+        {
+            cargando = true;
+            mensajeError = "";
+            StateHasChanged();
+
+            usuarios = await UsuarioService.ListarUsuariosAsync();
+            usuariosFiltrados = usuarios.ToList();
+        }
+        catch (Exception ex)
+        {
+            mensajeError = ex.Message;
+        }
+        finally
+        {
+            cargando = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CambiarEstadoUsuario(UsuarioListItem usuario)
+    {
+        if (procesando) return;
+
+        try
+        {
+            procesando = true;
+            usuarioSeleccionado = usuario;
+            mensajeError = "";
+            mensajeExito = "";
+            StateHasChanged();
+
+            var nuevoEstado = !usuario.Estado;
+            var resultado = await UsuarioService.CambiarEstadoUsuarioAsync(usuario.Id, nuevoEstado);
+
+            if (resultado.Exito)
+            {
+                usuario.Estado = nuevoEstado;
+                mensajeExito = resultado.Mensaje;
+
+                // Auto-ocultar mensaje después de 3 segundos
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(3000);
+                    mensajeExito = "";
+                    await InvokeAsync(StateHasChanged);
+                });
+            }
+            else
+            {
+                mensajeError = resultado.Mensaje;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensajeError = $"Error inesperado: {ex.Message}";
+        }
+        finally
+        {
+            procesando = false;
+            usuarioSeleccionado = null;
+            StateHasChanged();
+        }
+    }
+
+    private string GetRoleCssClass(string rol)
+    {
+        return rol switch
+        {
+            "f50fdbe5-2e16-4e91-9e7b-a39219d57031" => "admin",
+            "9a66346f-164e-4ce2-8e5b-568b8f643799" => "artista",
+            "62d2b61f-d92b-44d8-ada8-9d5dace7e6bc" => "comprador",
+            _ => "comprador"
+        };
+    }
+
+    private string GetRoleDisplayName(string rol)
+    {
+        return rol switch
+        {
+            "f50fdbe5-2e16-4e91-9e7b-a39219d57031" => "Administrador",
+            "9a66346f-164e-4ce2-8e5b-568b8f643799" => "Artista",
+            "62d2b61f-d92b-44d8-ada8-9d5dace7e6bc" => "Comprador",
+            _ => "Comprador"
+        };
+    }
+
+    private void NavigateToPanel()
+    {
+        Navigation.NavigateTo("/admin/panel");
+    }
+}

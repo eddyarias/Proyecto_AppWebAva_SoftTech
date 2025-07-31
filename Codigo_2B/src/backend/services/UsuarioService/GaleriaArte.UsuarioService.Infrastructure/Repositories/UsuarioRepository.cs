@@ -62,6 +62,11 @@ public class UsuarioRepository : IUsuarioRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task<List<Usuario>> ObtenerTodosAsync()
+    {
+        return await _context.Usuarios.Include(u => u.Rol).ToListAsync();
+    }
+
     public async Task<Usuario?> ObtenerPorCorreoAsync(string correo)
     {
         return await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == correo);

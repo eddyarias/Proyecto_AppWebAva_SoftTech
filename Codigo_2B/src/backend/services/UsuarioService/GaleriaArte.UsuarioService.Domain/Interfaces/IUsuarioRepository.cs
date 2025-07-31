@@ -9,6 +9,8 @@ public interface IUsuarioRepository
     Task<Rol?> ObtenerRolPorNombreAsync(string nombre);
     Task AgregarUsuarioAsync(Usuario usuario);
     Task<Usuario?> ObtenerPorNicknameOCorreoAsync(string identificador);
+        Task<List<Usuario>> ObtenerTodosAsync();
+
     Task ActualizarRefreshTokenAsync(Guid id, string refreshToken, DateTime expira);
     Task<Usuario?> ObtenerPorCorreoAsync(string correo);
     Task ActualizarPasswordAsync(Guid usuarioId, string hash);

@@ -69,6 +69,19 @@ public class UsuarioService : IUsuarioService
         }
     }
 
+    public async Task<IEnumerable<object>> ListarUsuariosAsync()
+    {
+        var usuarios = await _repositorio.ObtenerTodosAsync();
+        // Selecciona solo la información relevante para el admin
+        return usuarios.Select(u => new {
+            u.Id,
+            u.Nickname,
+            u.Correo,
+            Rol = u.Rol?.Nombre,
+            u.Estado
+        });
+    }
+
     public async Task<TokenResponseDto?> RenovarTokenAsync(string refreshToken)
     {
         var usuario = await _repositorio.ObtenerPorRefreshTokenAsync(refreshToken);
