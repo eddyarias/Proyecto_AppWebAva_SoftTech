@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using GaleriaArte.AuditoriaService.Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GaleriaArte.AuditoriaService.API.Controllers
 {
@@ -17,6 +18,7 @@ namespace GaleriaArte.AuditoriaService.API.Controllers
         }
 
         [HttpGet("microservicio/{microservicio}")]
+        [Authorize (Roles="f50fdbe5-2e16-4e91-9e7b-a39219d57031")]
         public async Task<IActionResult> ObtenerLogsPorMicroservicio(string microservicio, [FromQuery] int limite = 100)
         {
             try
@@ -32,6 +34,7 @@ namespace GaleriaArte.AuditoriaService.API.Controllers
         }
 
         [HttpGet("usuario/{usuarioId}")]
+        [Authorize (Roles="f50fdbe5-2e16-4e91-9e7b-a39219d57031")]
         public async Task<IActionResult> ObtenerLogsPorUsuario(string usuarioId, [FromQuery] int limite = 100)
         {
             try
@@ -47,6 +50,7 @@ namespace GaleriaArte.AuditoriaService.API.Controllers
         }
 
         [HttpGet("fecha")]
+        [Authorize (Roles="f50fdbe5-2e16-4e91-9e7b-a39219d57031")]
         public async Task<IActionResult> ObtenerLogsPorFecha([FromQuery] DateTime fechaInicio, [FromQuery] DateTime fechaFin)
         {
             try

@@ -8,4 +8,6 @@ public interface IUsuarioService
     Task<object> RegistrarUsuarioAsync(UsuarioDto dto);
     Task<IEnumerable<object>> ListarUsuariosAsync();
     Task<TokenResponseDto?> RenovarTokenAsync(string refreshToken);
+    Task<IEnumerable<Object>> ListarUsuariosAsync();
+    Task<Object?> ObtenerUsuarioPorIdAsync(Guid usuarioId);
 }

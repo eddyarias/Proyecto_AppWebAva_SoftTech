@@ -86,4 +86,19 @@ public class UsuarioRepository : IUsuarioRepository
     {
         return await _context.Usuarios.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
     }
+
+    public async Task<IEnumerable<object>> ListarUsuariosAsync()
+    {
+        // retirar los usuarios que no sean artistas o compradores
+        return await _context.Usuarios
+            .Where(u => u.Rol.Nombre == "artista" || u.Rol.Nombre == "comprador")
+            .Select(u => new
+            {
+                u.Id,
+                u.Nickname,
+                Estado = u.Estado ? "Activo" : "Inactivo",
+                Rol = u.Rol.Nombre
+            })
+            .ToListAsync();
+    }
 }
