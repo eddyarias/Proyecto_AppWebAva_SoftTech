@@ -16,7 +16,7 @@ builder.Services.AddScoped(sp =>
     var handler = sp.GetRequiredService<CustomAuthorizationMessageHandler>();
     var httpClient = new HttpClient(handler)
     {
-        BaseAddress = new Uri("http://localhost:5000") 
+        BaseAddress = new Uri("http://localhost:5000")
     };
     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
     return httpClient;
@@ -27,6 +27,8 @@ builder.Services.AddScoped<ObrasService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<AuditoriaService>();
+builder.Services.AddScoped<AuditoriaService>();
 
 
 await builder.Build().RunAsync();

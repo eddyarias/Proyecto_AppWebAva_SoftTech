@@ -1,0 +1,296 @@
+@page "/admin/logs-auditoria"
+@using GaleriaArteFrontend.Models
+@using GaleriaArteFrontend.Services
+@inject AuditoriaService AuditoriaService
+@inject IJSRuntime JSRuntime
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-clipboard-list"></i>
+                Logs de Auditoría
+            </h2>
+
+            <!-- Panel de Filtros -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-filter"></i>
+                        Filtros de Búsqueda
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Microservicio</label>
+                            <select class="form-select" @bind="filtros.Microservicio">
+                                <option value="">Seleccionar microservicio</option>
+                                <option value="UsuarioService">Usuario Service</option>
+                                <option value="ObrasService">Obras Service</option>
+                                <option value="AuditoriaService">Auditoría Service</option>
+                                <option value="ApiGateway">API Gateway</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Usuario ID</label>
+                            <input type="text" class="form-control" @bind="filtros.UsuarioId" placeholder="ID del usuario" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Límite</label>
+                            <select class="form-select" @bind="filtros.Limite">
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                                <option value="500">500</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button class="btn btn-primary me-2" @onclick="BuscarLogs" disabled="@cargando">
+                                @if (cargando)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                }
+                                <i class="fas fa-search"></i>
+                                Buscar
+                            </button>
+                            <button class="btn btn-secondary" @onclick="LimpiarFiltros">
+                                <i class="fas fa-eraser"></i>
+                                Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            @if (logs.Any())
+            {
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            Resultados (@logs.Count logs encontrados)
+                        </h5>
+                        <button class="btn btn-outline-primary btn-sm" @onclick="ExportarCSV">
+                            <i class="fas fa-download"></i>
+                            Exportar CSV
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Microservicio</th>
+                                        <th>Evento</th>
+                                        <th>Usuario</th>
+                                        <th>IP</th>
+                                        <th>Datos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var log in logs)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <small class="text-muted">
+                                                    @log.Fecha.ToString("dd/MM/yyyy HH:mm:ss")
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@log.Microservicio</span>
+                                            </td>
+                                            <td>
+                                                <span class="fw-semibold">@log.Evento</span>
+                                            </td>
+                                            <td>
+                                                <small class="font-monospace">@log.UsuarioId</small>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">@log.Ip</small>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(log.Datos))
+                                                {
+                                                    <button class="btn btn-outline-secondary btn-sm" 
+                                                            @onclick="() => MostrarDatos(log.Datos)">
+                                                        <i class="fas fa-eye"></i>
+                                                        Ver
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (busquedaRealizada && !cargando)
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    No se encontraron logs con los filtros especificados.
+                </div>
+            }
+            else if (!busquedaRealizada)
+            {
+                <div class="alert alert-primary">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Instrucciones:</strong> Seleccione un <strong>Microservicio</strong> o ingrese un <strong>Usuario ID</strong> para buscar logs de auditoría. Debe especificar al menos uno de estos filtros.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal para mostrar datos del log -->
+<div class="modal fade" id="datosModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Datos del Log</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre class="bg-light p-3 rounded"><code>@datosSeleccionados</code></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private FiltrosAuditoria filtros = new FiltrosAuditoria();
+    private List<LogEvento> logs = new List<LogEvento>();
+    private bool cargando = false;
+    private bool busquedaRealizada = false;
+    private string datosSeleccionados = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // No realizar búsqueda inicial, esperar a que el usuario seleccione filtros
+        await Task.CompletedTask;
+    }
+
+    private async Task BuscarLogs()
+    {
+        // Validar que se haya seleccionado al menos un filtro
+        if (string.IsNullOrEmpty(filtros.Microservicio) && string.IsNullOrEmpty(filtros.UsuarioId))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Debe seleccionar al menos un filtro: Microservicio o Usuario ID");
+            return;
+        }
+
+        cargando = true;
+        busquedaRealizada = true;
+        StateHasChanged();
+
+        try
+        {
+            logs = await AuditoriaService.ObtenerConFiltrosAsync(filtros);
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al buscar logs: {ex.Message}");
+        }
+        finally
+        {
+            cargando = false;
+            StateHasChanged();
+        }
+    }
+
+    private void LimpiarFiltros()
+    {
+        filtros = new FiltrosAuditoria
+        {
+            Limite = 100
+        };
+        logs.Clear();
+        busquedaRealizada = false;
+        StateHasChanged();
+    }
+
+    private async Task MostrarDatos(string datos)
+    {
+        datosSeleccionados = datos;
+        await JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('datosModal')).show()");
+    }
+
+    private async Task ExportarCSV()
+    {
+        try
+        {
+            var csv = GenerarCSV();
+            var fileName = $"logs_auditoria_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, csv, "text/csv");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al exportar: {ex.Message}");
+        }
+    }
+
+    private string GenerarCSV()
+    {
+        var csv = "Fecha,Microservicio,Evento,Usuario,IP,Datos\n";
+        
+        foreach (var log in logs)
+        {
+            var datos = log.Datos?.Replace("\"", "\"\"") ?? "";
+            csv += $"\"{log.Fecha:yyyy-MM-dd HH:mm:ss}\",\"{log.Microservicio}\",\"{log.Evento}\",\"{log.UsuarioId}\",\"{log.Ip}\",\"{datos}\"\n";
+        }
+        
+        return csv;
+    }
+}
+
+<style>
+    .table th {
+        border-top: none;
+    }
+    
+    .badge {
+        font-size: 0.75em;
+    }
+    
+    .font-monospace {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85em;
+    }
+    
+    pre code {
+        font-size: 0.875em;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
+
+<script>
+    window.downloadFile = function(filename, content, contentType) {
+        const blob = new Blob([content], { type: contentType });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    };
+</script>

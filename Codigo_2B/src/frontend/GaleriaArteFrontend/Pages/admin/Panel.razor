@@ -1,10 +1,6 @@
 @page "/admin/panel"
 @inject AuthService AuthService
 @inject NavigationManager Navigation
-@using GaleriaArteFrontend.Components
-@using GaleriaArteFrontend.Services
-
-<PageTitle>Panel de Administración - Galería de Arte</PageTitle>
 
 <AuthGuard RolRequerido="f50fdbe5-2e16-4e91-9e7b-a39219d57031">
     <div class="admin-panel">
@@ -41,13 +37,13 @@
                     </div>
                 </div>
 
-                <div class="admin-card disabled">
+                <div class="admin-card" @onclick="NavigateToAuditoria">
                     <div class="card-icon">
-                        <i class="fas fa-chart-bar"></i>
+                        <i class="fas fa-clipboard-list"></i>
                     </div>
                     <div class="card-content">
-                        <h3>Reportes</h3>
-                        <p>Ver estadísticas del sistema</p>
+                        <h3>Logs de Auditoría</h3>
+                        <p>Ver registros de actividad del sistema</p>
                     </div>
                     <div class="card-arrow">
                         <i class="fas fa-chevron-right"></i>
@@ -201,5 +197,10 @@
     private void NavigateToUsuarios()
     {
         Navigation.NavigateTo("/admin/usuarios");
+    }
+
+    private void NavigateToAuditoria()
+    {
+        Navigation.NavigateTo("/admin/logs-auditoria");
     }
 }
