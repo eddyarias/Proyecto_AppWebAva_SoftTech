@@ -81,19 +81,19 @@ public class UsuarioLoginService
     }
     
     private string GetClientIpAddress()
-        {
-            var context = _httpContextAccessor.HttpContext;
-            if (context == null) return "unknown";
+    {
+        var context = _httpContextAccessor.HttpContext;
+        if (context == null) return "unknown";
 
-            // Intentar obtener la IP real del cliente
-            string ipAddress = context.Request.Headers["X-Forwarded-For"];
+        // Intentar obtener la IP real del cliente
+        string ipAddress = context.Request.Headers["X-Forwarded-For"];
             
-            if (string.IsNullOrEmpty(ipAddress))
-                ipAddress = context.Request.Headers["X-Real-IP"];
+        if (string.IsNullOrEmpty(ipAddress))
+            ipAddress = context.Request.Headers["X-Real-IP"];
                 
             if (string.IsNullOrEmpty(ipAddress))
                 ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
             return ipAddress;
         }
-}
+    }
