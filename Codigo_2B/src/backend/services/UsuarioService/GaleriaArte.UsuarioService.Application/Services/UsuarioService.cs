@@ -68,7 +68,8 @@ public class UsuarioService : IUsuarioService
                 success = true,
                 message = "Usuario registrado exitosamente.",
             };
-        }catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             // Publicar evento de registro fallido
             await _auditoriaPublisher.PublishUsuarioEventoAsync(
@@ -81,7 +82,7 @@ public class UsuarioService : IUsuarioService
             throw;
         }
     }
-    
+
     public async Task<bool> CambiarEstadoUsuarioAsync(Guid usuarioId, bool nuevoEstado)
     {
         try
@@ -114,7 +115,8 @@ public class UsuarioService : IUsuarioService
             {
                 throw new Exception("Error al cambiar el estado del usuario.");
             }
-        }catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             // Publicar evento de auditoría de cambio de estado fallido
             await _auditoriaPublisher.PublishUsuarioEventoAsync(
@@ -156,13 +158,27 @@ public class UsuarioService : IUsuarioService
 
         // Intentar obtener la IP real del cliente
         string ipAddress = context.Request.Headers["X-Forwarded-For"];
-            
+
         if (string.IsNullOrEmpty(ipAddress))
             ipAddress = context.Request.Headers["X-Real-IP"];
-                
-            if (string.IsNullOrEmpty(ipAddress))
-                ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
-            return ipAddress;
+        if (string.IsNullOrEmpty(ipAddress))
+            ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return ipAddress;
+    }
+
+    public async Task<IEnumerable<Object>> ListarUsuariosAsync()
+    {
+        var usuarios = await _repositorio.ListarUsuariosAsync();
+        return usuarios;
+    }
+
+    public async Task<Object?> ObtenerUsuarioPorIdAsync(Guid usuarioId)
+    {
+        var usuario = await _repositorio.ObtenerPorIdAsync(usuarioId);
+        if (usuario == null) return null;
+
+        return usuario;
     }
 }
