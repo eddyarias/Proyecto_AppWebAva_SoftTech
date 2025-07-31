@@ -15,18 +15,6 @@ services:
     networks:
       - galeria_net
 
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@mail.com
-      - PGADMIN_DEFAULT_PASSWORD=root
-    ports:
-      - 5050:80
-    depends_on:
-      - postgres
-    networks:
-      - galeria_net
-
   rabbitmq:
     image: rabbitmq:3-management
     container_name: galeria_rabbitmq
