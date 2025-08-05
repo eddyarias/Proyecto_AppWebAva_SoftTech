@@ -39,10 +39,13 @@ RUN mkdir -p /app/logs && chown -R dotnet:dotnet /app
 # Switch to non-root user
 USER dotnet
 
-EXPOSE 80
+EXPOSE 5105
+
+# Configure URLs
+ENV ASPNETCORE_URLS=http://+:5105
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+    CMD curl -f http://localhost:5105/health || exit 1
 
 ENTRYPOINT ["dotnet", "GaleriaArte.MensajeriaService.API.dll"]

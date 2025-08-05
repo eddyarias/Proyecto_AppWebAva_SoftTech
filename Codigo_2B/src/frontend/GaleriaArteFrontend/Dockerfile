@@ -8,16 +8,16 @@ WORKDIR /src
 
 # Copiamos el archivo de solución y los csproj necesarios
 COPY GaleriaArte_V2.sln ./
-COPY src/frontend/GaleriaArteFrontend/GaleriaArteFrontend.csproj ./GaleriaArteFrontend/
+COPY src/frontend/GaleriaArteFrontend/GaleriaArteFrontend.csproj ./src/frontend/GaleriaArteFrontend/
 
 # Restauramos dependencias
-RUN dotnet restore ./GaleriaArteFrontend/GaleriaArteFrontend.csproj
+RUN dotnet restore ./src/frontend/GaleriaArteFrontend/GaleriaArteFrontend.csproj
 
 # Copiamos el resto del código del frontend
-COPY src/frontend/GaleriaArteFrontend/ ./GaleriaArteFrontend/
+COPY src/frontend/GaleriaArteFrontend/ ./src/frontend/GaleriaArteFrontend/
 
 # Publicamos el proyecto en modo Release
-RUN dotnet publish ./GaleriaArteFrontend/GaleriaArteFrontend.csproj -c Release -o /app/publish
+RUN dotnet publish ./src/frontend/GaleriaArteFrontend/GaleriaArteFrontend.csproj -c Release -o /app/publish
 
 # ------------------------------------------
 # Etapa 2: Runtime (Nginx sirve los archivos estáticos)
