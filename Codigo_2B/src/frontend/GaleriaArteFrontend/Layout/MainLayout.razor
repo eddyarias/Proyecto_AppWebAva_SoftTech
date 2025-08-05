@@ -31,6 +31,19 @@
                 <ul class="navbar-nav">
                     @if (AuthService.EstaAutenticado)
                     {
+                        <!-- Botón de mensajes -->
+                        <li class="nav-item position-relative me-3">
+                            <a class="nav-link mensajes-btn" href="/mensajes" title="Mensajes">
+                                <i class="fas fa-comments"></i>
+                                @if (mensajesNoLeidos > 0)
+                                {
+                                    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                                        @mensajesNoLeidos
+                                    </span>
+                                }
+                            </a>
+                        </li>
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle user-dropdown" href="#" id="navbarDropdown" role="button"
                                 data-bs-toggle="dropdown">
@@ -38,6 +51,17 @@
                                 @AuthService.UsuarioActual?.Nickname
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="/mensajes">
+                                        <i class="fas fa-comments"></i>
+                                        Mensajes
+                                        @if (mensajesNoLeidos > 0)
+                                        {
+                                            <span class="badge bg-primary ms-2">@mensajesNoLeidos</span>
+                                        }
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <button class="dropdown-item logout-btn" @onclick="HandleLogout">
                                         <i class="fas fa-sign-out-alt"></i>
@@ -138,6 +162,34 @@
         background-color: rgba(255, 255, 255, 0.1);
     }
 
+    .mensajes-btn {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .mensajes-btn:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+    }
+
+    .mensajes-btn .badge {
+        font-size: 0.7rem;
+        padding: 0.2em 0.4em;
+        border-radius: 50%;
+        min-width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     .user-dropdown {
         background-color: rgba(255, 255, 255, 0.1);
         border-radius: 6px;
@@ -221,19 +273,62 @@
 </style>
 
 @code {
+    private int mensajesNoLeidos = 0;
+    private Timer? _timer;
+
     protected override async Task OnInitializedAsync()
     {
         await AuthService.CheckAuthStateAsync();
         AuthService.OnAuthStateChanged += StateHasChanged;
+        
+        // Inicializar conteo de mensajes si el usuario está autenticado
+        if (AuthService.EstaAutenticado)
+        {
+            await CargarMensajesNoLeidos();
+            IniciarTimerMensajes();
+        }
+    }
+
+    private async Task CargarMensajesNoLeidos()
+    {
+        try
+        {
+            if (AuthService.EstaAutenticado && AuthService.UsuarioActual != null)
+            {
+                // Aquí harías la llamada a la API de mensajería
+                // Por ahora simularemos con un valor fijo para testing
+                mensajesNoLeidos = 0; // await MensajeriaService.ContarMensajesNoLeidosAsync();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cargando mensajes no leídos: {ex.Message}");
+        }
+    }
+
+    private void IniciarTimerMensajes()
+    {
+        // Actualizar cada 30 segundos
+        _timer = new Timer(async _ => 
+        {
+            await InvokeAsync(async () => 
+            {
+                await CargarMensajesNoLeidos();
+            });
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
     }
 
     private async Task HandleLogout()
     {
         await AuthService.LogoutAsync();
+        mensajesNoLeidos = 0;
+        _timer?.Dispose();
     }
 
     public void Dispose()
     {
         AuthService.OnAuthStateChanged -= StateHasChanged;
+        _timer?.Dispose();
     }
 }

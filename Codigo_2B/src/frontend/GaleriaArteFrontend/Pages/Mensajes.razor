@@ -1,0 +1,646 @@
+@page "/mensajes"
+@using Microsoft.AspNetCore.SignalR.Client
+@using GaleriaArteFrontend.Components.Chat
+@using GaleriaArteFrontend.Services
+@inject AuthService AuthService
+@inject IMensajeriaService MensajeriaService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@inject ILogger<Mensajes> Logger
+@implements IAsyncDisposable
+
+<PageTitle>Mensajes - Galería de Arte</PageTitle>
+
+<AuthGuard TipoUsuarioRequerido="usuario,artista,comprador,admin">
+    <div class="mensajeria-container">
+        <!-- Header de mensajería -->
+        <div class="mensajeria-header">
+            <div class="header-content">
+                <h3><i class="fas fa-comments"></i> Mensajes</h3>
+                <div class="header-actions">
+                    <button type="button" class="btn btn-sm btn-outline-light d-lg-none" @onclick="ToggleConversaciones">
+                        <i class="fas fa-list"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-light" @onclick="AbrirModalNuevaConversacion">
+                        <i class="fas fa-plus"></i> Nueva conversación
+                    </button>
+                    @if (mensajesNoLeidos > 0)
+                    {
+                        <span class="badge bg-danger">@mensajesNoLeidos</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="mensajeria-content">
+            <!-- Lista de conversaciones -->
+            <div class="conversaciones-panel @(mostrarConversaciones ? "show" : "")">
+                <div class="conversaciones-header d-lg-none">
+                    <h5>Conversaciones</h5>
+                    <button type="button" class="btn btn-sm btn-link text-muted" @onclick="ToggleConversaciones">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="conversaciones-lista">
+                    @if (cargandoConversaciones)
+                    {
+                        <div class="loading">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            Cargando conversaciones...
+                        </div>
+                    }
+                    else if (conversaciones == null || !conversaciones.Any())
+                    {
+                        <div class="no-conversaciones">
+                            <i class="fas fa-comment-slash"></i>
+                            <p>No tienes conversaciones aún</p>
+                            <button type="button" class="btn btn-primary btn-sm" @onclick="AbrirModalNuevaConversacion">
+                                Iniciar conversación
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var conversacion in conversaciones)
+                        {
+                            <div class="conversacion-item @(conversacionActual?.Id == conversacion.Id ? "active" : "")" 
+                                 @onclick="() => AbrirConversacion(conversacion)">
+                                <div class="conversacion-avatar">
+                                    <i class="fas fa-user"></i>
+                                    @if (usuariosConectados.ContainsKey(conversacion.OtroUsuarioId) && usuariosConectados[conversacion.OtroUsuarioId])
+                                    {
+                                        <span class="status-online"></span>
+                                    }
+                                </div>
+                                <div class="conversacion-info">
+                                    <div class="conversacion-nombre">@ObtenerNombreUsuario(conversacion.OtroUsuarioId)</div>
+                                    <div class="conversacion-ultimo-mensaje">
+                                        @(string.IsNullOrEmpty(conversacion.UltimoMensaje) ? "Sin mensajes" : 
+                                          (conversacion.UltimoMensaje.Length > 50 ? conversacion.UltimoMensaje.Substring(0, 50) + "..." : conversacion.UltimoMensaje))
+                                    </div>
+                                    <div class="conversacion-fecha">@FormatearFecha(conversacion.UltimaActividad)</div>
+                                </div>
+                                @if (conversacion.MensajesNoLeidos > 0)
+                                {
+                                    <div class="mensajes-no-leidos">
+                                        <span class="badge bg-primary">@conversacion.MensajesNoLeidos</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Chat activo -->
+            <div class="chat-panel">
+                @if (conversacionActual == null)
+                {
+                    <div class="no-chat-seleccionado">
+                        <i class="fas fa-comments"></i>
+                        <h4>Selecciona una conversación</h4>
+                        <p>Elige una conversación de la lista para comenzar a chatear</p>
+                        <button type="button" class="btn btn-primary" @onclick="AbrirModalNuevaConversacion">
+                            <i class="fas fa-plus"></i> Nueva conversación
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <!-- Header del chat -->
+                    <div class="chat-header">
+                        <div class="chat-usuario">
+                            <button type="button" class="btn btn-link d-lg-none me-2" @onclick="CerrarChat">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="usuario-avatar">
+                                <i class="fas fa-user"></i>
+                                @if (usuariosConectados.ContainsKey(conversacionActual.OtroUsuarioId) && usuariosConectados[conversacionActual.OtroUsuarioId])
+                                {
+                                    <span class="status-online"></span>
+                                }
+                            </div>
+                            <div class="usuario-info">
+                                <div class="usuario-nombre">@ObtenerNombreUsuario(conversacionActual.OtroUsuarioId)</div>
+                                <div class="usuario-estado">
+                                    @if (usuariosConectados.ContainsKey(conversacionActual.OtroUsuarioId) && usuariosConectados[conversacionActual.OtroUsuarioId])
+                                    {
+                                        <span class="text-success">En línea</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Desconectado</span>
+                                    }
+                                    
+                                    @if (usuariosEscribiendo.ContainsKey(conversacionActual.OtroUsuarioId) && usuariosEscribiendo[conversacionActual.OtroUsuarioId])
+                                    {
+                                        <span class="text-primary ms-2">
+                                            <small>escribiendo...</small>
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <button type="button" class="btn btn-sm btn-outline-secondary d-none d-lg-block" @onclick="CerrarChat">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Área de mensajes -->
+                    <div class="chat-mensajes" @ref="chatMensajesRef">
+                        @if (cargandoMensajes)
+                        {
+                            <div class="loading">
+                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                Cargando mensajes...
+                            </div>
+                        }
+                        else if (mensajes != null)
+                        {
+                            @foreach (var mensaje in mensajes)
+                            {
+                                <div class="mensaje @(mensaje.EmisorId == usuarioActualId ? "mensaje-propio" : "mensaje-otro")">
+                                    <div class="mensaje-contenido">
+                                        @((MarkupString)ParsearMensaje(mensaje.Contenido))
+                                    </div>
+                                    <div class="mensaje-info">
+                                        <span class="mensaje-fecha">@FormatearFecha(mensaje.FechaEnvio)</span>
+                                        @if (mensaje.EmisorId == usuarioActualId)
+                                        {
+                                            <span class="mensaje-estado">
+                                                @if (mensaje.Leido)
+                                                {
+                                                    <i class="fas fa-check-double text-primary" title="Leído"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fas fa-check text-muted" title="Enviado"></i>
+                                                }
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <!-- Input de mensaje -->
+                    <div class="chat-input">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Escribe un mensaje..." 
+                                   @bind="nuevoMensaje" @onkeypress="OnKeyPress" @oninput="OnTyping"
+                                   maxlength="1000" disabled="@enviandoMensaje" />
+                            <button type="button" class="btn btn-primary" @onclick="EnviarMensaje" 
+                                    disabled="@(string.IsNullOrWhiteSpace(nuevoMensaje) || enviandoMensaje)">
+                                @if (enviandoMensaje)
+                                {
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-paper-plane"></i>
+                                }
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para nueva conversación -->
+    @if (mostrarModalNuevaConversacion)
+    {
+        <div class="modal fade show" style="display: block;" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Nueva Conversación</h5>
+                        <button type="button" class="btn-close" @onclick="CerrarModalNuevaConversacion"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Buscar usuario:</label>
+                            <input type="text" class="form-control" @bind="busquedaUsuario" 
+                                   @oninput="BuscarUsuarios" placeholder="Nombre de usuario o email">
+                        </div>
+                        
+                        @if (usuariosBusqueda != null && usuariosBusqueda.Any())
+                        {
+                            <div class="usuarios-busqueda">
+                                @foreach (var usuario in usuariosBusqueda.Take(5))
+                                {
+                                    <div class="usuario-busqueda-item" @onclick="() => SeleccionarUsuario(usuario)">
+                                        <div class="usuario-avatar">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="usuario-info">
+                                            <div class="usuario-nombre">@usuario.Nickname</div>
+                                            <div class="usuario-email">@usuario.Email</div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else if (!string.IsNullOrEmpty(busquedaUsuario) && busquedaUsuario.Length >= 2)
+                        {
+                            <div class="text-muted text-center">No se encontraron usuarios</div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CerrarModalNuevaConversacion">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-backdrop fade show"></div>
+    }
+
+    <!-- Notificaciones flotantes -->
+    <div id="notificacionesContainer" class="notifications-container"></div>
+</AuthGuard>
+
+<link href="~/css/mensajeria.css" rel="stylesheet" />
+
+@code {
+    // SignalR
+    private HubConnection? hubConnection;
+    
+    // Estado del componente
+    private List<ConversacionDto>? conversaciones;
+    private ConversacionDto? conversacionActual;
+    private List<MensajeDto>? mensajes;
+    private string nuevoMensaje = "";
+    private string usuarioActualId = "";
+    private int mensajesNoLeidos = 0;
+    
+    // UI Estado
+    private bool mostrarConversaciones = false;
+    private bool mostrarModalNuevaConversacion = false;
+    private bool cargandoConversaciones = false;
+    private bool cargandoMensajes = false;
+    private bool enviandoMensaje = false;
+    private string busquedaUsuario = "";
+    private List<UsuarioDto>? usuariosBusqueda;
+    
+    // Referencias DOM
+    private ElementReference chatMensajesRef;
+    
+    // Estado de usuarios
+    private Dictionary<string, bool> usuariosConectados = new();
+    private Dictionary<string, bool> usuariosEscribiendo = new();
+    private Timer? timerEscritura;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Verificar autenticación
+        if (!AuthService.EstaAutenticado || AuthService.UsuarioActual == null)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        usuarioActualId = AuthService.UsuarioActual.Id.ToString();
+        
+        await InicializarSignalR();
+        await CargarConversaciones();
+    }
+
+    private async Task InicializarSignalR()
+    {
+        try
+        {
+            hubConnection = new HubConnectionBuilder()
+                .WithUrl("http://localhost:5002/hubs/mensajeria", options =>
+                {
+                    // Aquí se agregaría el token JWT
+                    // options.AccessTokenProvider = () => Task.FromResult(AuthService.Token);
+                })
+                .Build();
+
+            // Configurar eventos del hub
+            hubConnection.On<MensajeDto>("MensajeRecibido", OnMensajeRecibido);
+            hubConnection.On<MensajeDto>("MensajeEnviado", OnMensajeEnviado);
+            hubConnection.On<object>("MensajesLeidos", OnMensajesLeidos);
+            hubConnection.On<object>("UsuarioEscribiendo", OnUsuarioEscribiendo);
+            hubConnection.On<object>("EstadoConexionCambiado", OnEstadoConexionCambiado);
+            hubConnection.On<List<ConversacionDto>>("ConversacionesActualizadas", OnConversacionesActualizadas);
+            hubConnection.On<object>("MensajesActualizados", OnMensajesActualizados);
+
+            await hubConnection.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            await MostrarNotificacion("Error de conexión", "No se pudo conectar al servidor de mensajería", "error");
+            Console.WriteLine($"Error SignalR: {ex.Message}");
+        }
+    }
+
+    private async Task CargarConversaciones()
+    {
+        cargandoConversaciones = true;
+        StateHasChanged();
+        
+        try
+        {
+            if (hubConnection?.State == HubConnectionState.Connected)
+            {
+                await hubConnection.SendAsync("ObtenerConversaciones");
+            }
+        }
+        catch (Exception ex)
+        {
+            await MostrarNotificacion("Error", "No se pudieron cargar las conversaciones", "error");
+            Console.WriteLine($"Error cargando conversaciones: {ex.Message}");
+        }
+        finally
+        {
+            cargandoConversaciones = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task AbrirConversacion(ConversacionDto conversacion)
+    {
+        conversacionActual = conversacion;
+        mensajes = null;
+        mostrarConversaciones = false;
+        cargandoMensajes = true;
+        StateHasChanged();
+
+        try
+        {
+            if (hubConnection?.State == HubConnectionState.Connected)
+            {
+                await hubConnection.SendAsync("ObtenerMensajes", conversacion.Id);
+                await hubConnection.SendAsync("MarcarMensajesComoLeidos", conversacion.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            await MostrarNotificacion("Error", "No se pudieron cargar los mensajes", "error");
+            Console.WriteLine($"Error abriendo conversación: {ex.Message}");
+        }
+    }
+
+    private async Task EnviarMensaje()
+    {
+        if (string.IsNullOrWhiteSpace(nuevoMensaje) || conversacionActual == null || hubConnection?.State != HubConnectionState.Connected)
+            return;
+
+        enviandoMensaje = true;
+        var mensajeAEnviar = nuevoMensaje.Trim();
+        nuevoMensaje = "";
+        StateHasChanged();
+
+        try
+        {
+            var enviarMensajeDto = new EnviarMensajeDto
+            {
+                ReceptorId = conversacionActual.OtroUsuarioId,
+                Contenido = mensajeAEnviar
+            };
+
+            await hubConnection.SendAsync("EnviarMensaje", enviarMensajeDto);
+            
+            // Detener indicador de escritura
+            await hubConnection.SendAsync("DejoDeEscribir", conversacionActual.Id);
+        }
+        catch (Exception ex)
+        {
+            await MostrarNotificacion("Error", "No se pudo enviar el mensaje", "error");
+            Console.WriteLine($"Error enviando mensaje: {ex.Message}");
+            nuevoMensaje = mensajeAEnviar; // Restaurar mensaje
+        }
+        finally
+        {
+            enviandoMensaje = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(nuevoMensaje) && !enviandoMensaje)
+        {
+            await EnviarMensaje();
+        }
+    }
+
+    private async Task OnTyping()
+    {
+        if (conversacionActual == null || hubConnection?.State != HubConnectionState.Connected)
+            return;
+
+        try
+        {
+            await hubConnection.SendAsync("EscribiendoMensaje", conversacionActual.Id);
+
+            // Resetear timer para detener escritura
+            timerEscritura?.Dispose();
+            timerEscritura = new Timer(async _ =>
+            {
+                if (hubConnection?.State == HubConnectionState.Connected && conversacionActual != null)
+                    await hubConnection.SendAsync("DejoDeEscribir", conversacionActual.Id);
+            }, null, TimeSpan.FromSeconds(3), Timeout.InfiniteTimeSpan);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error notificando escritura: {ex.Message}");
+        }
+    }
+
+    // Event handlers de SignalR
+    private async Task OnMensajeRecibido(MensajeDto mensaje)
+    {
+        if (conversacionActual?.Id == mensaje.ConversacionId)
+        {
+            mensajes?.Add(mensaje);
+            await ScrollToBottom();
+            
+            // Marcar como leído automáticamente
+            if (hubConnection?.State == HubConnectionState.Connected)
+            {
+                await hubConnection.SendAsync("MarcarMensajesComoLeidos", mensaje.ConversacionId);
+            }
+        }
+        else
+        {
+            mensajesNoLeidos++;
+            await MostrarNotificacion("Nuevo mensaje", $"{ObtenerNombreUsuario(mensaje.EmisorId)}: {mensaje.Contenido}", "info");
+        }
+
+        await CargarConversaciones();
+        StateHasChanged();
+    }
+
+    private async Task OnMensajeEnviado(MensajeDto mensaje)
+    {
+        if (conversacionActual?.Id == mensaje.ConversacionId)
+        {
+            mensajes?.Add(mensaje);
+            await ScrollToBottom();
+        }
+
+        await CargarConversaciones();
+        StateHasChanged();
+    }
+
+    private void OnMensajesLeidos(object data)
+    {
+        StateHasChanged();
+    }
+
+    private void OnUsuarioEscribiendo(object data)
+    {
+        // Implementar lógica de usuario escribiendo
+        StateHasChanged();
+    }
+
+    private void OnEstadoConexionCambiado(object data)
+    {
+        // Actualizar estado de conexión
+        StateHasChanged();
+    }
+
+    private void OnConversacionesActualizadas(List<ConversacionDto> nuevasConversaciones)
+    {
+        conversaciones = nuevasConversaciones;
+        cargandoConversaciones = false;
+        StateHasChanged();
+    }
+
+    private void OnMensajesActualizados(object data)
+    {
+        // Actualizar mensajes
+        cargandoMensajes = false;
+        StateHasChanged();
+    }
+
+    // Funciones de UI
+    private void ToggleConversaciones()
+    {
+        mostrarConversaciones = !mostrarConversaciones;
+    }
+
+    private void CerrarChat()
+    {
+        conversacionActual = null;
+        mensajes = null;
+        mostrarConversaciones = true;
+    }
+
+    private void AbrirModalNuevaConversacion()
+    {
+        mostrarModalNuevaConversacion = true;
+        busquedaUsuario = "";
+        usuariosBusqueda = null;
+    }
+
+    private void CerrarModalNuevaConversacion()
+    {
+        mostrarModalNuevaConversacion = false;
+        busquedaUsuario = "";
+        usuariosBusqueda = null;
+    }
+
+    private async Task BuscarUsuarios()
+    {
+        if (string.IsNullOrEmpty(busquedaUsuario) || busquedaUsuario.Length < 2)
+        {
+            usuariosBusqueda = null;
+            return;
+        }
+
+        try
+        {
+            // Aquí harías la llamada a la API para buscar usuarios
+            // usuariosBusqueda = await UsuarioService.BuscarUsuariosAsync(busquedaUsuario);
+            usuariosBusqueda = new List<UsuarioDto>(); // Temporal
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error buscando usuarios: {ex.Message}");
+        }
+        
+        StateHasChanged();
+    }
+
+    private async Task SeleccionarUsuario(UsuarioDto usuario)
+    {
+        try
+        {
+            if (hubConnection?.State == HubConnectionState.Connected)
+            {
+                // Crear o obtener conversación
+                // await hubConnection.SendAsync("CrearConversacion", usuario.Id.ToString());
+                CerrarModalNuevaConversacion();
+                await CargarConversaciones();
+            }
+        }
+        catch (Exception ex)
+        {
+            await MostrarNotificacion("Error", "No se pudo crear la conversación", "error");
+            Console.WriteLine($"Error creando conversación: {ex.Message}");
+        }
+    }
+
+    // Funciones auxiliares
+    private string ObtenerNombreUsuario(string usuarioId)
+    {
+        // En una implementación real, esto vendría de un cache o servicio
+        return $"Usuario {usuarioId.Substring(0, Math.Min(8, usuarioId.Length))}";
+    }
+
+    private string FormatearFecha(DateTime fecha)
+    {
+        var ahora = DateTime.Now;
+        var diferencia = ahora - fecha;
+
+        if (diferencia.TotalMinutes < 1) return "Ahora";
+        if (diferencia.TotalHours < 1) return $"{(int)diferencia.TotalMinutes}m";
+        if (diferencia.TotalDays < 1) return $"{(int)diferencia.TotalHours}h";
+        if (diferencia.TotalDays < 7) return $"{(int)diferencia.TotalDays}d";
+        
+        return fecha.ToString("dd/MM HH:mm");
+    }
+
+    private string ParsearMensaje(string contenido)
+    {
+        // Escapar HTML
+        contenido = System.Net.WebUtility.HtmlEncode(contenido);
+        
+        // Convertir URLs a enlaces
+        contenido = System.Text.RegularExpressions.Regex.Replace(contenido, 
+            @"(https?://[^\s]+)", 
+            "<a href=\"$1\" target=\"_blank\" rel=\"noopener noreferrer\">$1</a>");
+        
+        return contenido;
+    }
+
+    private async Task ScrollToBottom()
+    {
+        await Task.Delay(50);
+        await JSRuntime.InvokeVoidAsync("scrollToBottom", chatMensajesRef);
+    }
+
+    private async Task MostrarNotificacion(string titulo, string mensaje, string tipo)
+    {
+        await JSRuntime.InvokeVoidAsync("mostrarNotificacion", titulo, mensaje, tipo);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        timerEscritura?.Dispose();
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+
+    // DTOs eliminados - ahora se usan los del servicio
+}
+}

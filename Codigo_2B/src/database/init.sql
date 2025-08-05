@@ -121,6 +121,76 @@ CREATE TABLE notificaciones.notificaciones (
 );
 
 -- =============================
+-- 💬 MENSAJERIA SERVICE (GaleriaArteMensajeria)
+-- =============================
+
+CREATE SCHEMA IF NOT EXISTS mensajeria;
+
+-- Tabla de conversaciones
+CREATE TABLE mensajeria.conversaciones (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    titulo VARCHAR(255),
+    tipo VARCHAR(20) CHECK (tipo IN ('privada', 'grupo', 'soporte')) DEFAULT 'privada',
+    obra_id INT, -- Referencia a obra si la conversación es sobre una obra específica
+    creador_nickname VARCHAR(50) NOT NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    activa BOOLEAN DEFAULT TRUE
+);
+
+-- Tabla de participantes en conversaciones
+CREATE TABLE mensajeria.participantes_conversacion (
+    id SERIAL PRIMARY KEY,
+    conversacion_id UUID REFERENCES mensajeria.conversaciones(id) ON DELETE CASCADE,
+    usuario_nickname VARCHAR(50) NOT NULL,
+    fecha_union TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    activo BOOLEAN DEFAULT TRUE,
+    UNIQUE(conversacion_id, usuario_nickname)
+);
+
+-- Tabla de mensajes
+CREATE TABLE mensajeria.mensajes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    conversacion_id UUID REFERENCES mensajeria.conversaciones(id) ON DELETE CASCADE,
+    remitente_nickname VARCHAR(50) NOT NULL,
+    contenido TEXT NOT NULL,
+    tipo_mensaje VARCHAR(20) CHECK (tipo_mensaje IN ('texto', 'imagen', 'archivo', 'sistema')) DEFAULT 'texto',
+    archivo_adjunto TEXT, -- Base64 o referencia al archivo
+    fecha_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    editado BOOLEAN DEFAULT FALSE,
+    fecha_edicion TIMESTAMP
+);
+
+-- Tabla de estados de lectura de mensajes
+CREATE TABLE mensajeria.estados_lectura (
+    id SERIAL PRIMARY KEY,
+    mensaje_id UUID REFERENCES mensajeria.mensajes(id) ON DELETE CASCADE,
+    usuario_nickname VARCHAR(50) NOT NULL,
+    fecha_lectura TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(mensaje_id, usuario_nickname)
+);
+
+-- Tabla de mensajes eliminados (soft delete)
+CREATE TABLE mensajeria.mensajes_eliminados (
+    id SERIAL PRIMARY KEY,
+    mensaje_id UUID REFERENCES mensajeria.mensajes(id) ON DELETE CASCADE,
+    usuario_nickname VARCHAR(50) NOT NULL,
+    fecha_eliminacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(mensaje_id, usuario_nickname)
+);
+
+-- Índices para mejorar el rendimiento
+CREATE INDEX idx_conversaciones_creador ON mensajeria.conversaciones(creador_nickname);
+CREATE INDEX idx_conversaciones_obra ON mensajeria.conversaciones(obra_id);
+CREATE INDEX idx_participantes_conversacion ON mensajeria.participantes_conversacion(conversacion_id);
+CREATE INDEX idx_participantes_usuario ON mensajeria.participantes_conversacion(usuario_nickname);
+CREATE INDEX idx_mensajes_conversacion ON mensajeria.mensajes(conversacion_id);
+CREATE INDEX idx_mensajes_remitente ON mensajeria.mensajes(remitente_nickname);
+CREATE INDEX idx_mensajes_fecha ON mensajeria.mensajes(fecha_envio);
+CREATE INDEX idx_estados_lectura_mensaje ON mensajeria.estados_lectura(mensaje_id);
+CREATE INDEX idx_estados_lectura_usuario ON mensajeria.estados_lectura(usuario_nickname);
+
+-- =============================
 -- 👥 USUARIOS DE BASE DE DATOS
 -- =============================
 
@@ -148,3 +218,8 @@ GRANT USAGE, SELECT, UPDATE ON SEQUENCE auditoria.logs_eventos_id_seq TO auditor
 CREATE USER notificacion_user WITH PASSWORD 'notificacion_pass';
 GRANT ALL PRIVILEGES ON SCHEMA notificaciones TO notificacion_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA notificaciones TO notificacion_user;
+
+CREATE USER mensajeria_user WITH PASSWORD 'mensajeria_pass';
+GRANT ALL PRIVILEGES ON SCHEMA mensajeria TO mensajeria_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA mensajeria TO mensajeria_user;
+GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA mensajeria TO mensajeria_user;

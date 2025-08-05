@@ -1,0 +1,435 @@
+@using Microsoft.AspNetCore.SignalR.Client
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+<!-- Botón flotante para abrir mensajes -->
+@if (mostrarBotonFlotante && !mostrarChatFlotante)
+{
+    <div class="chat-flotante-btn" @onclick="AbrirChatFlotante">
+        <i class="fas fa-comments"></i>
+        @if (mensajesNoLeidos > 0)
+        {
+            <span class="badge bg-danger">@mensajesNoLeidos</span>
+        }
+    </div>
+}
+
+<!-- Chat flotante -->
+@if (mostrarChatFlotante)
+{
+    <div class="chat-flotante-container">
+        <div class="chat-flotante-header">
+            <div class="chat-titulo">
+                <i class="fas fa-comments me-2"></i>
+                Mensajes
+            </div>
+            <div class="chat-acciones">
+                <button type="button" class="btn btn-sm btn-link text-white" @onclick="MinimizarChat">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-link text-white" @onclick="CerrarChat">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-flotante-body">
+            @if (conversaciones == null || !conversaciones.Any())
+            {
+                <div class="sin-conversaciones">
+                    <i class="fas fa-comment-slash"></i>
+                    <p>No hay conversaciones</p>
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="IrAMensajes">
+                        Ver todos los mensajes
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="conversaciones-rapidas">
+                    @foreach (var conv in conversaciones.Take(5))
+                    {
+                        <div class="conversacion-rapida" @onclick="() => AbrirConversacionRapida(conv)">
+                            <div class="avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="info">
+                                <div class="nombre">@ObtenerNombreUsuario(conv.OtroUsuarioId)</div>
+                                <div class="ultimo-mensaje">@TruncarTexto(conv.UltimoMensaje, 30)</div>
+                            </div>
+                            @if (conv.MensajesNoLeidos > 0)
+                            {
+                                <span class="badge bg-primary">@conv.MensajesNoLeidos</span>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="chat-flotante-footer">
+                    <button type="button" class="btn btn-outline-primary btn-sm w-100" @onclick="IrAMensajes">
+                        Ver todos los mensajes
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<style>
+    .chat-flotante-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+    .chat-flotante-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .chat-flotante-btn .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        font-size: 0.7rem;
+        min-width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chat-flotante-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 350px;
+        max-height: 500px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        animation: slideUp 0.3s ease;
+        overflow: hidden;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .chat-flotante-header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-titulo {
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .chat-acciones {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .chat-acciones .btn {
+        padding: 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    .chat-flotante-body {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .sin-conversaciones {
+        padding: 2rem;
+        text-align: center;
+        color: #6c757d;
+    }
+
+    .sin-conversaciones i {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .conversaciones-rapidas {
+        padding: 0.5rem 0;
+    }
+
+    .conversacion-rapida {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #f1f3f4;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .conversacion-rapida:hover {
+        background-color: #f8f9fa;
+    }
+
+    .conversacion-rapida:last-child {
+        border-bottom: none;
+    }
+
+    .conversacion-rapida .avatar {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .conversacion-rapida .info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .conversacion-rapida .nombre {
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 0.125rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .conversacion-rapida .ultimo-mensaje {
+        color: #6c757d;
+        font-size: 0.85rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .conversacion-rapida .badge {
+        flex-shrink: 0;
+        font-size: 0.7rem;
+    }
+
+    .chat-flotante-footer {
+        padding: 1rem;
+        border-top: 1px solid #e9ecef;
+        background: #f8f9fa;
+    }
+
+    @media (max-width: 768px) {
+        .chat-flotante-container {
+            width: 300px;
+            right: 15px;
+            bottom: 15px;
+        }
+
+        .chat-flotante-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+            right: 15px;
+            bottom: 15px;
+        }
+    }
+
+    /* Scroll personalizado */
+    .chat-flotante-body::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .chat-flotante-body::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .chat-flotante-body::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 2px;
+    }
+
+    .chat-flotante-body::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+</style>
+
+@code {
+    [Parameter] public bool MostrarBotonFlotante { get; set; } = true;
+    [Parameter] public string UsuarioActualId { get; set; } = "";
+    [Parameter] public EventCallback OnAbrirMensajes { get; set; }
+
+    private bool mostrarBotonFlotante = true;
+    private bool mostrarChatFlotante = false;
+    private List<ConversacionDto>? conversaciones;
+    private int mensajesNoLeidos = 0;
+    private HubConnection? hubConnection;
+    private Timer? _timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        mostrarBotonFlotante = MostrarBotonFlotante;
+        
+        if (!string.IsNullOrEmpty(UsuarioActualId))
+        {
+            await InicializarSignalR();
+            await CargarConversacionesRapidas();
+            IniciarTimer();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        mostrarBotonFlotante = MostrarBotonFlotante;
+        
+        if (!string.IsNullOrEmpty(UsuarioActualId) && hubConnection == null)
+        {
+            await InicializarSignalR();
+            await CargarConversacionesRapidas();
+        }
+    }
+
+    private async Task InicializarSignalR()
+    {
+        try
+        {
+            hubConnection = new HubConnectionBuilder()
+                .WithUrl("http://localhost:5002/hubs/mensajeria")
+                .Build();
+
+            hubConnection.On<object>("MensajeRecibido", OnMensajeRecibido);
+            hubConnection.On<List<ConversacionDto>>("ConversacionesActualizadas", OnConversacionesActualizadas);
+
+            await hubConnection.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error inicializando SignalR en chat flotante: {ex.Message}");
+        }
+    }
+
+    private async Task CargarConversacionesRapidas()
+    {
+        try
+        {
+            if (hubConnection?.State == HubConnectionState.Connected)
+            {
+                await hubConnection.SendAsync("ObtenerConversaciones");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cargando conversaciones rápidas: {ex.Message}");
+        }
+    }
+
+    private void IniciarTimer()
+    {
+        _timer = new Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await CargarConversacionesRapidas();
+            });
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(60));
+    }
+
+    private void OnMensajeRecibido(object mensaje)
+    {
+        mensajesNoLeidos++;
+        StateHasChanged();
+    }
+
+    private void OnConversacionesActualizadas(List<ConversacionDto> nuevasConversaciones)
+    {
+        conversaciones = nuevasConversaciones;
+        mensajesNoLeidos = conversaciones?.Sum(c => c.MensajesNoLeidos) ?? 0;
+        StateHasChanged();
+    }
+
+    private void AbrirChatFlotante()
+    {
+        mostrarChatFlotante = true;
+    }
+
+    private void MinimizarChat()
+    {
+        mostrarChatFlotante = false;
+    }
+
+    private void CerrarChat()
+    {
+        mostrarChatFlotante = false;
+    }
+
+    private async Task IrAMensajes()
+    {
+        await OnAbrirMensajes.InvokeAsync();
+        CerrarChat();
+    }
+
+    private async Task AbrirConversacionRapida(ConversacionDto conversacion)
+    {
+        await OnAbrirMensajes.InvokeAsync();
+        CerrarChat();
+        // Aquí podrías pasar el ID de la conversación para abrirla directamente
+    }
+
+    private string ObtenerNombreUsuario(string usuarioId)
+    {
+        return $"Usuario {usuarioId.Substring(0, Math.Min(8, usuarioId.Length))}";
+    }
+
+    private string TruncarTexto(string? texto, int longitud)
+    {
+        if (string.IsNullOrEmpty(texto)) return "Sin mensajes";
+        return texto.Length > longitud ? texto.Substring(0, longitud) + "..." : texto;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _timer?.Dispose();
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+
+    // DTO temporal (debería estar en un proyecto compartido)
+    public class ConversacionDto
+    {
+        public int Id { get; set; }
+        public string OtroUsuarioId { get; set; } = "";
+        public string UltimoMensaje { get; set; } = "";
+        public DateTime UltimaActividad { get; set; }
+        public int MensajesNoLeidos { get; set; }
+        public DateTime FechaCreacion { get; set; }
+    }
+}

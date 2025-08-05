@@ -3,56 +3,506 @@
 @using System.IO
 @using GaleriaArteFrontend.Components
 @using Microsoft.AspNetCore.Components.Forms
+@using System.ComponentModel.DataAnnotations
 @inject GaleriaArteFrontend.Services.ObrasService ObrasService
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 
-@using GaleriaArteFrontend.Components
+<PageTitle>Nueva Obra - Galería de Arte</PageTitle>
 
 <AuthGuard RolRequerido="9a66346f-164e-4ce2-8e5b-568b8f643799">
-    <h3>Subir Nueva Obra</h3>
+    <div class="crear-obra-container">
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <button class="btn-back" @onclick="VolverAlPanel">
+                            <i class="fas fa-arrow-left"></i>
+                            Volver al Panel
+                        </button>
+                        <h1 class="page-title">
+                            <i class="fas fa-plus-circle"></i>
+                            Nueva Obra de Arte
+                        </h1>
+                        <p class="page-subtitle">Comparte tu creatividad con el mundo</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="header-icon">
+                            <i class="fas fa-paint-brush"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <button class="btn btn-secondary mb-3" @onclick="VolverAlPanel">
-        <i class="bi bi-arrow-left"></i> Volver al Panel
-    </button>
+            <!-- Formulario -->
+            <div class="form-container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-xl-6">
+                        <div class="form-card">
+                            <EditForm Model="obra" OnValidSubmit="HandleValidSubmit">
+                                <DataAnnotationsValidator />
+                                
+                                <!-- Título -->
+                                <div class="form-group">
+                                    <label for="titulo" class="form-label">
+                                        <i class="fas fa-heading"></i>
+                                        Título de la Obra
+                                    </label>
+                                    <InputText id="titulo" class="@($"form-control {(HasValidationError("Titulo") ? "is-invalid" : "")}")" 
+                                              @bind-Value="obra.Titulo" placeholder="Escribe el título de tu obra..." />
+                                    <ValidationMessage For="@(() => obra.Titulo)" class="invalid-feedback" />
+                                </div>
 
-    <EditForm Model="obra" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        <div class="mb-3">
-            <label for="titulo" class="form-label">Título</label>
-            <InputText id="titulo" class="form-control" @bind-Value="obra.Titulo" />
+                                <!-- Descripción -->
+                                <div class="form-group">
+                                    <label for="descripcion" class="form-label">
+                                        <i class="fas fa-align-left"></i>
+                                        Descripción
+                                    </label>
+                                    <InputTextArea id="descripcion" class="@($"form-control description-textarea {(HasValidationError("Descripcion") ? "is-invalid" : "")}")" 
+                                                  @bind-Value="obra.Descripcion" placeholder="Describe tu obra, técnica utilizada, inspiración..." rows="4" />
+                                    <small class="form-text">Comparte la historia detrás de tu creación</small>
+                                    <ValidationMessage For="@(() => obra.Descripcion)" class="invalid-feedback" />
+                                </div>
+
+                                <!-- Precio -->
+                                <div class="form-group">
+                                    <label for="precio" class="form-label">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        Precio (COP)
+                                    </label>
+                                    <div class="price-input-container">
+                                        <span class="price-symbol">$</span>
+                                        <InputNumber id="precio" class="@($"form-control price-input {(HasValidationError("Precio") ? "is-invalid" : "")}")" 
+                                                    @bind-Value="obra.Precio" placeholder="0" min="0" step="1000" />
+                                    </div>
+                                    <small class="form-text">Establece un precio justo para tu obra</small>
+                                    <ValidationMessage For="@(() => obra.Precio)" class="invalid-feedback" />
+                                </div>
+
+                                <!-- Imagen -->
+                                <div class="form-group">
+                                    <label for="archivo" class="form-label">
+                                        <i class="fas fa-image"></i>
+                                        Imagen de la Obra
+                                    </label>
+                                    <div class="file-upload-container">
+                                        <div class="file-upload-area @(selectedFile != null ? "has-file" : "") @(!string.IsNullOrEmpty(fileError) ? "has-error" : "")">
+                                            <InputFile id="archivo" OnChange="OnInputFileChange" accept=".jpg,.jpeg,.png" class="file-input" />
+                                            <div class="file-upload-content">
+                                                @if (selectedFile == null)
+                                                {
+                                                    <div class="upload-icon">
+                                                        <i class="fas fa-cloud-upload-alt"></i>
+                                                    </div>
+                                                    <h5>Arrastra tu imagen aquí</h5>
+                                                    <p>o <strong>haz clic para seleccionar</strong></p>
+                                                    <small>JPG, JPEG o PNG • Máximo 5MB</small>
+                                                }
+                                                else
+                                                {
+                                                    <div class="file-success">
+                                                        <i class="fas fa-check-circle"></i>
+                                                        <span>@selectedFile.Name</span>
+                                                        <button type="button" class="btn-remove-file" @onclick="RemoveFile">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(fileError))
+                                        {
+                                            <div class="file-error">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                @fileError
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Botones de Acción -->
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-outline-secondary btn-cancel" @onclick="VolverAlPanel">
+                                        <i class="fas fa-times"></i>
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" class="btn btn-primary btn-submit" disabled="@isSubmitting">
+                                        @if (isSubmitting)
+                                        {
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                            <span>Subiendo...</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-upload"></i>
+                                            <span>Publicar Obra</span>
+                                        }
+                                    </button>
+                                </div>
+
+                                <!-- Mensajes -->
+                                @if (!string.IsNullOrEmpty(successMessage))
+                                {
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle"></i>
+                                        @successMessage
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(errorMessage))
+                                {
+                                    <div class="alert alert-danger">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        @errorMessage
+                                    </div>
+                                }
+                            </EditForm>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <InputTextArea id="descripcion" class="form-control" @bind-Value="obra.Descripcion" />
-        </div>
-        <div class="mb-3">
-            <label for="precio" class="form-label">Precio</label>
-            <InputNumber id="precio" class="form-control" @bind-Value="obra.Precio" />
-        </div>
-        <div class="mb-3">
-            <label for="archivo" class="form-label">Imagen (JPG/JPEG)</label>
-            <InputFile id="archivo" OnChange="OnInputFileChange" accept=".jpg,.jpeg" />
-            @if (!string.IsNullOrEmpty(fileError))
-            {
-                <div class="text-danger">@fileError</div>
-            }
-        </div>
-        <button class="btn btn-primary" type="submit" disabled="@(isSubmitting)">Subir Obra</button>
-        @if (isSubmitting)
-        {
-            <span class="ms-2">Subiendo...</span>
-        }
-        @if (!string.IsNullOrEmpty(successMessage))
-        {
-            <div class="alert alert-success mt-3">@successMessage</div>
-        }
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="alert alert-danger mt-3">@errorMessage</div>
-        }
-    </EditForm>
+    </div>
 </AuthGuard>
+
+<style>
+    .crear-obra-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        color: white;
+        padding: 3rem 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .btn-back {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateX(-2px);
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .header-icon {
+        font-size: 4rem;
+        opacity: 0.3;
+        text-align: center;
+    }
+
+    .form-container {
+        padding: 0 2rem 3rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .form-label i {
+        color: #6f42c1;
+        width: 20px;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #fafbfc;
+    }
+
+    .form-control:focus {
+        border-color: #6f42c1;
+        box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+        background: white;
+        outline: none;
+    }
+
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .description-textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .price-input-container {
+        position: relative;
+    }
+
+    .price-symbol {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-weight: 600;
+        z-index: 2;
+    }
+
+    .price-input {
+        padding-left: 2.5rem;
+    }
+
+    .form-text {
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+
+    .file-upload-container {
+        margin-top: 0.5rem;
+    }
+
+    .file-upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        background: #fafbfc;
+    }
+
+    .file-upload-area:hover {
+        border-color: #6f42c1;
+        background: rgba(111, 66, 193, 0.02);
+    }
+
+    .file-upload-area.has-file {
+        border-color: #28a745;
+        background: rgba(40, 167, 69, 0.05);
+    }
+
+    .file-upload-area.has-error {
+        border-color: #dc3545;
+        background: rgba(220, 53, 69, 0.05);
+    }
+
+    .file-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: #6f42c1;
+        margin-bottom: 1rem;
+    }
+
+    .file-upload-content h5 {
+        color: #495057;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .file-upload-content p {
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+
+    .file-upload-content small {
+        color: #868e96;
+    }
+
+    .file-success {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    .file-success i {
+        font-size: 1.5rem;
+    }
+
+    .btn-remove-file {
+        background: none;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .btn-remove-file:hover {
+        background: rgba(220, 53, 69, 0.1);
+        transform: scale(1.1);
+    }
+
+    .file-error {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn-cancel {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .alert {
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        margin-top: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .alert-success {
+        background: rgba(40, 167, 69, 0.1);
+        border: 1px solid rgba(40, 167, 69, 0.2);
+        color: #155724;
+    }
+
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.2);
+        color: #721c24;
+    }
+
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .page-header {
+            padding: 2rem 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .form-container {
+            padding: 0 1rem 2rem;
+        }
+
+        .form-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+
+        .form-actions .btn {
+            width: 100%;
+        }
+
+        .header-icon {
+            display: none;
+        }
+    }
+</style>
 
 @code {
     private ObraCrearModel obra = new();
@@ -61,67 +511,123 @@
     private string? successMessage;
     private string? errorMessage;
     private bool isSubmitting = false;
+    private EditContext? editContext;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(obra);
+    }
+
+    private bool HasValidationError(string fieldName)
+    {
+        return editContext?.GetValidationMessages(editContext.Field(fieldName)).Any() ?? false;
+    }
 
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
         fileError = null;
         var file = e.File;
+        
         if (file == null)
         {
-            fileError = "Debes seleccionar una imagen.";
             selectedFile = null;
             return;
         }
-        var ext = Path.GetExtension(file.Name).ToLower();
-        if (ext != ".jpg" && ext != ".jpeg")
+
+        // Validar tamaño (5MB máximo)
+        if (file.Size > 5 * 1024 * 1024)
         {
-            fileError = "Solo se permiten archivos JPG o JPEG.";
+            fileError = "El archivo es demasiado grande. Máximo 5MB.";
             selectedFile = null;
             return;
         }
+
+        // Validar tipo de archivo
+        var ext = Path.GetExtension(file.Name).ToLower();
+        if (ext != ".jpg" && ext != ".jpeg" && ext != ".png")
+        {
+            fileError = "Solo se permiten archivos JPG, JPEG o PNG.";
+            selectedFile = null;
+            return;
+        }
+
         selectedFile = file;
+        StateHasChanged();
+    }
+
+    private void RemoveFile()
+    {
+        selectedFile = null;
+        fileError = null;
+        StateHasChanged();
     }
 
     private async Task HandleValidSubmit()
     {
-        errorMessage = null;
-        successMessage = null;
         if (selectedFile == null)
         {
-            fileError = "Debes seleccionar una imagen JPG/JPEG.";
+            fileError = "Debes seleccionar una imagen para tu obra.";
             return;
         }
+
+        errorMessage = null;
+        successMessage = null;
         isSubmitting = true;
+        StateHasChanged();
+
         try
         {
             var result = await ObrasService.CrearObraAsync(obra, selectedFile);
             if (result)
             {
-                successMessage = "Obra subida exitosamente.";
-                await Task.Delay(1200);
+                successMessage = "¡Obra publicada exitosamente! Redirigiendo...";
+                StateHasChanged();
+                
+                // Esperar un momento para mostrar el mensaje y luego redirigir
+                await Task.Delay(1500);
                 Navigation.NavigateTo("/artista/panel");
             }
             else
             {
-                errorMessage = "No se pudo subir la obra.";
+                errorMessage = "No se pudo publicar la obra. Inténtalo nuevamente.";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error: {ex.Message}";
+            errorMessage = $"Error al subir la obra: {ex.Message}";
         }
-        isSubmitting = false;
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
     }
 
-    private void VolverAlPanel()
+    private async Task VolverAlPanel()
     {
+        // Verificar si hay cambios sin guardar
+        if (!string.IsNullOrEmpty(obra.Titulo) || !string.IsNullOrEmpty(obra.Descripcion) || obra.Precio > 0 || selectedFile != null)
+        {
+            var confirmar = await JSRuntime.InvokeAsync<bool>("confirm", 
+                "¿Estás seguro de que deseas salir? Los cambios no guardados se perderán.");
+            
+            if (!confirmar) return;
+        }
+        
         Navigation.NavigateTo("/artista/panel");
     }
 
     public class ObraCrearModel
     {
+        [Required(ErrorMessage = "El título es obligatorio")]
+        [StringLength(200, ErrorMessage = "El título no puede exceder 200 caracteres")]
         public string Titulo { get; set; } = string.Empty;
+
+        [StringLength(1000, ErrorMessage = "La descripción no puede exceder 1000 caracteres")]
         public string? Descripcion { get; set; }
+
+        [Required(ErrorMessage = "El precio es obligatorio")]
+        [Range(0, double.MaxValue, ErrorMessage = "El precio debe ser mayor o igual a 0")]
         public decimal Precio { get; set; }
     }
 }

@@ -28,7 +28,10 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<AuditoriaService>();
-builder.Services.AddScoped<AuditoriaService>();
+builder.Services.AddScoped<IMensajeriaService, MensajeriaService>();
+
+// Configurar logging
+builder.Logging.SetMinimumLevel(LogLevel.Information);
 
 
 await builder.Build().RunAsync();
