@@ -16,7 +16,7 @@ builder.Services.AddScoped(sp =>
     var handler = sp.GetRequiredService<CustomAuthorizationMessageHandler>();
     var httpClient = new HttpClient(handler)
     {
-        BaseAddress = new Uri("http://localhost:5000") 
+        BaseAddress = new Uri("https://stunning-guacamole-xq67qrxqgv629qgr-5000.app.github.dev/") 
     };
     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
     return httpClient;

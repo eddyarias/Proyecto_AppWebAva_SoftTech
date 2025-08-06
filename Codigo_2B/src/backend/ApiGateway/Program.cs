@@ -1,11 +1,10 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuración de CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", builder =>
     {
-        builder.WithOrigins("http://localhost:5000", "http://localhost:5001") // 👈 Pon el dominio exacto
+        builder.SetIsOriginAllowed(_ => true) // 👈 Permite cualquier origen
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials(); // 👈 Esto permite cookies
