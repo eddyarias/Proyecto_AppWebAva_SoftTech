@@ -21,63 +21,90 @@ public class ObraService : IObraService
 
     public async Task<object> CrearObraAsync(CreateObraDto dto)
     {
-        // Convertir archivo a base64
-        string archivoBase64 = await FileService.ConvertToBase64Async(dto.Archivo);
-        
-        // Crear archivo temporal para la firma
-        string rutaArchivoTemporal = await FileService.CreateTemporaryFileFromBase64Async(archivoBase64);
+        Console.WriteLine($"[DEBUG] Iniciando creación de obra: {dto.Titulo}");
+        Console.WriteLine($"[DEBUG] Artista nickname: {dto.ArtistaNickname}");
+        Console.WriteLine($"[DEBUG] Archivo recibido: {dto.Archivo?.FileName} ({dto.Archivo?.Length} bytes)");
         
         try
         {
-            // Obtener la clave privada desde la configuración
-            string? rutaClavePrivada = _configuration["DigitalSignature:PrivateKeyPath"];
-            if (string.IsNullOrEmpty(rutaClavePrivada))
-                throw new InvalidOperationException("No se ha configurado la ruta de la clave privada");
-
-            if (!File.Exists(rutaClavePrivada))
-                throw new FileNotFoundException($"No se encontró el archivo de clave privada en: {rutaClavePrivada}");
-
-            // Leer la clave privada
-            string clavePrivadaXml = await File.ReadAllTextAsync(rutaClavePrivada);
-
-            // Generar la firma digital
-            string firmaDigital = await _digitalSignatureService.FirmarArchivoAsync(rutaArchivoTemporal, clavePrivadaXml);
-
-            // Crear la obra con la firma
-            var obra = new Obra
+            // Convertir archivo a base64
+            Console.WriteLine("[DEBUG] Convirtiendo archivo a base64...");
+            string archivoBase64 = await FileService.ConvertToBase64Async(dto.Archivo);
+            Console.WriteLine($"[DEBUG] Archivo convertido a base64, tamaño: {archivoBase64.Length} caracteres");
+            
+            // Crear archivo temporal para la firma
+            Console.WriteLine("[DEBUG] Creando archivo temporal...");
+            string rutaArchivoTemporal = await FileService.CreateTemporaryFileFromBase64Async(archivoBase64);
+            Console.WriteLine($"[DEBUG] Archivo temporal creado: {rutaArchivoTemporal}");
+            
+            try
             {
-                Titulo = dto.Titulo,
-                Descripcion = dto.Descripcion,
-                ArchivoBase64 = archivoBase64,
-                FirmaDigital = firmaDigital,
-                ArtistaNickname = dto.ArtistaNickname,
-                Precio = dto.Precio,
-                Estado = Obra.Estados.Activa,
-                FechaPublicacion = DateTime.UtcNow
-            };
+                // Obtener la clave privada desde la configuración
+                Console.WriteLine("[DEBUG] Obteniendo configuración de clave privada...");
+                string? rutaClavePrivada = _configuration["DigitalSignature:PrivateKeyPath"];
+                Console.WriteLine($"[DEBUG] Ruta de clave privada configurada: {rutaClavePrivada}");
+                
+                if (string.IsNullOrEmpty(rutaClavePrivada))
+                    throw new InvalidOperationException("No se ha configurado la ruta de la clave privada");
 
-            await _repositorio.AgregarObraAsync(obra);
+                if (!File.Exists(rutaClavePrivada))
+                    throw new FileNotFoundException($"No se encontró el archivo de clave privada en: {rutaClavePrivada}");
 
-            return new
-            {
-                id = obra.Id,
-                titulo = obra.Titulo,
-                descripcion = obra.Descripcion,
-                archivoBase64 = obra.ArchivoBase64,
-                firmaDigital = obra.FirmaDigital,
-                artistaNickname = obra.ArtistaNickname,
-                precio = obra.Precio,
-                estado = obra.Estado,
-                fechaPublicacion = obra.FechaPublicacion
-            };
-        }
-        finally
-        {
-            // Limpiar archivo temporal
-            if (File.Exists(rutaArchivoTemporal))
-            {
-                File.Delete(rutaArchivoTemporal);
+                // Leer la clave privada
+                Console.WriteLine("[DEBUG] Leyendo clave privada...");
+                string clavePrivadaXml = await File.ReadAllTextAsync(rutaClavePrivada);
+
+                // Generar la firma digital
+                Console.WriteLine("[DEBUG] Generando firma digital...");
+                string firmaDigital = await _digitalSignatureService.FirmarArchivoAsync(rutaArchivoTemporal, clavePrivadaXml);
+                Console.WriteLine($"[DEBUG] Firma digital generada: {firmaDigital.Substring(0, Math.Min(50, firmaDigital.Length))}...");
+
+                // Crear la obra con la firma
+                Console.WriteLine("[DEBUG] Creando entidad Obra...");
+                var obra = new Obra
+                {
+                    Titulo = dto.Titulo,
+                    Descripcion = dto.Descripcion,
+                    ArchivoBase64 = archivoBase64,
+                    FirmaDigital = firmaDigital,
+                    ArtistaNickname = dto.ArtistaNickname,
+                    Precio = dto.Precio,
+                    Estado = Obra.Estados.Activa,
+                    FechaPublicacion = DateTime.UtcNow
+                };
+
+                Console.WriteLine("[DEBUG] Guardando obra en repositorio...");
+                await _repositorio.AgregarObraAsync(obra);
+                Console.WriteLine($"[DEBUG] Obra creada exitosamente con ID: {obra.Id}");
+
+                return new
+                {
+                    id = obra.Id,
+                    titulo = obra.Titulo,
+                    descripcion = obra.Descripcion,
+                    archivoBase64 = obra.ArchivoBase64,
+                    firmaDigital = obra.FirmaDigital,
+                    artistaNickname = obra.ArtistaNickname,
+                    precio = obra.Precio,
+                    estado = obra.Estado,
+                    fechaPublicacion = obra.FechaPublicacion
+                };
             }
+            finally
+            {
+                // Limpiar archivo temporal
+                if (File.Exists(rutaArchivoTemporal))
+                {
+                    Console.WriteLine($"[DEBUG] Eliminando archivo temporal: {rutaArchivoTemporal}");
+                    File.Delete(rutaArchivoTemporal);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Error en CrearObraAsync: {ex.Message}");
+            Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
+            throw;
         }
     }
 

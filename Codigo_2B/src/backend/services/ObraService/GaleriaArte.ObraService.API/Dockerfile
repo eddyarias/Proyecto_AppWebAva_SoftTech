@@ -31,6 +31,9 @@ WORKDIR /app
 # Copia los archivos publicados
 COPY --from=build /app/publish .
 
+# Copia las claves para firma digital
+COPY src/backend/services/ObraService/GaleriaArte.ObraService.API/Keys/ ./Keys/
+
 # Expone el puerto 5003
 EXPOSE 5003
 

@@ -29,10 +29,19 @@ public class ObraController : ControllerBase
     [HttpPost("crear")]
     public async Task<IActionResult> Crear([FromForm] CreateObraDto dto)
     {
+        // Debug: Log todos los claims disponibles
+        var allClaims = User.Claims.Select(c => $"{c.Type}={c.Value}").ToList();
+        Console.WriteLine($"[DEBUG] Claims disponibles: {string.Join(", ", allClaims)}");
+        
         var roleId = GetRoleIdFromJwt();
+        Console.WriteLine($"[DEBUG] RoleId obtenido: {roleId}");
+        
         if (roleId != ROLE_ARTISTA && roleId != ROLE_ADMIN)
             return Forbid();
+            
         var nickname = GetNicknameFromJwt();
+        Console.WriteLine($"[DEBUG] Nickname obtenido: {nickname}");
+        
         if (string.IsNullOrEmpty(nickname))
             return Unauthorized(new { error = "No se pudo obtener el nickname del usuario autenticado." });
         dto.ArtistaNickname = nickname;
