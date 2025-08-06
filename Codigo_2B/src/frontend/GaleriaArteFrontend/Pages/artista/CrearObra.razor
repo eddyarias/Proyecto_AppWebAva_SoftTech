@@ -6,52 +6,78 @@
 @inject GaleriaArteFrontend.Services.ObrasService ObrasService
 @inject NavigationManager Navigation
 
-@using GaleriaArteFrontend.Components
-
 <AuthGuard RolRequerido="9a66346f-164e-4ce2-8e5b-568b8f643799">
-    <h3>Subir Nueva Obra</h3>
+    <div class="crear-obra-container">
+        <div class="crear-obra-card">
+            <div class="crear-obra-header">
+                <h3><i class="fas fa-plus-circle"></i> Subir Nueva Obra</h3>
+            </div>
+            
+            <div class="crear-obra-body">
+                <button class="btn btn-secondary" @onclick="VolverAlPanel">
+                    <i class="fas fa-arrow-left"></i> Volver al Panel
+                </button>
 
-    <button class="btn btn-secondary mb-3" @onclick="VolverAlPanel">
-        <i class="bi bi-arrow-left"></i> Volver al Panel
-    </button>
-
-    <EditForm Model="obra" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        <div class="mb-3">
-            <label for="titulo" class="form-label">Título</label>
-            <InputText id="titulo" class="form-control" @bind-Value="obra.Titulo" />
+                <EditForm Model="obra" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="validation-summary" />
+                    
+                    <div class="form-group">
+                        <label for="titulo" class="form-label">Título</label>
+                        <InputText id="titulo" class="form-control" @bind-Value="obra.Titulo" placeholder="Ingresa el título de tu obra" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <InputTextArea id="descripcion" class="form-control" @bind-Value="obra.Descripcion" rows="4" placeholder="Describe tu obra de arte..." />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="precio" class="form-label">Precio (USD)</label>
+                        <InputNumber id="precio" class="form-control" @bind-Value="obra.Precio" placeholder="0.00" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="archivo" class="form-label">Imagen (JPG/JPEG)</label>
+                        <div class="file-upload-container">
+                            <InputFile id="archivo" OnChange="OnInputFileChange" accept=".jpg,.jpeg" class="file-input" />
+                            <label for="archivo" class="file-upload-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Seleccionar imagen</span>
+                            </label>
+                        </div>
+                        @if (!string.IsNullOrEmpty(fileError))
+                        {
+                            <div class="file-error">@fileError</div>
+                        }
+                    </div>
+                    
+                    <div class="btn-container">
+                        <button class="btn btn-primary" type="submit" disabled="@(isSubmitting)">
+                            <i class="fas fa-upload"></i> Subir Obra
+                        </button>
+                        @if (isSubmitting)
+                        {
+                            <span class="loading-indicator">Subiendo...</span>
+                        }
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i> @errorMessage
+                        </div>
+                    }
+                </EditForm>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <InputTextArea id="descripcion" class="form-control" @bind-Value="obra.Descripcion" />
-        </div>
-        <div class="mb-3">
-            <label for="precio" class="form-label">Precio</label>
-            <InputNumber id="precio" class="form-control" @bind-Value="obra.Precio" />
-        </div>
-        <div class="mb-3">
-            <label for="archivo" class="form-label">Imagen (JPG/JPEG)</label>
-            <InputFile id="archivo" OnChange="OnInputFileChange" accept=".jpg,.jpeg" />
-            @if (!string.IsNullOrEmpty(fileError))
-            {
-                <div class="text-danger">@fileError</div>
-            }
-        </div>
-        <button class="btn btn-primary" type="submit" disabled="@(isSubmitting)">Subir Obra</button>
-        @if (isSubmitting)
-        {
-            <span class="ms-2">Subiendo...</span>
-        }
-        @if (!string.IsNullOrEmpty(successMessage))
-        {
-            <div class="alert alert-success mt-3">@successMessage</div>
-        }
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="alert alert-danger mt-3">@errorMessage</div>
-        }
-    </EditForm>
+    </div>
 </AuthGuard>
 
 @code {
@@ -125,3 +151,310 @@
         public decimal Precio { get; set; }
     }
 }
+
+<style>
+    .crear-obra-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .crear-obra-card {
+        max-width: 600px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 24px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .crear-obra-header {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+        padding: 35px;
+        text-align: center;
+        position: relative;
+    }
+
+    .crear-obra-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23pattern)"/></svg>');
+    }
+
+    .crear-obra-header h3 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .crear-obra-body {
+        padding: 40px;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-bottom: 30px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(113, 128, 150, 0.3);
+        color: white;
+    }
+
+    .form-group {
+        margin-bottom: 28px;
+        position: relative;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 12px;
+        display: block;
+        font-size: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+    }
+
+    .form-label::after {
+        content: '';
+        position: absolute;
+        bottom: -6px;
+        left: 0;
+        width: 30px;
+        height: 3px;
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        border-radius: 2px;
+    }
+
+    .form-control {
+        width: 100%;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 16px 20px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: #f7fafc;
+        color: #2d3748;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .form-control:focus {
+        border-color: #48bb78;
+        box-shadow: 0 0 0 4px rgba(72, 187, 120, 0.1);
+        outline: none;
+        background: white;
+        transform: translateY(-1px);
+    }
+
+    .form-control::placeholder {
+        color: #a0aec0;
+        font-weight: 400;
+    }
+
+    .file-upload-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .file-input {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .file-upload-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 20px;
+        border: 3px dashed #cbd5e0;
+        border-radius: 16px;
+        background: #f7fafc;
+        color: #4a5568;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 16px;
+        min-height: 80px;
+    }
+
+    .file-upload-label:hover {
+        border-color: #48bb78;
+        background: rgba(72, 187, 120, 0.05);
+        color: #38a169;
+        transform: translateY(-2px);
+    }
+
+    .file-upload-label i {
+        font-size: 24px;
+    }
+
+    .file-error {
+        color: #e53e3e;
+        font-size: 14px;
+        margin-top: 8px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .file-error::before {
+        content: '⚠️';
+    }
+
+    .btn-container {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        margin-top: 35px;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        border: none;
+        padding: 16px 32px;
+        border-radius: 16px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(72, 187, 120, 0.4);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .loading-indicator {
+        color: #48bb78;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+    }
+
+    .loading-indicator::before {
+        content: "";
+        width: 20px;
+        height: 20px;
+        border: 3px solid #e2e8f0;
+        border-top: 3px solid #48bb78;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .alert {
+        border-radius: 16px;
+        padding: 18px 24px;
+        font-weight: 600;
+        border: none;
+        margin-top: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        color: white;
+    }
+
+    .validation-summary {
+        background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+        border: 2px solid #fc8181;
+        color: #742a2a;
+        padding: 18px;
+        border-radius: 16px;
+        margin-bottom: 25px;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 768px) {
+        .crear-obra-container {
+            padding: 20px 15px;
+        }
+        
+        .crear-obra-body {
+            padding: 25px;
+        }
+        
+        .crear-obra-header h3 {
+            font-size: 24px;
+        }
+        
+        .btn-container {
+            flex-direction: column;
+            gap: 15px;
+        }
+    }
+</style>

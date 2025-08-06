@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres
+    image: postgres:15
     container_name: galeria_postgres
     restart: always
     ports:
@@ -14,6 +14,11 @@ services:
       - ./src/database/init.sql:/docker-entrypoint-initdb.d/init.sql  # 🔧 RUTA ADAPTADA
     networks:
       - galeria_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adminuser -d GaleriaArte"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -34,6 +39,118 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+  
+  # Servicio de Usuarios
+  usuario-service:
+    build:
+      context: .
+      dockerfile: src/backend/services/UsuarioService/GaleriaArte.UsuarioService.API/Dockerfile
+    container_name: galeria-usuario-service
+    ports:
+      - "5002:5002"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=GaleriaArte;Username=galeria_user;Password=galeria_pass
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      -  galeria_net
+    restart: unless-stopped
+
+  # Servicio de Obras
+  obra-service:
+    build:
+      context: .
+      dockerfile: src/backend/services/ObraService/GaleriaArte.ObraService.API/Dockerfile
+    container_name: galeria-obra-service
+    ports:
+      - "5003:5003"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=GaleriaArte;Username=obra_user;Password=obra_pass
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      -  galeria_net
+    restart: unless-stopped
+
+  # Servicio de Auditoría
+  auditoria-service:
+    build:
+      context: .
+      dockerfile: src/backend/services/AuditoriaService/GaleriaArte.AuditoriaService.API/Dockerfile
+    container_name: galeria-auditoria-service
+    ports:
+      - "5004:5004"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=GaleriaArte;Username=auditoria_user;Password=auditoria_pass
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=admin
+      - RabbitMQ__Password=admin123
+      - RabbitMQ__VirtualHost=galeria_arte
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      -  galeria_net
+    restart: unless-stopped
+
+  # Servicio de Media
+  media-service:
+    build:
+      context: .
+      dockerfile: src/backend/services/MediaService/GaleriaArte.MediaService.API/Dockerfile
+    container_name: galeria-media-service
+    ports:
+      - "5108:5108"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=GaleriaArte;Username=media_user;Password=media_pass
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      -  galeria_net
+    restart: unless-stopped
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: src/backend/ApiGateway/Dockerfile
+    container_name: galeria-api-gateway
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - usuario-service
+      - obra-service
+      - auditoria-service
+      - media-service
+    networks:
+      -  galeria_net
+    restart: unless-stopped
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: src/frontend/GaleriaArteFrontend/Dockerfile
+    container_name: galeria-frontend
+    ports:
+      - "5001:5001"
+    depends_on:
+      - api-gateway
+    networks:
+      -  galeria_net
+    restart: unless-stopped
 
 volumes:
   pgdata:

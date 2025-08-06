@@ -90,5 +90,58 @@ namespace GaleriaArteFrontend.Services
                 return new ApiResponse { Exito = false, Mensaje = $"Error de conexión: {ex.Message}" };
             }
         }
+
+        public async Task<UsuarioListItem?> ObtenerUsuarioActualAsync()
+        {
+            try
+            {
+                await AddJwtHeaderAsync();
+                var response = await _httpClient.GetAsync("usuario/perfil");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var usuario = await response.Content.ReadFromJsonAsync<UsuarioListItem>();
+                    return usuario;
+                }
+                else
+                {
+                    // Si no existe endpoint de perfil, intentar extraer del token y buscar en la lista
+                    var payload = await _jwtService.ObtenerPayloadAsync();
+                    if (payload != null)
+                    {
+                        var nickname = _jwtService.ObtenerClaim(payload, "nickname");
+                        if (!string.IsNullOrEmpty(nickname))
+                        {
+                            var usuarios = await ListarUsuariosAsync();
+                            return usuarios.FirstOrDefault(u => u.Nickname == nickname);
+                        }
+                    }
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error obteniendo usuario actual: {ex.Message}");
+                // Fallback: intentar extraer del token
+                try
+                {
+                    var payload = await _jwtService.ObtenerPayloadAsync();
+                    if (payload != null)
+                    {
+                        var nickname = _jwtService.ObtenerClaim(payload, "nickname");
+                        if (!string.IsNullOrEmpty(nickname))
+                        {
+                            var usuarios = await ListarUsuariosAsync();
+                            return usuarios.FirstOrDefault(u => u.Nickname == nickname);
+                        }
+                    }
+                }
+                catch (Exception fallbackEx)
+                {
+                    Console.WriteLine($"Error en fallback: {fallbackEx.Message}");
+                }
+                return null;
+            }
+        }
     }
 }

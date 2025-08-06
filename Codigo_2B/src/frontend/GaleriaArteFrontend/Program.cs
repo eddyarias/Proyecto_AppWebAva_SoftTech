@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using GaleriaArteFrontend;
 using GaleriaArteFrontend.Services;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -13,10 +14,13 @@ builder.Services.AddScoped<CustomAuthorizationMessageHandler>();
 // Configurar HttpClient con la URL base del API Gateway y con cookies
 builder.Services.AddScoped(sp =>
 {
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    var baseUrl = configuration["ApiGateway:BaseUrl"] ?? "http://localhost:5000";
+    
     var handler = sp.GetRequiredService<CustomAuthorizationMessageHandler>();
     var httpClient = new HttpClient(handler)
     {
-        BaseAddress = new Uri("http://localhost:5000")
+        BaseAddress = new Uri(baseUrl)
     };
     httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
     return httpClient;
@@ -28,6 +32,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<AuditoriaService>();
+builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<AuditoriaService>();
 
 

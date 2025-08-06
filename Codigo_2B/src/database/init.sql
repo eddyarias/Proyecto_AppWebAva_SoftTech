@@ -48,6 +48,12 @@ INSERT INTO usuarios.roles (id,nombre, descripcion) VALUES
 ('62d2b61f-d92b-44d8-ada8-9d5dace7e6bc','comprador', 'Usuario que puede adquirir obras'),
 ('f50fdbe5-2e16-4e91-9e7b-a39219d57031','administrador', 'Usuario con privilegios de gestión de cuentas y contenido');
 
+
+-- Insertar usuario administrador por defecto
+-- Contraseña: Admin123! (hash generado con BCrypt)
+INSERT INTO usuarios.usuarios (id, nickname, correo, contraseña_hash, estado, rol_id) VALUES
+('550e8400-e29b-41d4-a716-446655440000', 'admin', 'admin@galeriaarte.com', '$2a$12$LQv3c1yqBwLVMQeAcFrCCePwLx6BjF5CuQ/NFOGpL5YM7nzKnXA0u', TRUE, 'f50fdbe5-2e16-4e91-9e7b-a39219d57031');
+
 -- =============================
 -- 🎨 OBRA SERVICE (GaleriaArteObras)
 -- =============================
@@ -106,7 +112,21 @@ CREATE TABLE auditoria.logs_eventos (
 );
 
 -- =============================
--- 🔔 NOTIFICACION SERVICE (GaleriaArteNotificaciones)
+-- � CHAT SERVICE (GaleriaArteChat)
+-- =============================
+
+CREATE SCHEMA IF NOT EXISTS chat;
+
+CREATE TABLE chat.mensajes (
+    id SERIAL PRIMARY KEY,
+    nombre_usuario VARCHAR(50) NOT NULL,
+    mensaje TEXT NOT NULL,
+    fecha_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sala VARCHAR(50) DEFAULT 'general'
+);
+
+-- =============================
+-- �🔔 NOTIFICACION SERVICE (GaleriaArteNotificaciones)
 -- =============================
 
 CREATE SCHEMA IF NOT EXISTS notificaciones;
@@ -148,3 +168,8 @@ GRANT USAGE, SELECT, UPDATE ON SEQUENCE auditoria.logs_eventos_id_seq TO auditor
 CREATE USER notificacion_user WITH PASSWORD 'notificacion_pass';
 GRANT ALL PRIVILEGES ON SCHEMA notificaciones TO notificacion_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA notificaciones TO notificacion_user;
+
+CREATE USER chat_user WITH PASSWORD 'chat_pass';
+GRANT ALL PRIVILEGES ON SCHEMA chat TO chat_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA chat TO chat_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA chat TO chat_user;

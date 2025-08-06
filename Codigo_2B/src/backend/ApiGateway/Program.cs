@@ -1,3 +1,5 @@
+using ApiGateway.Hubs;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuración de CORS
@@ -12,6 +14,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Agregar SignalR
+builder.Services.AddSignalR();
 
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
@@ -20,6 +24,9 @@ var app = builder.Build();
 
 // Usar CORS
 app.UseCors("AllowFrontend");
+
+// Configurar SignalR Hub
+app.MapHub<ChatHub>("/chatHub");
 
 app.MapReverseProxy();
 

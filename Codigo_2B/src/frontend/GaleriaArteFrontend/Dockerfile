@@ -30,8 +30,11 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copia los archivos publicados al directorio de nginx
 COPY --from=build /app/publish/wwwroot /usr/share/nginx/html
 
-# Expone el puerto 80
-EXPOSE 80
+# Copia la configuración personalizada de nginx
+COPY src/frontend/GaleriaArteFrontend/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expone el puerto 5001
+EXPOSE 5001
 
 # Inicia nginx
 CMD ["nginx", "-g", "daemon off;"]

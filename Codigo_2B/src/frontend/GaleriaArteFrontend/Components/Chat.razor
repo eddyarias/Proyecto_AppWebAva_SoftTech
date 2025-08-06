@@ -1,0 +1,902 @@
+@using GaleriaArteFrontend.Services
+@inject ChatService ChatService
+@inject AuthService AuthService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+<!-- Botón para abrir el chat -->
+<div id="chatButton" @onclick="ToggleChat">💬</div>
+
+<!-- Ventana del chat -->
+<div id="chatWindow" style="display: @(_isVisible ? "block" : "none")">
+    <div id="chatHeader">
+        <div class="chat-header-left">
+            <span class="chat-title">@(_showPrivateMessages ? "Mensajes Privados" : "Chat Público")</span>
+            @if (_isConnected)
+            {
+                <span class="connection-status connected">●</span>
+            }
+            else
+            {
+                <span class="connection-status disconnected">●</span>
+            }
+        </div>
+        <div class="chat-header-actions">
+            <button class="btn-toggle-view" @onclick="ToggleView" title="@(_showPrivateMessages ? "Ver chat público" : "Ver mensajes privados")">
+                <i class="fas @(_showPrivateMessages ? "fa-comments" : "fa-envelope")"></i>
+            </button>
+            <span id="closeChat" @onclick="CloseChat">&times;</span>
+        </div>
+    </div>
+    
+    @if (_showPrivateMessages)
+    {
+        <!-- Vista de mensajes privados -->
+        <div id="privateMessagesView">
+            @if (_selectedConversation == null)
+            {
+                <!-- Lista de conversaciones -->
+                <div class="conversations-list">
+                    @if (_conversationUsers.Any())
+                    {
+                        @foreach (var user in _conversationUsers)
+                        {
+                            <div class="conversation-item" @onclick="() => SelectConversation(user)">
+                                <div class="conversation-avatar">@(user.FirstOrDefault().ToString().ToUpper())</div>
+                                <div class="conversation-info">
+                                    <span class="conversation-user">@user</span>
+                                    <span class="conversation-preview">Toca para ver mensajes</span>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-conversations">
+                            <i class="fas fa-inbox"></i>
+                            <p>No tienes conversaciones privadas</p>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <!-- Conversación específica -->
+                <div class="conversation-header">
+                    <button class="btn-back" @onclick="BackToConversations">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <span class="conversation-title">@_selectedConversation</span>
+                </div>
+                <ul class="private-messages-list">
+                    @foreach (var message in _selectedConversationMessages.AsEnumerable().Reverse())
+                    {
+                        var isOwn = message.FromUser == _userName;
+                        var cssClass = isOwn ? "private-message own-message" : "private-message other-message";
+                        var initial = !string.IsNullOrEmpty(message.FromUser) ? message.FromUser.First().ToString().ToUpper() : "?";
+                        var timeString = message.Timestamp.ToString("HH:mm");
+                        
+                        <li class="@cssClass">
+                            <div class="avatar">@initial</div>
+                            <div class="bubble">
+                                <span class="sender-name">@message.FromUser</span>
+                                <div class="message-content">@message.Message</div>
+                                <div class="message-time">@timeString</div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                <div class="private-chat-footer">
+                    <input type="text" @bind="_currentPrivateMessage" @onkeypress="HandlePrivateKeyPress" placeholder="Escribe un mensaje privado..." />
+                    <button type="button" @onclick="SendPrivateMessage" disabled="@_isSendingPrivateMessage">
+                        @if (_isSendingPrivateMessage)
+                        {
+                            <span>Enviando...</span>
+                        }
+                        else
+                        {
+                            <span>Enviar</span>
+                        }
+                    </button>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Vista de chat público -->
+        <ul id="chatMessages">
+            @foreach (var message in _messages.AsEnumerable().Reverse())
+            {
+                var isOwn = message.Name == _userName;
+                var cssClass = isOwn ? "chat-message own-message" : "chat-message other-message";
+                var initial = !string.IsNullOrEmpty(message.Name) ? message.Name.First().ToString().ToUpper() : "?";
+                var timeString = message.Timestamp.ToString("HH:mm");
+                
+                <li class="@cssClass">
+                    <div class="avatar">@initial</div>
+                    <div class="bubble">
+                        <span class="sender-name">@message.Name</span>
+                        <div class="message-content">@message.Message</div>
+                        <div class="message-time">@timeString</div>
+                    </div>
+                </li>
+            }
+        </ul>
+        <div id="chatFooter">
+            <input type="text" id="userName" @bind="_userName" readonly />
+            <input type="text" id="messageInput" @bind="_currentMessage" @onkeypress="HandleKeyPress" placeholder="Escribe un mensaje..." />
+            <button type="button" id="sendMessage" @onclick="SendMessage" disabled="@_isSendingMessage">
+                @if (_isSendingMessage)
+                {
+                    <span>Enviando...</span>
+                }
+                else
+                {
+                    <span>Enviar</span>
+                }
+            </button>
+        </div>
+    }
+</div>
+
+<style>
+    #chatButton {
+        position: fixed;
+        bottom: 24px;
+        left: 24px;
+        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
+        color: white;
+        padding: 14px 18px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 1000;
+        font-size: 22px;
+        box-shadow: 0 4px 16px rgba(74,144,226,0.18);
+        transition: background 0.2s;
+    }
+
+    #chatButton:hover {
+        background: linear-gradient(135deg, #357ab8 60%, #4a90e2 100%);
+    }
+
+    #chatWindow {
+        position: fixed;
+        bottom: 90px;
+        left: 24px;
+        width: 350px;
+        background: #fff;
+        border: none;
+        border-radius: 16px;
+        padding: 0;
+        z-index: 1000;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        overflow: hidden;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    #chatHeader {
+        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
+        color: #fff;
+        padding: 14px 18px;
+        font-weight: bold;
+        font-size: 17px;
+        letter-spacing: 1px;
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .chat-title {
+        font-size: 16px;
+    }
+
+    .chat-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .btn-toggle-view {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        border-radius: 6px;
+        padding: 8px 10px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.3s ease;
+        min-width: 36px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-toggle-view:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .connection-status {
+        font-size: 12px;
+        margin-left: 8px;
+    }
+
+    .connection-status.connected {
+        color: #4ade80;
+    }
+
+    .connection-status.disconnected {
+        color: #f87171;
+    }
+
+    #closeChat {
+        cursor: pointer;
+        font-size: 24px;
+        color: #fff;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+        padding: 4px 8px;
+        border-radius: 4px;
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    #closeChat:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    #chatMessages {
+        display: flex;
+        flex-direction: column-reverse;
+        height: 270px;
+        overflow-y: auto;
+        padding: 18px 12px 12px 12px;
+        margin: 0;
+        list-style: none;
+        background: #f7fafd;
+        border-bottom: 1px solid #e3e3e3;
+    }
+
+    .chat-message {
+        display: flex;
+        align-items: flex-end;
+        margin: 8px 0;
+        font-size: 15px;
+        max-width: 85%;
+        padding: 0;
+        background: none;
+        box-shadow: none;
+    }
+
+    .own-message {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+        margin-left: auto;
+    }
+
+    .other-message {
+        align-self: flex-start;
+        margin-right: auto;
+    }
+
+    .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+        margin: 0 8px;
+        box-shadow: 0 2px 8px rgba(74,144,226,0.10);
+        flex-shrink: 0;
+    }
+
+    .own-message .avatar {
+        background: linear-gradient(135deg, #25d366 60%, #128c7e 100%);
+    }
+
+    .bubble {
+        padding: 10px 16px;
+        border-radius: 18px;
+        background: #e5e5ea;
+        color: #222;
+        position: relative;
+        min-width: 60px;
+        word-break: break-word;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        max-width: 280px;
+    }
+
+    .own-message .bubble {
+        background: linear-gradient(135deg, #dcf8c6 0%, #d1f2cc 100%);
+        color: #222;
+        border-bottom-right-radius: 4px;
+    }
+
+    .other-message .bubble {
+        background: #ffffff;
+        border-bottom-left-radius: 4px;
+        border: 1px solid #e3e3e3;
+    }
+
+    .sender-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: #4a90e2;
+        margin-bottom: 2px;
+        display: block;
+        letter-spacing: 0.5px;
+    }
+
+    .own-message .sender-name {
+        color: #128c7e;
+        text-align: right;
+    }
+
+    .other-message .sender-name {
+        color: #4a90e2;
+        text-align: left;
+    }
+
+    .message-content {
+        line-height: 1.4;
+        margin-bottom: 4px;
+    }
+
+    .message-time {
+        font-size: 11px;
+        color: #999;
+        text-align: right;
+        margin-top: 4px;
+        font-weight: 400;
+    }
+
+    .own-message .message-time {
+        color: #666;
+    }
+
+    #chatFooter {
+        padding: 12px 14px;
+        background: #f7fafd;
+        display: flex;
+        gap: 6px;
+        border-top: 1px solid #e3e3e3;
+    }
+
+    #userName {
+        display: none;
+    }
+
+    #messageInput {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #cfd8dc;
+        border-radius: 18px;
+        font-size: 15px;
+        outline: none;
+        background: #fff;
+        transition: border 0.2s;
+    }
+
+    #messageInput:focus {
+        border: 1.5px solid #4a90e2;
+    }
+
+    #sendMessage {
+        padding: 0 18px;
+        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 18px;
+        font-size: 15px;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+
+    #sendMessage:hover {
+        background: linear-gradient(135deg, #357ab8 60%, #4a90e2 100%);
+    }
+
+    /* Estilos para mensajes privados */
+    #privateMessagesView {
+        height: 270px;
+        background: #f7fafd;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .conversations-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+    }
+
+    .conversation-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid #e3e3e3;
+    }
+
+    .conversation-item:hover {
+        background: #f0f7ff;
+        border-color: #4a90e2;
+        transform: translateY(-1px);
+    }
+
+    .conversation-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 12px;
+    }
+
+    .conversation-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .conversation-user {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 15px;
+    }
+
+    .conversation-preview {
+        font-size: 12px;
+        color: #718096;
+        margin-top: 2px;
+    }
+
+    .conversation-header {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        background: white;
+        border-bottom: 1px solid #e3e3e3;
+        gap: 10px;
+    }
+
+    .btn-back {
+        background: none;
+        border: none;
+        color: #4a90e2;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 5px;
+        transition: background 0.3s ease;
+    }
+
+    .btn-back:hover {
+        background: #f0f7ff;
+    }
+
+    .conversation-title {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 16px;
+    }
+
+    .private-messages-list {
+        flex: 1;
+        display: flex;
+        flex-direction: column-reverse;
+        overflow-y: auto;
+        padding: 12px;
+        margin: 0;
+        list-style: none;
+        background: #f7fafd;
+    }
+
+    .private-message {
+        display: flex;
+        align-items: flex-end;
+        margin: 6px 0;
+        font-size: 14px;
+        max-width: 85%;
+    }
+
+    .private-chat-footer {
+        padding: 12px;
+        background: white;
+        display: flex;
+        gap: 8px;
+        border-top: 1px solid #e3e3e3;
+    }
+
+    .private-chat-footer input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #cfd8dc;
+        border-radius: 18px;
+        font-size: 14px;
+        outline: none;
+    }
+
+    .private-chat-footer input:focus {
+        border-color: #4a90e2;
+    }
+
+    .private-chat-footer button {
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #4a90e2 60%, #357ab8 100%);
+        color: white;
+        border: none;
+        border-radius: 18px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .private-chat-footer button:hover {
+        background: linear-gradient(135deg, #357ab8 60%, #4a90e2 100%);
+    }
+
+    .no-conversations {
+        text-align: center;
+        padding: 40px 20px;
+        color: #718096;
+    }
+
+    .no-conversations i {
+        font-size: 40px;
+        margin-bottom: 15px;
+        color: #cbd5e0;
+    }
+
+    .no-conversations p {
+        margin: 0;
+        font-size: 14px;
+    }
+</style>
+
+@code {
+    private bool _isVisible = false;
+    private bool _isConnected = false;
+    private bool _showPrivateMessages = false;
+    private bool _hubConnection = false;
+    private bool _isSendingMessage = false;
+    private bool _isSendingPrivateMessage = false;
+    private string _userName = "";
+    private string _currentMessage = "";
+    private string _currentPrivateMessage = "";
+    private string? _selectedConversation = null;
+    private List<ChatService.ChatMessage> _messages = new();
+    private List<ChatService.PrivateMessage> _privateMessages = new();
+    private List<ChatService.PrivateMessage> _selectedConversationMessages = new();
+    private List<string> _conversationUsers = new();
+
+    [Parameter] public string? ContactUser { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Suscribirse a cambios en el estado de autenticación
+        AuthService.OnAuthStateChanged += OnAuthStateChanged;
+        
+        await InitializeChatAsync();
+
+        // Si hay un usuario para contactar, abrir conversación directamente
+        if (!string.IsNullOrEmpty(ContactUser))
+        {
+            _showPrivateMessages = true;
+            _selectedConversation = ContactUser;
+            await LoadConversation(ContactUser);
+            _isVisible = true;
+            StateHasChanged();
+        }
+    }
+
+    private async void OnAuthStateChanged()
+    {
+        // El estado de autenticación cambió, reinicializar el usuario
+        await RefreshUserAsync();
+    }
+
+    private async Task InitializeChatAsync()
+    {
+        // Obtener nombre de usuario desde el servicio
+        _userName = await ChatService.GetUserNameAsync();
+        Console.WriteLine($"[Chat] Usuario inicializado: {_userName}");
+        
+        // Debug: obtener info completa del usuario
+        var userInfo = await ChatService.GetUserInfoDebugAsync();
+        Console.WriteLine($"[Chat] Info usuario: {userInfo}");
+        
+        // No cargar historial - solo mensajes nuevos desde esta sesión
+        _messages = new List<ChatService.ChatMessage>();
+        
+        // Cargar mensajes privados existentes
+        await LoadPrivateMessages();
+        
+        // Configurar el chat service solo una vez
+        if (!_hubConnection)
+        {
+            ChatService.OnMessageReceived += OnMessageReceived;
+            ChatService.OnPrivateMessageReceived += OnPrivateMessageReceived;
+            ChatService.OnUserChanged += OnUserChanged;
+            _hubConnection = true;
+            
+            // Solo inicializar la conexión una vez
+            try
+            {
+                await ChatService.StartAsync();
+                _isConnected = true;
+                Console.WriteLine("[Chat] Conexión SignalR inicializada");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error conectando al chat: {ex.Message}");
+                _isConnected = false;
+            }
+        }
+        else
+        {
+            Console.WriteLine("[Chat] Chat ya está inicializado, solo actualizando estado");
+            // Verificar si la conexión sigue activa
+            _isConnected = await ChatService.IsUserLoggedInAsync();
+        }
+        
+        StateHasChanged();
+    }
+
+    public async Task RefreshUserAsync()
+    {
+        // Método público para reinicializar el usuario después del login
+        var oldUserName = _userName;
+        
+        // Notificar al ChatService que el usuario se logueó
+        await ChatService.OnUserLoggedInAsync();
+        
+        // Obtener el nuevo nombre de usuario
+        _userName = await ChatService.GetUserNameAsync();
+        
+        if (oldUserName != _userName)
+        {
+            Console.WriteLine($"[Chat] Usuario actualizado de '{oldUserName}' a '{_userName}'");
+            
+            // Si cambió el usuario y hay conexión, reconectar con el nuevo usuario
+            if (_isConnected)
+            {
+                try
+                {
+                    await ChatService.ReconnectWithNewUserAsync();
+                    Console.WriteLine($"[Chat] Reconectado con nuevo usuario: {_userName}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error reconectando con nuevo usuario: {ex.Message}");
+                }
+            }
+            
+            // Cargar mensajes privados del nuevo usuario
+            await LoadPrivateMessages();
+            
+            StateHasChanged();
+        }
+    }
+
+    private async void OnUserChanged(string newUserName)
+    {
+        // El usuario cambió en el ChatService, actualizar la UI
+        Console.WriteLine($"[Chat] Evento OnUserChanged recibido: {newUserName}");
+        _userName = newUserName;
+        
+        // Cargar mensajes privados del nuevo usuario
+        await LoadPrivateMessages();
+        
+        StateHasChanged();
+    }
+
+    private async Task LoadPrivateMessages()
+    {
+        _privateMessages = await ChatService.GetPrivateMessagesAsync();
+        _conversationUsers = _privateMessages
+            .Where(m => m.FromUser != _userName || m.ToUser != _userName)
+            .Select(m => m.FromUser == _userName ? m.ToUser : m.FromUser)
+            .Distinct()
+            .ToList();
+    }
+
+    private void ToggleChat()
+    {
+        _isVisible = !_isVisible;
+        StateHasChanged();
+    }
+
+    private void CloseChat()
+    {
+        _isVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task ToggleView()
+    {
+        _showPrivateMessages = !_showPrivateMessages;
+        if (_showPrivateMessages)
+        {
+            _selectedConversation = null;
+            await LoadPrivateMessages();
+        }
+        StateHasChanged();
+    }
+
+    private async Task SelectConversation(string user)
+    {
+        _selectedConversation = user;
+        await LoadConversation(user);
+        StateHasChanged();
+    }
+
+    private async Task LoadConversation(string user)
+    {
+        _selectedConversationMessages = await ChatService.GetConversationAsync(user);
+    }
+
+    private void BackToConversations()
+    {
+        _selectedConversation = null;
+        StateHasChanged();
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SendMessage();
+        }
+    }
+
+    private async Task HandlePrivateKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SendPrivateMessage();
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        if (!string.IsNullOrWhiteSpace(_currentMessage) && !_isSendingMessage)
+        {
+            _isSendingMessage = true;
+            try
+            {
+                // Refrescar el nombre de usuario antes de enviar
+                _userName = await ChatService.GetUserNameAsync();
+                Console.WriteLine($"[Chat] Enviando mensaje como: {_userName}");
+                
+                var messageToSend = _currentMessage.Trim();
+                await ChatService.SendMessageAsync(_userName, messageToSend);
+                
+                _currentMessage = "";
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error enviando mensaje: {ex.Message}");
+            }
+            finally
+            {
+                _isSendingMessage = false;
+            }
+        }
+    }
+
+    private async Task SendPrivateMessage()
+    {
+        if (!string.IsNullOrWhiteSpace(_currentPrivateMessage) && !string.IsNullOrEmpty(_selectedConversation) && !_isSendingPrivateMessage)
+        {
+            _isSendingPrivateMessage = true;
+            try
+            {
+                // Refrescar el nombre de usuario antes de enviar
+                _userName = await ChatService.GetUserNameAsync();
+                Console.WriteLine($"[Chat] Enviando mensaje privado como: {_userName} a: {_selectedConversation}");
+                
+                var messageToSend = _currentPrivateMessage.Trim();
+                await ChatService.SendPrivateMessageAsync(_userName, _selectedConversation, messageToSend);
+                
+                _currentPrivateMessage = "";
+                await LoadConversation(_selectedConversation);
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error enviando mensaje privado: {ex.Message}");
+            }
+            finally
+            {
+                _isSendingPrivateMessage = false;
+            }
+        }
+    }
+
+    private async void OnMessageReceived(string name, string message)
+    {
+        var newMessage = new ChatService.ChatMessage 
+        { 
+            Name = name, 
+            Message = message, 
+            Timestamp = DateTime.Now 
+        };
+        
+        _messages.Add(newMessage);
+        
+        // Mantener solo los últimos 50 mensajes para rendimiento
+        if (_messages.Count > 50)
+        {
+            _messages.RemoveAt(0);
+        }
+        
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async void OnPrivateMessageReceived(string fromUser, string toUser, string message)
+    {
+        // Guardar mensaje privado recibido
+        await ChatService.SavePrivateMessageAsync(fromUser, toUser, message, false);
+        
+        // Actualizar conversaciones si es necesario
+        await LoadPrivateMessages();
+        
+        // Si estamos viendo esta conversación, actualizarla
+        if (_selectedConversation == fromUser || _selectedConversation == toUser)
+        {
+            await LoadConversation(_selectedConversation);
+        }
+        
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task InitiateConversation(string artistName)
+    {
+        _showPrivateMessages = true;
+        _selectedConversation = artistName;
+        await LoadConversation(artistName);
+        _isVisible = true;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        if (_hubConnection)
+        {
+            ChatService.OnMessageReceived -= OnMessageReceived;
+            ChatService.OnPrivateMessageReceived -= OnPrivateMessageReceived;
+            ChatService.OnUserChanged -= OnUserChanged;
+        }
+        AuthService.OnAuthStateChanged -= OnAuthStateChanged;
+    }
+}

@@ -1,5 +1,6 @@
 ﻿@using GaleriaArteFrontend.Layout
 @using GaleriaArteFrontend.Services
+@using GaleriaArteFrontend.Components
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
@@ -38,21 +39,6 @@
                                 @AuthService.UsuarioActual?.Nickname
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="/mi-perfil">
-                                        <i class="fas fa-user"></i>
-                                        Mi Perfil
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="/configuracion">
-                                        <i class="fas fa-cog"></i>
-                                        Configuración
-                                    </a>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
                                 <li>
                                     <button class="dropdown-item logout-btn" @onclick="HandleLogout">
                                         <i class="fas fa-sign-out-alt"></i>
@@ -99,6 +85,12 @@
             </div>
         </div>
     </footer>
+
+    @* Chat flotante - solo visible para usuarios autenticados *@
+    @if (AuthService.EstaAutenticado)
+    {
+        <Chat />
+    }
 </div>
 
 <style>

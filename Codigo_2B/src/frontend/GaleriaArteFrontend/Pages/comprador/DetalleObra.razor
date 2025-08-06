@@ -7,6 +7,7 @@
 @using GaleriaArteFrontend.Services
 @using GaleriaArteFrontend.Models
 @using Microsoft.AspNetCore.Components.Web
+@using GaleriaArteFrontend.Components
 
 <PageTitle>@(obra?.Titulo ?? "Cargando...") - Galería de Arte</PageTitle>
 
@@ -164,6 +165,9 @@
         }
     </div>
 </div>
+
+<!-- Chat con parámetro para contactar artista -->
+<Chat @ref="chatComponent" ContactUser="@_artistToContact" />
 
 <!-- Modal para imagen completa -->
 <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
@@ -552,6 +556,8 @@
     private Obra? obra;
     private bool cargando = true;
     private string mensajeError = "";
+    private Chat? chatComponent;
+    private string? _artistToContact;
 
     protected override async Task OnInitializedAsync()
     {
@@ -633,11 +639,16 @@
 
     private async Task ContactarArtista()
     {
-        if (obra != null)
+        if (obra != null && AuthService.EstaAutenticado)
         {
-            // Aquí podrías implementar la funcionalidad de contacto
-            // Por ejemplo, abrir un modal de contacto o navegar a una página de mensajes
-            await JSRuntime.InvokeVoidAsync("alert", $"Funcionalidad de contacto con {obra.ArtistaNickname} próximamente disponible.");
+            // Iniciar conversación privada con el artista
+            _artistToContact = obra.ArtistaNickname;
+            chatComponent?.InitiateConversation(obra.ArtistaNickname);
+        }
+        else if (!AuthService.EstaAutenticado)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Debes iniciar sesión para contactar al artista.");
+            Navigation.NavigateTo("/login");
         }
     }
 
